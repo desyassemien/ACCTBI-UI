@@ -1,0 +1,269 @@
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h4 class="fw-bold text-primary-900 mb-1">Vue Consolidée</h4>
+            <p class="text-secondary mb-0">Aperçu global de la situation financière du Trésor Public</p>
+        </div>
+
+        <div class="d-none d-md-flex gap-2">
+            <button class="btn btn-outline-primary bg-white d-flex align-items-center">
+                <i class="fas fa-file-excel me-2"></i> Export Excel
+            </button>
+            <button class="btn btn-primary d-flex align-items-center">
+                <i class="fas fa-file-pdf me-2"></i> Rapport PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- KPIs Grid (6 cards) -->
+    <div class="row g-4 mb-4">
+        @for (kpi of kpis; track kpi.id) {
+        <div class="col-12 col-md-6 col-xl-4">
+            <app-kpi-card [data]="kpi"></app-kpi-card>
+        </div>
+        }
+    </div>
+
+    <!-- Charts & Tables Section -->
+    <div class="row g-4">
+
+        <!-- Left Column: Treasury Evolution -->
+        <div class="col-12 col-xxl-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div
+                    class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Évolution de la Trésorerie (12 mois)</h6>
+                    <div class="d-flex gap-2 align-items-center">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="dashChartType" id="d1_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="dashChartType">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="d1_bar" title="Barre"><i
+                                    class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="dashChartType" id="d1_line" value="line"
+                                autocomplete="off" [(ngModel)]="dashChartType">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="d1_line"
+                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-icon text-secondary" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">Télécharger image</a></li>
+                                <li><a class="dropdown-item" href="#">Voir données</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Placeholder for Chart -->
+                    <div
+                        class="chart-placeholder d-flex align-items-end justify-content-between px-2 pt-4 pb-2 w-100 h-100 min-h-300 position-relative">
+
+                        @if (dashChartType === 'bar') {
+                        <!-- Mocking a bar chart with CSS for demonstration -->
+                        <div class="mock-bar bg-primary opacity-50 rounded-top" style="height: 30%; width: 6%"></div>
+                        <div class="mock-bar bg-primary opacity-50 rounded-top" style="height: 45%; width: 6%"></div>
+                        <div class="mock-bar bg-primary opacity-50 rounded-top" style="height: 40%; width: 6%"></div>
+                        <div class="mock-bar bg-primary opacity-50 rounded-top" style="height: 60%; width: 6%"></div>
+                        <div class="mock-bar bg-primary opacity-50 rounded-top" style="height: 55%; width: 6%"></div>
+                        <div class="mock-bar bg-primary opacity-50 rounded-top" style="height: 70%; width: 6%"></div>
+                        <div class="mock-bar bg-primary opacity-50 rounded-top" style="height: 65%; width: 6%"></div>
+                        <div class="mock-bar bg-primary opacity-50 rounded-top" style="height: 80%; width: 6%"></div>
+                        <div class="mock-bar bg-primary opacity-50 rounded-top" style="height: 75%; width: 6%"></div>
+                        <div class="mock-bar bg-primary opacity-50 rounded-top" style="height: 90%; width: 6%"></div>
+                        <div class="mock-bar bg-primary-700 rounded-top position-relative"
+                            style="height: 100%; width: 6%">
+                            <div class="position-absolute top-0 start-50 translate-middle pointer-event"
+                                style="width: 12px; height: 12px; background: var(--accent-500); border-radius: 50%; border: 3px solid white; top: -5px;">
+                            </div>
+                        </div>
+                        }
+
+                        @if (dashChartType === 'line') {
+                        <!-- SVG Line Chart Mockup -->
+                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end px-2 pb-2">
+                            <svg class="w-100 h-100" viewBox="0 0 1000 300" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="var(--primary-700)" stop-opacity="0.3" />
+                                        <stop offset="100%" stop-color="var(--primary-700)" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                <path
+                                    d="M 0,210 L 100,165 L 200,180 L 300,120 L 400,135 L 500,90 L 600,105 L 700,60 L 800,75 L 900,30 L 1000,0 L 1000,300 L 0,300 Z"
+                                    fill="url(#lineGrad)"></path>
+                                <path
+                                    d="M 0,210 L 100,165 L 200,180 L 300,120 L 400,135 L 500,90 L 600,105 L 700,60 L 800,75 L 900,30 L 1000,0"
+                                    fill="none" class="animate__animated animate__fadeIn" stroke="var(--primary-700)"
+                                    stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+
+                                <circle cx="100" cy="165" r="5" fill="var(--surface)" stroke="var(--primary-700)"
+                                    stroke-width="3" />
+                                <circle cx="300" cy="120" r="5" fill="var(--surface)" stroke="var(--primary-700)"
+                                    stroke-width="3" />
+                                <circle cx="500" cy="90" r="5" fill="var(--surface)" stroke="var(--primary-700)"
+                                    stroke-width="3" />
+                                <circle cx="700" cy="60" r="5" fill="var(--surface)" stroke="var(--primary-700)"
+                                    stroke-width="3" />
+                                <circle cx="1000" cy="0" r="6" fill="var(--accent-500)" stroke="var(--surface)"
+                                    stroke-width="3" />
+                            </svg>
+                        </div>
+                        }
+                    </div>
+                    <div class="d-flex justify-content-between text-secondary small px-2 mt-2">
+                        <span>Jan</span><span>Fév</span><span>Mar</span><span>Avr</span><span>Mai</span><span>Juin</span><span>Juil</span><span>Août</span><span>Sep</span><span>Oct</span><span>Déc</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Alerts & Distribution -->
+        <div class="col-12 col-xxl-4 d-flex flex-column gap-4">
+
+            <!-- Expenses Distribution Chart -->
+            <div class="card border-0 shadow-sm flex-grow-1">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <h6 class="fw-bold mb-0">Répartition Dépenses par Organisme</h6>
+                </div>
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <!-- Mock doughnut chart -->
+                    <div class="mock-doughnut position-relative d-flex align-items-center justify-content-center mb-4">
+                        <div
+                            class="mock-doughnut-inner rounded-circle bg-white d-flex flex-column align-items-center justify-content-center">
+                            <span class="fs-4 fw-bold text-primary-900">12B</span>
+                            <span class="fs-9 text-secondary">Total (FCFA)</span>
+                        </div>
+                    </div>
+
+                    <div class="w-100 mt-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2 fs-8">
+                            <div class="d-flex align-items-center"><span class="color-dot me-2"
+                                    style="background:#1B3A6B"></span> Collectivités Locales</div>
+                            <span class="fw-medium">45%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 fs-8">
+                            <div class="d-flex align-items-center"><span class="color-dot me-2"
+                                    style="background:#3D5A8C"></span> EPN</div>
+                            <span class="fw-medium">30%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 fs-8">
+                            <div class="d-flex align-items-center"><span class="color-dot me-2"
+                                    style="background:#D4A017"></span> Projets Co-financés</div>
+                            <span class="fw-medium">15%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center fs-8">
+                            <div class="d-flex align-items-center"><span class="color-dot me-2"
+                                    style="background:#E8EEF5"></span> Autres</div>
+                            <span class="fw-medium">10%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Alerts Table & Top Posts -->
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-4 pb-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">
+                        <i class="fas fa-bell text-warning me-2"></i> Alertes Actives
+                    </h6>
+                    <a href="#" class="fs-8 fw-medium text-decoration-none">Tout voir</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @for (alerte of alertes; track alerte.id) {
+                        <div class="list-group-item list-group-item-action p-4 border-bottom"
+                            [class.bg-light]="!alerte.lue">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="alert-icon-wrapper rounded-circle d-flex align-items-center justify-content-center"
+                                        [class.bg-danger-subtle]="alerte.type === 'DANGER'"
+                                        [class.bg-warning-subtle]="alerte.type === 'WARNING'"
+                                        [class.bg-info-subtle]="alerte.type === 'INFO'">
+                                        <i [class]="getAlertIcon(alerte.type)"></i>
+                                    </div>
+                                    <div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <span class="badge bg-secondary-subtle text-secondary me-2 fs-9">{{
+                                                alerte.service }}</span>
+                                            <h6 class="mb-0 fw-bold fs-7">{{ alerte.titre }}</h6>
+                                            @if (!alerte.lue) {
+                                            <span class="badge bg-danger ms-2 rounded-circle p-1"
+                                                style="width: 6px; height: 6px;"><span
+                                                    class="visually-hidden">New</span></span>
+                                            }
+                                        </div>
+                                        <p class="mb-0 text-secondary fs-8">{{ alerte.description }}</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-light border btn-icon ms-2">
+                                    <i class="fas fa-arrow-right fs-9"></i>
+                                </button>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Accounting Posts -->
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3">
+                    <h6 class="fw-bold mb-0">Top Postes Comptables Approvisionnés</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 fw-medium text-secondary fs-8 text-uppercase border-0">Poste
+                                        Comptable</th>
+                                    <th class="fw-medium text-secondary fs-8 text-uppercase border-0 text-end">Montant
+                                        (FCFA)</th>
+                                    <th class="pe-4 fw-medium text-secondary fs-8 text-uppercase border-0 text-end">
+                                        Évolution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (poste of topPostes; track poste.poste) {
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary-100 text-primary-700 rounded d-flex align-items-center justify-content-center me-3"
+                                                style="width: 32px; height: 32px;">
+                                                <i class="fas fa-building fs-8"></i>
+                                            </div>
+                                            <span class="fw-medium text-dark">{{ poste.poste }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-bold">{{ poste.montant | number:'1.0-0' }}</td>
+                                    <td class="pe-4 text-end">
+                                        <span class="badge rounded-pill fw-medium"
+                                            [class.bg-success-subtle]="poste.evolution.includes('+')"
+                                            [class.text-success]="poste.evolution.includes('+')"
+                                            [class.bg-danger-subtle]="poste.evolution.includes('-')"
+                                            [class.text-danger]="poste.evolution.includes('-')">
+                                            {{ poste.evolution }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

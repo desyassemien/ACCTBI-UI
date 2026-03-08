@@ -1,0 +1,84 @@
+.kpi-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+    }
+}
+
+.table {
+    th {
+        background-color: #f8fafc;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    td {
+        border-bottom-color: #f1f5f9;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+}
+
+.circular-chart {
+    display: block;
+    margin: 0 auto;
+    max-width: 80%;
+    max-height: 250px;
+}
+
+.circle {
+    stroke: var(--success);
+    fill: none;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+}
+
+@keyframes progress {
+    0% {
+        stroke-dasharray: 0 100;
+    }
+}
+
+/* Drag and Drop Styling */
+.cursor-grab {
+    cursor: grab;
+}
+
+.cursor-grab:active {
+    cursor: grabbing;
+}
+
+.cdk-drag-preview {
+    box-sizing: border-box;
+    border-radius: 4px;
+    box-shadow: 0 5px 15px -3px rgba(0, 0, 0, 0.2), 0 8px 10px -5px rgba(0, 0, 0, 0.14);
+}
+
+.cdk-drag-placeholder {
+    opacity: 0.2;
+    background: #ccc;
+    border: 2px dashed #999;
+}
+
+.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.drag-list.cdk-drop-list-dragging .drag-item:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.drag-drop-zone {
+    min-height: 100px;
+    transition: background-color 0.2s;
+
+    &.cdk-drop-list-receiving {
+        background-color: var(--primary-100) !important;
+        border-color: var(--primary) !important;
+    }
+}

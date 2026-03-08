@@ -1,1 +1,159 @@
 /* You can add global styles to this file, and also import other style files */
+
+// Import Bootstrap using modern @use API with variables override
+@use "bootstrap/scss/bootstrap" with ($primary: #F77F00, // Orange National
+  $secondary: #1A365D, // Bleu Nuit
+  $success: #2E7D32, // Vert Ivoire
+  $warning: #D4A017,
+  $danger: #B71C1C,
+  $info: #1A365D // Bleu Nuit
+);
+
+// Import FontAwesome
+@use "@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@use "@fortawesome/fontawesome-free/scss/solid.scss";
+@use "@fortawesome/fontawesome-free/scss/regular.scss";
+@use "@fortawesome/fontawesome-free/scss/brands.scss";
+
+:root {
+  // Primaires — Orange National (Côte d'Ivoire)
+  --primary-900: #cc6600;
+  --primary-700: #F77F00; // Principal
+  --primary-500: #ff9833;
+  --primary-100: #fff0e0;
+
+  // Secondaires — Vert Ivoire (Côte d'Ivoire)
+  --accent-900: #1b5e20;
+  --accent-500: #2E7D32; // Vert principal
+  --accent-100: #e8f5e9;
+
+  // Neutres & Typographie
+  --bg-body: #F8F9FA;
+  --surface: #FFFFFF;
+  --text-primary: #2D3748; // Gris Ardoise
+  --text-secondary: #5A6578;
+  --border: #DEE2E6;
+
+  // Navigation / Bleu Nuit
+  --nav-bg: #1A365D; // Bleu Nuit
+  --nav-text: #FFFFFF;
+
+  // Sidebar
+  --sidebar-bg: linear-gradient(160deg, #fbaf5d 0%, #e67500 100%);
+  --sidebar-text: #FFFFFF;
+  --sidebar-hover: rgba(255, 255, 255, 0.1);
+  --sidebar-active: var(--primary-700);
+}
+
+body {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font-family: 'Open Sans', 'Poppins', sans-serif;
+  font-size: 0.875rem; // 14px default instead of 16px
+  line-height: 1.5;
+}
+
+[data-bs-theme="dark"] {
+  --bg-body: #121212;
+  --surface: #1e1e1e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border: #333333;
+
+  --sidebar-bg: #1A2639; // Un bleu nuit plus gris/doux pour le mode sombre
+  --sidebar-text: #e0e0e0;
+  --sidebar-hover: rgba(255, 255, 255, 0.05);
+
+  .bg-white,
+  .card {
+    background-color: var(--surface) !important;
+  }
+
+  .text-dark {
+    color: var(--text-primary) !important;
+  }
+
+  .border,
+  .border-bottom,
+  .border-top,
+  .border-start,
+  .border-end {
+    border-color: var(--border) !important;
+  }
+
+  .shadow-sm,
+  .shadow {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  }
+}
+
+// Typography adjustments for a denser UI
+h1,
+.h1 {
+  font-size: 1.75rem;
+}
+
+h2,
+.h2 {
+  font-size: 1.5rem;
+}
+
+h3,
+.h3 {
+  font-size: 1.25rem;
+}
+
+h4,
+.h4 {
+  font-size: 1.1rem;
+}
+
+h5,
+.h5 {
+  font-size: 1rem;
+}
+
+h6,
+.h6 {
+  font-size: 0.9rem;
+}
+
+// Custom utilities for smaller text
+.fs-7 {
+  font-size: 0.85rem !important;
+}
+
+.fs-8 {
+  font-size: 0.75rem !important;
+}
+
+.fs-9 {
+  font-size: 0.65rem !important;
+}
+
+.tracking-tight {
+  letter-spacing: -0.02em;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+// Premium subtle scrollbar
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-body);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

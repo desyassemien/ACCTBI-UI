@@ -1,0 +1,168 @@
+.bg-primary-dark {
+    background: var(--sidebar-bg);
+}
+
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
+
+    .sidebar-brand {
+        height: 64px; // Matches header height
+        background-color: rgba(0, 0, 0, 0.1); // Slightly darker for distinction
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+    }
+
+    .sidebar-scrollable {
+        overflow-y: auto;
+
+        // Hide scrollbar for clean look but allow scrolling
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .nav-item-link {
+        color: var(--primary-100);
+        opacity: 0.9;
+
+        i {
+            width: 20px;
+            text-align: center;
+            opacity: 0.9;
+            transition: all 0.2s ease;
+        }
+
+        &:hover {
+            color: var(--surface);
+            opacity: 1;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+
+            i {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+
+        &.active {
+            color: #c8e6c9; // Vert léger
+            opacity: 1;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            font-weight: 600;
+
+            i {
+                color: #c8e6c9; // Vert léger
+                opacity: 1;
+            }
+
+            .active-indicator {
+                opacity: 1;
+                transform: scaleY(1);
+            }
+        }
+
+        // Modern active indicator bar on the left
+        .active-indicator {
+            position: absolute;
+            left: 0;
+            top: 10%;
+            height: 80%;
+            width: 4px;
+            background-color: #c8e6c9; // Vert léger
+            border-radius: 0 4px 4px 0;
+            opacity: 0;
+            transform: scaleY(0);
+            transition: all 0.2s ease-in-out;
+            transform-origin: center;
+        }
+    }
+
+    .dashboard-link {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        &.active {
+            background-color: #c8e6c9; // Vert léger fond
+            color: #1b5e20; // Texte foncé pour contraster
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+            i {
+                color: #1b5e20;
+            }
+        }
+    }
+
+    .border-primary-500 {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+}
+
+// Offcanvas adjustments
+.offcanvas {
+    width: 280px;
+
+    .nav-item-link {
+        color: var(--primary-100);
+        opacity: 0.9;
+
+        i {
+            width: 20px;
+            text-align: center;
+        }
+
+        &:hover {
+            color: var(--surface);
+            opacity: 1;
+        }
+
+        &.active {
+            color: #c8e6c9; // Vert léger
+            opacity: 1;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+
+            i {
+                color: #c8e6c9;
+            }
+        }
+    }
+
+    .dashboard-link {
+        &.active {
+            background-color: #c8e6c9; // Vert léger fond
+            color: #1b5e20; // Texte contrasté
+            border-radius: 8px;
+
+            i {
+                color: #1b5e20;
+            }
+        }
+    }
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}

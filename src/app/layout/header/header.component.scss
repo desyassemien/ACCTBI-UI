@@ -1,0 +1,71 @@
+.app-header {
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    background-color: var(--surface);
+    border-bottom-color: var(--border) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+    .btn-icon {
+        border: none;
+        background: transparent;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: var(--bg-body) !important;
+
+            i {
+                color: var(--primary-700) !important;
+            }
+        }
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .avatar-circle {
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-toggle::after {
+        display: none; // Hide default bootstrap caret
+    }
+
+    .dropdown-menu {
+        min-width: 200px;
+        animation: fadeInDropdown 0.2s ease-out;
+
+        .dropdown-item {
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background-color: var(--bg-body);
+                color: var(--primary-700) !important;
+
+                i {
+                    color: var(--primary-700) !important;
+                }
+            }
+
+            &.text-danger:hover {
+                background-color: #FEF2F2;
+                color: var(--danger) !important;
+            }
+        }
+    }
+}
+
+@keyframes fadeInDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,90 @@
+<header
+    class="app-header d-flex align-items-center justify-content-between px-4 bg-surface border-bottom transition-all">
+
+    <!-- Left Side: Mobile Toggle & Page Context -->
+    <div class="d-flex align-items-center">
+        <!-- Mobile Sidebar Toggle -->
+        <button class="btn btn-icon d-xl-none me-3" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
+            <i class="fas fa-bars fs-5 text-secondary"></i>
+        </button>
+
+        <!-- Optional: Breadcrumb or context title can go here based on route -->
+        <h5 class="mb-0 fw-bold d-none d-md-block text-primary-900 tracking-tight">SYGACUT-BI <span
+                class="fw-light text-secondary ms-2 fs-6">| Direction Générale</span></h5>
+    </div>
+
+    <!-- Right Side: Actions & Profile -->
+    <div class="d-flex align-items-center gap-3 gap-md-4">
+
+        <!-- Global Period Selector (Desktop only) -->
+        <div class="d-none d-lg-flex align-items-center bg-body px-3 py-1 rounded-pill border">
+            <i class="far fa-calendar-alt text-secondary me-2"></i>
+            <span class="fs-7 fw-medium text-dark">Mars 2026</span>
+        </div>
+
+        <!-- Theme Toggle -->
+        <div class="position-relative cursor-pointer me-1">
+            <div class="btn-icon rounded-circle bg-body position-relative d-flex align-items-center justify-content-center border"
+                style="width: 40px; height: 40px;" (click)="toggleTheme()"
+                [title]="isDarkMode ? 'Passer en mode clair' : 'Passer en mode sombre'">
+                <i class="fs-6 text-secondary" [class.fas]="true" [class.fa-sun]="isDarkMode"
+                    [class.fa-moon]="!isDarkMode"></i>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="position-relative cursor-pointer">
+            <div class="btn-icon rounded-circle bg-body position-relative d-flex align-items-center justify-content-center"
+                style="width: 40px; height: 40px;">
+                <i class="far fa-bell fs-5 text-secondary"></i>
+                @if (notificationCount > 0) {
+                <span
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-white"
+                    style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                    {{ notificationCount }}
+                    <span class="visually-hidden">notifications non lues</span>
+                </span>
+                }
+            </div>
+        </div>
+
+        <!-- User Profile Dropdown -->
+        <div class="dropdown">
+            <div class="btn btn-outline-secondary border-0 d-flex align-items-center gap-2 cursor-pointer user-select-none"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                style="padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(0,0,0,0.02)">
+                <!-- Avatar -->
+                <div class="avatar-circle bg-primary-100 text-primary-700 fw-bold d-flex align-items-center justify-content-center rounded-circle shadow-sm"
+                    style="width: 36px; height: 36px; font-size: 0.9rem;">
+                    {{ user()?.prenom?.charAt(0) || 'U' }}{{ user()?.nom?.charAt(0) || '' }}
+                </div>
+
+                <!-- User Info (Desktop only) -->
+                <div class="d-none d-md-flex align-items-center lh-1 text-start">
+                    <span class="fs-7 fw-bold text-dark me-2">Mon Profil</span>
+                    <i class="fas fa-chevron-down fs-8 text-secondary"></i>
+                </div>
+            </div>
+
+            <!-- Dropdown Menu -->
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2 rounded-3 py-2">
+                <li>
+                    <div class="px-3 py-2 d-md-none border-bottom mb-2">
+                        <div class="fw-bold fs-7">{{ user()?.prenom }} {{ user()?.nom }}</div>
+                        <div class="text-secondary fs-8">{{ user()?.role }}</div>
+                    </div>
+                </li>
+                <li><a class="dropdown-item py-2 px-3 fw-medium text-dark" routerLink="/profil"><i
+                            class="far fa-user me-2 text-secondary"></i> Mon Profil</a></li>
+                <li><a class="dropdown-item py-2 px-3 fw-medium text-dark" href="#"><i
+                            class="fas fa-cog me-2 text-secondary"></i> Paramètres</a></li>
+                <li>
+                    <hr class="dropdown-divider my-2">
+                </li>
+                <li><button class="dropdown-item py-2 px-3 fw-medium text-danger" (click)="logout()"><i
+                            class="fas fa-sign-out-alt me-2"></i> Déconnexion</button></li>
+            </ul>
+        </div>
+    </div>
+</header>

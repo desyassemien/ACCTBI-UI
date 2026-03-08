@@ -1,0 +1,656 @@
+<div class="comptabilite-container">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 gap-md-0">
+        <div>
+            <h4 class="fw-bold text-primary-900 mb-1">Comptabilité</h4>
+            <p class="text-secondary mb-0">SYGACUT-BI / Services / Comptabilité</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
+                <i class="far fa-file-excel me-2 text-success"></i> Export Excel
+            </button>
+            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
+                <i class="far fa-file-pdf me-2 text-danger"></i> Export PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Analyse Selector Area -->
+    <div class="card border-0 shadow-sm mb-4 bg-white rounded-3">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-filter text-primary-500 me-2"></i> Sélecteur
+                    d'Analyse Actif</h6>
+
+                <!-- Toggle Mode -->
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off"
+                        [checked]="!isDragDropMode" (change)="toggleMode('classic')">
+                    <label class="btn btn-outline-primary btn-sm px-3" for="btnradio1"><i
+                            class="fas fa-list-ul me-1"></i> Classique</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
+                        [checked]="isDragDropMode" (change)="toggleMode('dragdrop')">
+                    <label class="btn btn-outline-primary btn-sm px-3" for="btnradio2"><i
+                            class="fas fa-arrows-alt me-1"></i> Drag & Drop</label>
+                </div>
+            </div>
+
+            @if (!isDragDropMode) {
+            <!-- Classic Mode Form -->
+            <div class="row g-4 align-items-end">
+                <div class="col-md-3">
+                    <label
+                        class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Période</label>
+                    <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium mb-1"
+                        style="height: 38px;" [(ngModel)]="selectedPeriod">
+                        <option value="Aujourd'hui">Aujourd'hui</option>
+                        <option value="Cette semaine">Cette semaine</option>
+                        <option value="Ce mois-ci">Ce mois-ci</option>
+                        <option value="Ce trimestre">Ce trimestre</option>
+                        <option value="Cette année">Cette année</option>
+                        <option value="Personnalisé...">Personnalisé...</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Indicateurs
+                        (Max 6)</label>
+                    <div class="dropdown">
+                        <button
+                            class="btn btn-outline-secondary btn-sm w-100 text-start d-flex justify-content-between align-items-center text-dark"
+                            style="height: 38px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>Solde BCEAO, Écart CCB</span>
+                            <i class="fas fa-chevron-down fs-8"></i>
+                        </button>
+                        <ul class="dropdown-menu w-100 shadow-sm border-0 p-2">
+                            <li>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="ind1" checked>
+                                    <label class="form-check-label" for="ind1">Solde BCEAO</label>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="ind2" checked>
+                                    <label class="form-check-label" for="ind2">Écart CCB</label>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="ind3">
+                                    <label class="form-check-label" for="ind3">Imputations provisoires</label>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="ind4">
+                                    <label class="form-check-label" for="ind4">Taux de concordance</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Axes (Max
+                        3)</label>
+                    <div class="dropdown">
+                        <button
+                            class="btn btn-outline-secondary btn-sm w-100 text-start d-flex justify-content-between align-items-center text-dark"
+                            style="height: 38px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>Nature opération</span>
+                            <i class="fas fa-chevron-down fs-8"></i>
+                        </button>
+                        <ul class="dropdown-menu w-100 shadow-sm border-0 p-2">
+                            <li>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="axe1" checked>
+                                    <label class="form-check-label" for="axe1">Nature opération</label>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="axe2">
+                                    <label class="form-check-label" for="axe2">Poste comptable</label>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="form-check border-top pt-2 mt-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="axe3">
+                                    <label class="form-check-label" for="axe3">Date de valeur</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-2 text-end">
+                    <button class="btn btn-primary btn-sm w-100 fw-medium shadow-sm" style="height: 38px;">
+                        <i class="fas fa-sync-alt me-2"></i> Actualiser
+                    </button>
+                </div>
+            </div>
+
+            @if (selectedPeriod === 'Personnalisé...') {
+            <!-- Custom Date Range Row -->
+            <div class="row g-4 mt-1 animate__animated animate__fadeIn">
+                <div class="col-12 col-md-5 d-flex gap-2 align-items-center bg-light p-2 rounded-3 border">
+                    <i class="far fa-calendar-alt text-secondary ms-2"></i>
+                    <span class="fs-8 fw-medium text-secondary text-nowrap">Du :</span>
+                    <input type="date"
+                        class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white"
+                        title="Date de début">
+
+                    <span class="fs-8 fw-medium text-secondary text-nowrap ms-2">Au :</span>
+                    <input type="date"
+                        class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white"
+                        title="Date de fin">
+                </div>
+            </div>
+            }
+            } @else {
+            <!-- Drag and Drop Form -->
+            <div class="drag-drop-container pt-2">
+
+                <!-- Top section: Period & Refresh block -->
+                <div
+                    class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 bg-light rounded-3 p-3 border">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <label
+                            class="form-label mb-0 text-secondary fs-8 fw-medium text-uppercase tracking-wider flex-shrink-0">Période:</label>
+                        <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium"
+                            style="width: 200px;" [(ngModel)]="selectedPeriod">
+                            <option value="Aujourd'hui">Aujourd'hui</option>
+                            <option value="Cette semaine">Cette semaine</option>
+                            <option value="Ce mois-ci">Ce mois-ci</option>
+                            <option value="Ce trimestre">Ce trimestre</option>
+                            <option value="Cette année">Cette année</option>
+                            <option value="Personnalisé...">Personnalisé...</option>
+                        </select>
+
+                        @if (selectedPeriod === 'Personnalisé...') {
+                        <div class="d-flex gap-2 align-items-center animate__animated animate__fadeIn">
+                            <input type="date"
+                                class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none"
+                                placeholder="Du" title="Date de début">
+                            <i class="fas fa-arrow-right text-secondary fs-9"></i>
+                            <input type="date"
+                                class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none"
+                                placeholder="Au" title="Date de fin">
+                        </div>
+                        }
+                    </div>
+                    <button class="btn btn-primary btn-sm fw-medium shadow-sm">
+                        <i class="fas fa-sync-alt me-2"></i> Générer l'Analyse
+                    </button>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Column 1: Available Elements -->
+                    <div class="col-12 col-md-4">
+                        <div class="bg-light rounded-3 p-3 h-100 border border-secondary border-opacity-10 shadow-sm">
+                            <h6 class="fs-8 fw-bold text-secondary text-uppercase tracking-wider mb-3">Éléments
+                                Disponibles</h6>
+
+                            <div class="mb-4">
+                                <div class="fs-9 text-secondary mb-2 fw-medium"><i class="fas fa-chart-line me-1"></i>
+                                    Indicateurs</div>
+                                <div cdkDropList id="availableIndicatorsList" [cdkDropListData]="availableIndicators"
+                                    [cdkDropListConnectedTo]="['selectedIndicatorsList']" class="drag-list"
+                                    (cdkDropListDropped)="drop($event)">
+                                    @for (item of availableIndicators; track item) {
+                                    <div class="drag-item bg-white border shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab"
+                                        cdkDrag>
+                                        <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="fs-9 text-secondary mb-2 fw-medium"><i class="fas fa-layer-group me-1"></i>
+                                    Axes d'Analyse</div>
+                                <div cdkDropList id="availableAxesList" [cdkDropListData]="availableAxes"
+                                    [cdkDropListConnectedTo]="['selectedAxesList']" class="drag-list"
+                                    (cdkDropListDropped)="drop($event)">
+                                    @for (item of availableAxes; track item) {
+                                    <div class="drag-item bg-white border border-primary-100 shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab"
+                                        cdkDrag>
+                                        <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Selected Zone -->
+                    <div class="col-12 col-md-8">
+                        <div
+                            class="border border-2 border-dashed border-primary-200 rounded-3 p-4 h-100 d-flex flex-column bg-primary-50">
+
+                            <div class="mb-4 flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fs-8 fw-bold text-primary-900 text-uppercase tracking-wider mb-0">
+                                        Indicateurs Actifs (Max 6)</h6>
+                                </div>
+                                <div class="rounded-3 p-3 drag-drop-zone bg-white border" cdkDropList
+                                    id="selectedIndicatorsList" [cdkDropListData]="selectedIndicators"
+                                    [cdkDropListConnectedTo]="['availableIndicatorsList']"
+                                    (cdkDropListDropped)="drop($event)">
+                                    @for (item of selectedIndicators; track item) {
+                                    <div class="drag-item bg-primary-100 border border-primary shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-bold text-primary-900 cursor-grab"
+                                        cdkDrag>
+                                        <i class="fas fa-grip-vertical text-primary opacity-50 me-2"></i> {{ item }}
+                                    </div>
+                                    }
+                                    @if (selectedIndicators.length === 0) {
+                                    <div class="text-secondary text-center fs-8 py-3 opacity-50"><i
+                                            class="fas fa-download mb-2 d-block fs-6"></i> Glissez des indicateurs ici
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fs-8 fw-bold text-primary-900 text-uppercase tracking-wider mb-0">Axes
+                                        Principaux (Max 3)</h6>
+                                </div>
+                                <div class="rounded-3 p-3 drag-drop-zone bg-white border" cdkDropList
+                                    id="selectedAxesList" [cdkDropListData]="selectedAxes"
+                                    [cdkDropListConnectedTo]="['availableAxesList']"
+                                    (cdkDropListDropped)="drop($event)">
+                                    @for (item of selectedAxes; track item) {
+                                    <div class="drag-item bg-accent-100 border border-accent shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-bold text-accent-900 cursor-grab"
+                                        cdkDrag>
+                                        <i class="fas fa-grip-vertical text-accent opacity-50 me-2"></i> {{ item }}
+                                    </div>
+                                    }
+                                    @if (selectedAxes.length === 0) {
+                                    <div class="text-secondary text-center fs-8 py-3 opacity-50"><i
+                                            class="fas fa-download mb-2 d-block fs-6"></i> Glissez des axes ici</div>
+                                    }
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Contextual KPIs based on filters -->
+    <div class="row g-4 mb-4">
+        @for (kpi of kpis; track kpi.titre) {
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 bg-white rounded-3 kpi-card">
+                <div class="card-body p-4">
+                    <h6 class="text-secondary fw-semibold mb-3">{{ kpi.titre }}</h6>
+                    <h3 class="fw-bold text-dark mb-1">{{ kpi.valeur }}</h3>
+                    <span class="fs-8 fw-medium" [class.text-success]="kpi.type === 'success'"
+                        [class.text-warning]="kpi.type === 'warning'" [class.text-secondary]="kpi.type === 'primary'">
+                        {{ kpi.info }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Main Analysis Content -->
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+
+        <!-- Chart 1: Concordance -->
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Concordance Bancaire</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="chart1Type" id="c1_pie" value="pie"
+                                autocomplete="off" [(ngModel)]="compChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c1_pie"
+                                title="Pie/Doughnut"><i class="fas fa-chart-pie fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart1Type" id="c1_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="compChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c1_bar" title="Barre"><i
+                                    class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart1Type" id="c1_line" value="line"
+                                autocomplete="off" [(ngModel)]="compChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c1_line"
+                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 2px; padding-bottom: 2px;">
+                                <i class="fas fa-download fs-9"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+
+                    @if (compChart1Type === 'pie') {
+                    <!-- CSS Mockup for Doughnut Chart -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 160px; height: 160px;">
+                        <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100">
+                            <path class="circle-bg" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3" />
+                            <path class="circle" stroke-dasharray="97.6, 100" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--success)" stroke-width="3"
+                                stroke-linecap="round" />
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center mt-1">
+                            <h3 class="fw-bold text-dark mb-0">97.6%</h3>
+                            <span class="fs-9 text-secondary text-uppercase tracking-wider">Rapproché</span>
+                        </div>
+                    </div>
+                    }
+
+                    @if (compChart1Type === 'bar') {
+                    <!-- Bar Chart Mockup -->
+                    <div class="d-flex align-items-end justify-content-center gap-3 mb-4 mt-2 h-100 w-100 animate__animated animate__fadeIn"
+                        style="min-height: 160px;">
+                        <div class="bg-success rounded-top" style="height: 97%; width: 40px;" title="Rapproché: 97.6%">
+                        </div>
+                        <div class="bg-warning rounded-top" style="height: 15%; width: 40px;" title="Écart: 2.4%"></div>
+                    </div>
+                    }
+
+                    @if (compChart1Type === 'line') {
+                    <!-- Line Chart Mockup -->
+                    <div class="w-100 mb-4 mt-2 position-relative animate__animated animate__fadeIn"
+                        style="height: 160px;">
+                        <svg class="w-100 h-100" viewBox="0 0 200 100" preserveAspectRatio="none">
+                            <path d="M 0,80 L 50,20 L 100,60 L 150,10 L 200,5" fill="none" stroke="var(--success)"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <circle cx="200" cy="5" r="4" fill="var(--surface)" stroke="var(--success)"
+                                stroke-width="2" />
+                            <path d="M 0,90 L 50,95 L 100,85 L 150,92 L 200,90" fill="none" stroke="var(--warning)"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,4">
+                            </path>
+                        </svg>
+                    </div>
+                    }
+
+                    <div class="w-100 px-2 mt-auto">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fs-8 text-secondary"><i
+                                    class="fas fa-circle text-success fs-9 me-2"></i>Rapproché</span>
+                            <span class="fs-8 fw-bold text-dark">12.1 Mds</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fs-8 text-secondary"><i
+                                    class="fas fa-circle text-warning fs-9 me-2"></i>Écart</span>
+                            <span class="fs-8 fw-bold text-dark">300 Mls</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 2: Répartition by Organigram -->
+        <div class="col-12 col-xl-8">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Répartition par Organisme</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="chart2Type" id="c2_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="compChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c2_bar" title="Barre"><i
+                                    class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart2Type" id="c2_line" value="line"
+                                autocomplete="off" [(ngModel)]="compChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c2_line"
+                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart2Type" id="c2_pie" value="pie"
+                                autocomplete="off" [(ngModel)]="compChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c2_pie"
+                                title="Pie/Doughnut"><i class="fas fa-chart-pie fs-9"></i></label>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 2px; padding-bottom: 2px;">
+                                <i class="fas fa-download fs-9"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+
+                    @if (compChart2Type === 'bar') {
+                    <!-- Pseudo Bar Chart -->
+                    <div class="animate__animated animate__fadeIn">
+                        <div class="mb-4 mt-2">
+                            <div class="d-flex justify-content-between fs-8 mb-2">
+                                <span class="text-dark fw-bold">Ministère de la Santé et de l'Hygiène Publique</span>
+                                <span class="text-secondary fw-medium">4.2 Mds (45%)</span>
+                            </div>
+                            <div class="progress rounded-pill bg-light" style="height: 10px;">
+                                <div class="progress-bar bg-primary-700 rounded-pill" role="progressbar"
+                                    style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between fs-8 mb-2">
+                                <span class="text-dark fw-bold">Ministère de l'Éducation Nationale</span>
+                                <span class="text-secondary fw-medium">3.1 Mds (35%)</span>
+                            </div>
+                            <div class="progress rounded-pill bg-light" style="height: 10px;">
+                                <div class="progress-bar bg-info rounded-pill" role="progressbar" style="width: 35%"
+                                    aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between fs-8 mb-2">
+                                <span class="text-dark fw-bold">Ministère de l'Équipement et de l'Entretien
+                                    Routier</span>
+                                <span class="text-secondary fw-medium">1.8 Mds (20%)</span>
+                            </div>
+                            <div class="progress rounded-pill bg-light" style="height: 10px;">
+                                <div class="progress-bar bg-accent-500 rounded-pill" role="progressbar"
+                                    style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                    }
+
+                    @if (compChart2Type === 'pie') {
+                    <!-- Pie Chart Mockup -->
+                    <div
+                        class="d-flex align-items-center justify-content-center gap-4 animate__animated animate__fadeIn mb-3">
+                        <div class="position-relative" style="width: 140px; height: 140px;">
+                            <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100"
+                                style="transform: rotate(-90deg);">
+                                <!-- 45% Santé -->
+                                <path stroke-dasharray="45, 100"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none" stroke="var(--primary-700)" stroke-width="6" />
+                                <!-- 35% Education (Offset 45) -->
+                                <path stroke-dasharray="35, 100" stroke-dashoffset="-45"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none" stroke="var(--info)" stroke-width="6" />
+                                <!-- 20% Equipement (Offset 45+35=80) -->
+                                <path stroke-dasharray="20, 100" stroke-dashoffset="-80"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none" stroke="var(--accent-500)" stroke-width="6" />
+                            </svg>
+                        </div>
+                        <div class="d-flex flex-column gap-2 flex-grow-1 fs-8">
+                            <div class="d-flex justify-content-between align-items-center"><span
+                                    class="text-secondary"><i class="fas fa-circle text-primary me-2 fs-9"></i>Santé
+                                    (45%)</span><span class="fw-bold">4.2 Mds</span></div>
+                            <div class="d-flex justify-content-between align-items-center"><span
+                                    class="text-secondary"><i class="fas fa-circle text-info me-2 fs-9"></i>Éducation
+                                    (35%)</span><span class="fw-bold">3.1 Mds</span></div>
+                            <div class="d-flex justify-content-between align-items-center"><span
+                                    class="text-secondary"><i
+                                        class="fas fa-circle text-success me-2 fs-9"></i>Équipement (20%)</span><span
+                                    class="fw-bold">1.8 Mds</span></div>
+                        </div>
+                    </div>
+                    }
+
+                    @if (compChart2Type === 'line') {
+                    <!-- Line Chart Mockup -->
+                    <div class="w-100 position-relative animate__animated animate__fadeIn mt-2 mb-3"
+                        style="height: 140px;">
+                        <svg class="w-100 h-100" viewBox="0 0 300 100" preserveAspectRatio="none">
+                            <path d="M 0,20 L 50,40 L 100,30 L 150,50 L 200,10 L 250,60 L 300,45" fill="none"
+                                stroke="var(--primary-700)" stroke-width="3" stroke-linecap="round"
+                                stroke-linejoin="round"></path>
+                            <path d="M 0,80 L 50,70 L 100,50 L 150,60 L 200,80 L 250,30 L 300,40" fill="none"
+                                stroke="var(--info)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            </path>
+                            <path d="M 0,90 L 50,85 L 100,95 L 150,70 L 200,60 L 250,90 L 300,75" fill="none"
+                                stroke="var(--accent-500)" stroke-width="3" stroke-linecap="round"
+                                stroke-linejoin="round"></path>
+                        </svg>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3 fs-9 mt-2">
+                        <span class="text-secondary"><i
+                                class="fas fa-minus text-primary border-bottom border-primary border-2 me-1"></i>
+                            Santé</span>
+                        <span class="text-secondary"><i
+                                class="fas fa-minus text-info border-bottom border-info border-2 me-1"></i>
+                            Éducation</span>
+                        <span class="text-secondary"><i
+                                class="fas fa-minus text-success border-bottom border-success border-2 me-1"></i>
+                            Équipement</span>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Table Row -->
+    <div class="row g-4">
+        <!-- Table Example -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Imputations Provisoires par Nature (Tableau élargi)</h6>
+                    <div class="d-flex gap-2">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown">
+                                <i class="fas fa-sort-amount-down me-1 text-secondary"></i> Trier
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#">Montant (Décroissant)</a></li>
+                                <li><a class="dropdown-item py-2" href="#">Date</a></li>
+                            </ul>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 5px; padding-bottom: 5px;">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-excel text-success me-2"></i> Exporter Excel</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Exporter PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-secondary fs-8 text-uppercase tracking-wider">
+                                <tr>
+                                    <th class="ps-4 fw-medium border-0 py-3">Réf / Compte</th>
+                                    <th class="fw-medium border-0 py-3">Nature Opération</th>
+                                    <th class="fw-medium border-0 py-3">Date</th>
+                                    <th class="fw-medium border-0 py-3 text-end pe-4">Montant (FCFA)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">OP-2026-001</div>
+                                        <div class="text-secondary fs-8">Compte 4711</div>
+                                    </td>
+                                    <td>Régularisation transferts</td>
+                                    <td><span class="badge bg-light text-dark fw-medium border">12 Mars 2026</span></td>
+                                    <td class="text-end pe-4 fw-bold">45 000 000</td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">OP-2026-009</div>
+                                        <div class="text-secondary fs-8">Compte 4712</div>
+                                    </td>
+                                    <td>Virements non identifiés</td>
+                                    <td><span class="badge bg-light text-dark fw-medium border">10 Mars 2026</span></td>
+                                    <td class="text-end pe-4 fw-bold text-warning">120 500 000</td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">OP-2026-014</div>
+                                        <div class="text-secondary fs-8">Compte 4780</div>
+                                    </td>
+                                    <td>Ajustement de caisse</td>
+                                    <td><span class="badge bg-light text-dark fw-medium border">05 Mars 2026</span></td>
+                                    <td class="text-end pe-4 fw-bold">8 250 000</td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-4 pb-4">
+                                        <div class="fw-bold text-dark">OP-2026-022</div>
+                                        <div class="text-secondary fs-8">Compte 4711</div>
+                                    </td>
+                                    <td class="pb-4">Frais de mandat en suspens</td>
+                                    <td class="pb-4"><span class="badge bg-light text-dark fw-medium border">01 Mars
+                                            2026</span></td>
+                                    <td class="pb-4 text-end pe-4 fw-bold text-danger">235 000 000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

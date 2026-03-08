@@ -1,0 +1,119 @@
+<div class="login-container container-fluid p-0">
+  <div class="row g-0 vh-100">
+    <!-- Left Split (Image/Branding) - Hidden on mobile -->
+    <div class="col-lg-6 d-none d-lg-flex bg-primary-dark auth-banner align-items-center justify-content-center flex-column text-white p-5 position-relative overflow-hidden">
+      <!-- Decorative background elements -->
+      <div class="bg-shape shape-1"></div>
+      <div class="bg-shape shape-2"></div>
+      
+      <div class="content-wrapper text-center z-1">
+        <h1 class="display-4 fw-bold mb-4 brand-title">SYGACUT-BI</h1>
+        <p class="lead mb-4 fw-light text-primary-100">
+          Système Intégré de Gestion de la Comptabilité<br>
+          Trésor Public de Côte d'Ivoire
+        </p>
+        <div class="d-flex align-items-center justify-content-center gap-3 mt-5">
+          <div class="feature-badge">
+            <i class="fas fa-chart-line fs-4 mb-2"></i>
+            <span>Analyses</span>
+          </div>
+          <div class="feature-badge">
+            <i class="fas fa-shield-alt fs-4 mb-2"></i>
+            <span>Sécurisé</span>
+          </div>
+          <div class="feature-badge">
+            <i class="fas fa-bolt fs-4 mb-2"></i>
+            <span>Temps Réel</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Split (Login Form) -->
+    <div class="col-12 col-lg-6 d-flex align-items-center justify-content-center bg-body">
+      <div class="auth-form-wrapper w-100 p-4 p-md-5">
+        
+        <!-- Mobile Header (Visible only on small screens) -->
+        <div class="d-lg-none text-center mb-5">
+          <h2 class="fw-bold text-primary-700 mb-1">SYGACUT-BI</h2>
+          <p class="text-secondary small">Trésor Public CI</p>
+        </div>
+
+        <div class="text-center text-lg-start mb-5">
+          <h3 class="fw-bold text-dark mb-2">Connexion</h3>
+          <p class="text-secondary">Accédez à votre espace sécurisé</p>
+        </div>
+
+        @if (errorMessage()) {
+          <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <div>{{ errorMessage() }}</div>
+          </div>
+        }
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="needs-validation">
+          <div class="form-floating mb-4">
+            <input 
+              type="text" 
+              class="form-control" 
+              id="matricule" 
+              formControlName="matricule"
+              placeholder="Ex: 123456A"
+              [class.is-invalid]="loginForm.get('matricule')?.invalid && loginForm.get('matricule')?.touched"
+            >
+            <label for="matricule">Matricule</label>
+            @if (loginForm.get('matricule')?.invalid && loginForm.get('matricule')?.touched) {
+              <div class="invalid-feedback">
+                Le matricule est requis
+              </div>
+            }
+          </div>
+
+          <div class="form-floating mb-4">
+            <input 
+              type="password" 
+              class="form-control" 
+              id="password" 
+              formControlName="password"
+              placeholder="Mot de passe"
+              [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+            >
+            <label for="password">Mot de passe</label>
+            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+              <div class="invalid-feedback">
+                Le mot de passe est requis
+              </div>
+            }
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-5">
+            <div class="form-check">
+              <input class="form-check-input custom-checkbox" type="checkbox" id="rememberMe">
+              <label class="form-check-label text-secondary" for="rememberMe">
+                Se souvenir de moi
+              </label>
+            </div>
+            <a href="#" class="text-decoration-none fw-medium text-accent">Mot de passe oublié ?</a>
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-primary w-100 py-3 fw-bold fs-6 d-flex justify-content-center align-items-center" 
+            [disabled]="isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Connexion en cours...
+            } @else {
+              Se connecter
+            }
+          </button>
+          
+          <div class="text-center mt-5 text-secondary small">
+            &copy; 2026 ACCT — Trésor Public CI. Tous droits réservés.
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+.kpi-card {
+    border-radius: 16px;
+    background-color: var(--surface);
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+
+        .bg-icon {
+            transform: scale(1.1) rotate(-10deg);
+            opacity: 0.08;
+        }
+    }
+
+    .bg-icon {
+        font-size: 100px;
+        right: -20px;
+        bottom: -20px;
+        opacity: 0.04;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 0;
+    }
+
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        z-index: 1;
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.5px;
+    }
+
+    .tracking-tight {
+        letter-spacing: -0.5px;
+    }
+
+    h3 {
+        z-index: 1;
+        position: relative;
+    }
+}
