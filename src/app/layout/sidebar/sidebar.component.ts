@@ -25,6 +25,7 @@ export class SidebarComponent {
                 { path: '/tresorerie', icon: 'fas fa-money-bill-wave', label: 'Trésorerie' },
                 { path: '/cautionnement', icon: 'fas fa-shield-alt', label: 'Cautionnement' },
                 { path: '/regies', icon: 'fas fa-store', label: 'Régies' },
+                { path: '/reglement', icon: 'fas fa-hand-holding-usd', label: 'Règlement' },
                 { path: '/statistiques', icon: 'fas fa-chart-bar', label: 'Statistiques' },
                 { path: '/compte-gestion', icon: 'fas fa-clipboard-list', label: 'Compte de Gestion' }
             ]

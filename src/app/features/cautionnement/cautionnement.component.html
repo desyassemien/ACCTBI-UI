@@ -1,0 +1,283 @@
+<div class="comptabilite-container"> <!-- Reusing container class for consistent spacing -->
+
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 gap-md-0">
+        <div>
+            <h4 class="fw-bold text-primary-900 mb-1">Cautionnement et Dépôt</h4>
+            <p class="text-secondary mb-0">SYGACUT-BI / Services / Cautionnement et Dépôt</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
+                <i class="far fa-file-excel me-2 text-success"></i> Export Excel
+            </button>
+            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
+                <i class="far fa-file-pdf me-2 text-danger"></i> Export PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Analyse Selector Area -->
+    <div class="card border-0 shadow-sm mb-4 bg-white rounded-3">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-filter text-primary-500 me-2"></i> Sélecteur d'Analyse Cautionnement</h6>
+
+                <!-- Toggle Mode -->
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off"
+                        [checked]="!isDragDropMode" (change)="toggleMode('classic')">
+                    <label class="btn btn-outline-primary btn-sm px-3" for="btnradio1"><i
+                            class="fas fa-list-ul me-1"></i> Classique</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
+                        [checked]="isDragDropMode" (change)="toggleMode('dragdrop')">
+                    <label class="btn btn-outline-primary btn-sm px-3" for="btnradio2"><i
+                            class="fas fa-arrows-alt me-1"></i> Drag & Drop</label>
+                </div>
+            </div>
+
+            @if (!isDragDropMode) {
+            <!-- Classic Mode Form -->
+            <div class="row g-4 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Période</label>
+                    <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium mb-1"
+                        style="height: 38px;" [(ngModel)]="selectedPeriod">
+                        <option value="Aujourd'hui">Aujourd'hui</option>
+                        <option value="Cette semaine">Cette semaine</option>
+                        <option value="Ce mois-ci">Ce mois-ci</option>
+                        <option value="Ce trimestre">Ce trimestre</option>
+                        <option value="Cette année">Cette année</option>
+                        <option value="Personnalisé...">Personnalisé...</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Indicateurs (Max 6)</label>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm w-100 text-start d-flex justify-content-between align-items-center text-dark"
+                            style="height: 38px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>Taux Cautionnement, Délai Émission</span>
+                            <i class="fas fa-chevron-down fs-8"></i>
+                        </button>
+                        <ul class="dropdown-menu w-100 shadow-sm border-0 p-2">
+                            <li><div class="form-check mb-2"><input class="form-check-input" type="checkbox" checked id="ind1"><label class="form-check-label" for="ind1">Taux de cautionnement actif</label></div></li>
+                            <li><div class="form-check mb-2"><input class="form-check-input" type="checkbox" checked id="ind2"><label class="form-check-label" for="ind2">Délai moy. émission</label></div></li>
+                            <li><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="ind3"><label class="form-check-label" for="ind3">Taux de précompte</label></div></li>
+                            <li><div class="form-check"><input class="form-check-input" type="checkbox" id="ind4"><label class="form-check-label" for="ind4">Taux de chèques sans provision</label></div></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Axes (Max 3)</label>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm w-100 text-start d-flex justify-content-between align-items-center text-dark"
+                            style="height: 38px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>Ministère</span>
+                            <i class="fas fa-chevron-down fs-8"></i>
+                        </button>
+                        <ul class="dropdown-menu w-100 shadow-sm border-0 p-2">
+                            <li><div class="form-check mb-2"><input class="form-check-input" type="checkbox" checked id="axe1"><label class="form-check-label" for="axe1">Administratif (Ministère/Dir.)</label></div></li>
+                            <li><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="axe2"><label class="form-check-label" for="axe2">Temporel (Nomination/Échéance)</label></div></li>
+                            <li><div class="form-check border-top pt-2 mt-2"><input class="form-check-input" type="checkbox" id="axe3"><label class="form-check-label" for="axe3">Financier (Montant/Précompte)</label></div></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-2 text-end">
+                    <button class="btn btn-primary btn-sm w-100 fw-medium shadow-sm" style="height: 38px;">
+                        <i class="fas fa-sync-alt me-2"></i> Actualiser
+                    </button>
+                </div>
+            </div>
+            } @else {
+            <!-- Drag and Drop Form (Simplified as in Compta) -->
+            <div class="drag-drop-container pt-2">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 bg-light rounded-3 p-3 border">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <span class="form-label mb-0 text-secondary fs-8 fw-medium text-uppercase tracking-wider">Période:</span>
+                        <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium" style="width: 200px;" [(ngModel)]="selectedPeriod">
+                            <option value="Aujourd'hui">Aujourd'hui</option>
+                            <option value="Cette semaine">Cette semaine</option>
+                            <option value="Ce mois-ci">Ce mois-ci</option>
+                            <option value="Cette année">Cette année</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-sm fw-medium shadow-sm">
+                        <i class="fas fa-sync-alt me-2"></i> Générer l'Analyse
+                    </button>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="bg-light rounded-3 p-3 h-100 border shadow-sm">
+                            <h6 class="fs-8 fw-bold text-secondary text-uppercase tracking-wider mb-3">Éléments Disponibles</h6>
+                            <div class="mb-4">
+                                <div class="fs-9 text-secondary mb-2 fw-medium"><i class="fas fa-chart-line me-1"></i> Indicateurs</div>
+                                <div cdkDropList id="availableIndicatorsList" [cdkDropListData]="availableIndicators" [cdkDropListConnectedTo]="['selectedIndicatorsList']" class="drag-list" (cdkDropListDropped)="drop($event)">
+                                    @for (item of availableIndicators; track item) {
+                                    <div class="drag-item bg-white border shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab" cdkDrag>
+                                        <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            <div>
+                                <div class="fs-9 text-secondary mb-2 fw-medium"><i class="fas fa-layer-group me-1"></i> Axes</div>
+                                <div cdkDropList id="availableAxesList" [cdkDropListData]="availableAxes" [cdkDropListConnectedTo]="['selectedAxesList']" class="drag-list" (cdkDropListDropped)="drop($event)">
+                                    @for (item of availableAxes; track item) {
+                                    <div class="drag-item bg-white border border-primary-100 shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab" cdkDrag>
+                                        <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="border border-2 border-dashed border-primary-200 rounded-3 p-4 h-100 bg-primary-50">
+                            <div class="mb-4">
+                                <h6 class="fs-8 fw-bold text-primary-900 text-uppercase tracking-wider mb-2">Indicateurs Actifs</h6>
+                                <div class="rounded-3 p-3 drag-drop-zone bg-white border" cdkDropList id="selectedIndicatorsList" [cdkDropListData]="selectedIndicators" [cdkDropListConnectedTo]="['availableIndicatorsList']" (cdkDropListDropped)="drop($event)">
+                                    @for (item of selectedIndicators; track item) {
+                                    <div class="drag-item bg-primary-100 border border-primary shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-bold text-primary-900 cursor-grab" cdkDrag>
+                                        <i class="fas fa-grip-vertical text-primary opacity-50 me-2"></i> {{ item }}
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="fs-8 fw-bold text-primary-900 text-uppercase tracking-wider mb-2">Axes Principaux</h6>
+                                <div class="rounded-3 p-3 drag-drop-zone bg-white border" cdkDropList id="selectedAxesList" [cdkDropListData]="selectedAxes" [cdkDropListConnectedTo]="['availableAxesList']" (cdkDropListDropped)="drop($event)">
+                                    @for (item of selectedAxes; track item) {
+                                    <div class="drag-item bg-accent-100 border border-accent shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-bold text-accent-900 cursor-grab" cdkDrag>
+                                        <i class="fas fa-grip-vertical text-accent opacity-50 me-2"></i> {{ item }}
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- KPIs Grid -->
+    <div class="row g-4 mb-4">
+        @for (kpi of kpis; track kpi.titre) {
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 bg-white rounded-3 kpi-card">
+                <div class="card-body p-4">
+                    <h6 class="text-secondary fw-semibold mb-3">{{ kpi.titre }}</h6>
+                    <h3 class="fw-bold text-dark mb-1">{{ kpi.valeur }}</h3>
+                    <span class="fs-8 fw-medium" [class.text-success]="kpi.type === 'success'" [class.text-secondary]="kpi.type === 'primary'">
+                        {{ kpi.info }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Main Analysis Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Chart 1: Administratif -->
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Couverture par Ministère</h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary btn-icon" type="button" data-bs-toggle="dropdown"><i class="fas fa-download fs-9"></i></button>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+                    <!-- Pie Chart Mockup -->
+                    <div class="position-relative mb-4 mt-2" style="width: 160px; height: 160px;">
+                        <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3" />
+                            <path class="circle" stroke-dasharray="96.2, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" />
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center mt-1">
+                            <h3 class="fw-bold text-dark mb-0">96%</h3>
+                            <span class="fs-9 text-secondary text-uppercase tracking-wider">Couvert</span>
+                        </div>
+                    </div>
+                    <div class="w-100 px-2 mt-auto">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fs-8 text-secondary"><i class="fas fa-circle text-primary fs-9 me-2"></i>Actif</span>
+                            <span class="fs-8 fw-bold text-dark">4.5B FCFA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 2: Financier -->
+        <div class="col-12 col-xl-8">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Analyse Financière (Cautions vs Dépôts)</h6>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1 active"><i class="fas fa-chart-bar fs-9"></i></button>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Progress bars mockup -->
+                    <div class="mb-4 mt-2">
+                        <div class="d-flex justify-content-between fs-8 mb-2"><span class="text-dark fw-bold">Cautionnements nominatifs</span><span class="text-secondary">75%</span></div>
+                        <div class="progress rounded-pill bg-light" style="height: 10px;"><div class="progress-bar bg-primary rounded-pill" style="width: 75%"></div></div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between fs-8 mb-2"><span class="text-dark fw-bold">Précomptes appliqués</span><span class="text-secondary">98%</span></div>
+                        <div class="progress rounded-pill bg-light" style="height: 10px;"><div class="progress-bar bg-success rounded-pill" style="width: 98%"></div></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between fs-8 mb-2"><span class="text-dark fw-bold">Garanties chèques</span><span class="text-secondary">40%</span></div>
+                        <div class="progress rounded-pill bg-light" style="height: 10px;"><div class="progress-bar bg-warning rounded-pill" style="width: 40%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table: Deliverables -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Livrables: Situation des Cautionnements et Dépôts</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-secondary fs-8 text-uppercase tracking-wider">
+                                <tr>
+                                    <th class="ps-4 fw-medium border-0 py-3">Réf Attestation</th>
+                                    <th class="fw-medium border-0 py-3">Ministère / Bénéficiaire</th>
+                                    <th class="fw-medium border-0 py-3">Date Émission</th>
+                                    <th class="fw-medium border-0 py-3 text-end pe-4">Montant (FCFA)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of deliverables; track item.ref) {
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">{{ item.ref }}</div>
+                                        <div class="text-secondary fs-8">Statut: {{ item.statut }}</div>
+                                    </td>
+                                    <td>{{ item.ministere }}</td>
+                                    <td><span class="badge bg-light text-dark fw-medium border">{{ item.date }}</span></td>
+                                    <td class="text-end pe-4 fw-bold">{{ item.montant }}</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

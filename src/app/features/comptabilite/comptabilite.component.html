@@ -64,31 +64,23 @@
                             <span>Solde BCEAO, Écart CCB</span>
                             <i class="fas fa-chevron-down fs-8"></i>
                         </button>
-                        <ul class="dropdown-menu w-100 shadow-sm border-0 p-2">
+                        <ul class="dropdown-menu w-100 shadow-sm border-0 p-2" style="max-height: 300px; overflow-y: auto;">
+                            @for (ind of selectedIndicators; track ind) {
                             <li>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" value="" id="ind1" checked>
-                                    <label class="form-check-label" for="ind1">Solde BCEAO</label>
+                                    <input class="form-check-input" type="checkbox" checked id="ind_sel_{{$index}}">
+                                    <label class="form-check-label" for="ind_sel_{{$index}}">{{ind}}</label>
                                 </div>
                             </li>
+                            }
+                            @for (ind of availableIndicators; track ind) {
                             <li>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" value="" id="ind2" checked>
-                                    <label class="form-check-label" for="ind2">Écart CCB</label>
+                                    <input class="form-check-input" type="checkbox" id="ind_avail_{{$index}}">
+                                    <label class="form-check-label" for="ind_avail_{{$index}}">{{ind}}</label>
                                 </div>
                             </li>
-                            <li>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" value="" id="ind3">
-                                    <label class="form-check-label" for="ind3">Imputations provisoires</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="" id="ind4">
-                                    <label class="form-check-label" for="ind4">Taux de concordance</label>
-                                </div>
-                            </li>
+                            }
                         </ul>
                     </div>
                 </div>
@@ -103,25 +95,23 @@
                             <span>Nature opération</span>
                             <i class="fas fa-chevron-down fs-8"></i>
                         </button>
-                        <ul class="dropdown-menu w-100 shadow-sm border-0 p-2">
+                        <ul class="dropdown-menu w-100 shadow-sm border-0 p-2" style="max-height: 300px; overflow-y: auto;">
+                            @for (axe of selectedAxes; track axe) {
                             <li>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" value="" id="axe1" checked>
-                                    <label class="form-check-label" for="axe1">Nature opération</label>
+                                    <input class="form-check-input" type="checkbox" checked id="axe_sel_{{$index}}">
+                                    <label class="form-check-label" for="axe_sel_{{$index}}">{{axe}}</label>
                                 </div>
                             </li>
+                            }
+                            @for (axe of availableAxes; track axe) {
                             <li>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" value="" id="axe2">
-                                    <label class="form-check-label" for="axe2">Poste comptable</label>
+                                    <input class="form-check-input" type="checkbox" id="axe_avail_{{$index}}">
+                                    <label class="form-check-label" for="axe_avail_{{$index}}">{{axe}}</label>
                                 </div>
                             </li>
-                            <li>
-                                <div class="form-check border-top pt-2 mt-2">
-                                    <input class="form-check-input" type="checkbox" value="" id="axe3">
-                                    <label class="form-check-label" for="axe3">Date de valeur</label>
-                                </div>
-                            </li>
+                            }
                         </ul>
                     </div>
                 </div>
@@ -419,7 +409,7 @@
             <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
                 <div
                     class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Répartition par Organisme</h6>
+                    <h6 class="fw-bold mb-0">Analyse de Répartition (Sect. 2.4/2.5)</h6>
                     <div class="d-flex gap-2">
                         <!-- Chart Type Toggle -->
                         <div class="btn-group" role="group">
@@ -571,7 +561,7 @@
             <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
                 <div
                     class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Imputations Provisoires par Nature (Tableau élargi)</h6>
+                    <h6 class="fw-bold mb-0">Livrables Comptables (CCB / CIP / Quote-parts)</h6>
                     <div class="d-flex gap-2">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-light dropdown-toggle" type="button"

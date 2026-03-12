@@ -30,11 +30,21 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/comptabilite/comptabilite.component').then(m => m.ComptabiliteComponent)
             },
             // Placeholder routes for navigation items to prevent errors
-            { path: 'tresorerie', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
-            { path: 'cautionnement', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
-            { path: 'regies', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+            {
+                path: 'tresorerie',
+                loadComponent: () => import('./features/tresorerie/tresorerie.component').then(m => m.TresorerieComponent)
+            },
+            {
+                path: 'cautionnement',
+                loadComponent: () => import('./features/cautionnement/cautionnement.component').then(m => m.CautionnementComponent)
+            },
+            {
+                path: 'regies',
+                loadComponent: () => import('./features/regies/regies.component').then(m => m.RegiesComponent)
+            },
             { path: 'statistiques', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
             { path: 'compte-gestion', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+            { path: 'reglement', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
             { path: 'admin', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) }
         ]
     },

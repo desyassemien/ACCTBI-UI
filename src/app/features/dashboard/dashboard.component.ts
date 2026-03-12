@@ -15,21 +15,29 @@ import { Alerte } from '../../core/models/alerte.model';
 export class DashboardComponent {
     // Chart selected type state
     dashChartType: string = 'bar';
-    // Mock KPIs
+    // Mock KPIs aligned with Section 11.3.A
     kpis: KpiCard[] = [
-        { id: '1', titre: 'Solde CUT', valeur: 1542300000, unite: 'FCFA', couleur: '#1B3A6B', icone: 'fas fa-wallet', tendance: 'up', variation: 5.2 },
-        { id: '2', titre: 'Mandats du Mois', valeur: 1245, unite: 'NOMBRE', couleur: '#3D5A8C', icone: 'fas fa-file-invoice-dollar', tendance: 'up', variation: 12 },
-        { id: '3', titre: 'Taux Exécution Budg', valeur: 45.8, unite: 'PERCENT', couleur: '#2E7D32', icone: 'fas fa-chart-line', tendance: 'up', variation: 2.1 },
-        { id: '4', titre: 'LA en Instance', valeur: 85000000, unite: 'FCFA', couleur: '#E65100', icone: 'fas fa-clock', tendance: 'down', variation: -1.5 },
-        { id: '5', titre: 'Restes à Payer', valeur: 320000000, unite: 'FCFA', couleur: '#B71C1C', icone: 'fas fa-exclamation-triangle', tendance: 'up', variation: 4.8 },
-        { id: '6', titre: 'Concordance Bancaire', valeur: 98.5, unite: 'PERCENT', couleur: '#D4A017', icone: 'fas fa-check-double', tendance: 'neutral', variation: 0 }
+        { id: '1', titre: 'Position Trésorerie Nette', valeur: 12450000000, unite: 'FCFA', couleur: '#1B3A6B', icone: 'fas fa-money-bill-wave', tendance: 'up', variation: 5.2 },
+        { id: '2', titre: 'Total Restes à Payer', valeur: 320000000, unite: 'FCFA', couleur: '#B71C1C', icone: 'fas fa-exclamation-triangle', tendance: 'up', variation: 4.8 },
+        { id: '3', titre: 'Taux Exécution Budgétaire', valeur: 85.8, unite: 'PERCENT', couleur: '#2E7D32', icone: 'fas fa-chart-line', tendance: 'up', variation: 2.1 },
+        { id: '4', titre: 'Solde Bancaire Consolidé', valeur: 15423000000, unite: 'FCFA', couleur: '#D4A017', icone: 'fas fa-university', tendance: 'neutral', variation: 0 },
+        { id: '5', titre: 'Opérations en Attente', valeur: 12, unite: 'NOMBRE', couleur: '#E65100', icone: 'fas fa-clock', tendance: 'up', variation: 1.5 }
     ];
 
-    // Mock Alerts
+    // Mock Alerts aligned with Section 11.3.B
     alertes: Alerte[] = [
-        { id: 'a1', type: 'DANGER', service: 'Trésorerie', titre: 'Rapprochement en retard', description: 'Le rapprochement BCEAO n\'a pas été validé depuis 48h.', routeAction: '/tresorerie', lue: false, dateCreation: new Date() },
-        { id: 'a2', type: 'WARNING', service: 'Comptabilité', titre: 'Écart de balance', description: 'Écart détecté de 2M FCFA sur le compte d\'attente 4711.', routeAction: '/comptabilite', lue: false, dateCreation: new Date() },
-        { id: 'a3', type: 'INFO', service: 'Cautionnement', titre: 'Expiration imminente', description: '5 cautions arrivent à expiration dans les 7 prochains jours.', routeAction: '/cautionnement', lue: true, dateCreation: new Date() }
+        { id: 'a1', type: 'DANGER', service: 'Statistiques', titre: 'RAP > 90 jours', description: 'Ancienneté moyenne des Restes à Payer dépassée.', routeAction: '/statistiques', lue: false, dateCreation: new Date() },
+        { id: 'a2', type: 'DANGER', service: 'Trésorerie', titre: 'LA > 60 jours', description: 'Lettres d\'Avance non régularisées après délai.', routeAction: '/tresorerie', lue: false, dateCreation: new Date() },
+        { id: 'a3', type: 'DANGER', service: 'Comptabilité', titre: 'Écart concordance > 0.1%', description: 'Écart critique détecté entre BCEAO et ACCT.', routeAction: '/comptabilite', lue: false, dateCreation: new Date() },
+        { id: 'a4', type: 'WARNING', service: 'Cautionnement', titre: 'Cautionnement échu', description: 'Cautionnement non régularisé (Date fin + 30j).', routeAction: '/cautionnement', lue: true, dateCreation: new Date() }
+    ];
+
+    // Mock Daily Activity aligned with Section 11.3.C
+    activiteJour = [
+        { label: 'Règlements effectués', valeur: '45', tendance: '+3', icone: 'fas fa-check-circle', couleur: 'text-success' },
+        { label: 'Mandats émis', valeur: '128', tendance: '+12', icone: 'fas fa-file-invoice-dollar', couleur: 'text-primary' },
+        { label: 'Nouveaux cautionnements', valeur: '8', tendance: '0', icone: 'fas fa-shield-alt', couleur: 'text-warning' },
+        { label: 'Recettes perçues (Régies)', valeur: '2.4B', tendance: '+15%', icone: 'fas fa-arrow-down', couleur: 'text-info' }
     ];
 
     // Mock Top Posts

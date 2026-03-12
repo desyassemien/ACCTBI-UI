@@ -26,14 +26,31 @@ export class ComptabiliteComponent {
     compChart1Type: string = 'pie';
     compChart2Type: string = 'bar';
 
-    // Drag & Drop specific state
+    // Drag & Drop specific state aligned with Section 2.4
     isDragDropMode = false;
 
-    availableIndicators = ['Solde Livre', 'Imputations prov.', 'Volume de transactions'];
-    selectedIndicators = ['Solde BCEAO', 'Écart CCB', 'Taux Concordance'];
+    availableIndicators = [
+        'Vol. imputations provisoires',
+        'Ancienneté moy. imputations',
+        'Répartition recettes par nature',
+        'Taux de collecte TVA'
+    ];
+    selectedIndicators = [
+        'Taux rapprochement auto',
+        'Délai moyen rapprochement',
+        'Écart concordance BCEAO/ACCT'
+    ];
 
-    availableAxes = ['Poste comptable', 'Date de valeur', 'Banque', 'Sens'];
-    selectedAxes = ['Nature opération'];
+    availableAxes = [
+        'Poste comptable',
+        'Agence',
+        'Type opération',
+        'Nature impôt',
+        'Contribuable',
+        'Région',
+        'Taux erreur'
+    ];
+    selectedAxes = ['Date (Jour/Mois/Exercice)'];
 
     toggleMode(mode: 'classic' | 'dragdrop') {
         this.isDragDropMode = mode === 'dragdrop';
@@ -53,10 +70,10 @@ export class ComptabiliteComponent {
     }
 
     kpis = [
-        { titre: 'Solde BCEAO', valeur: '12.4 Milliards', info: 'FCFA', type: 'primary' },
-        { titre: 'Solde Livre Comptable', valeur: '12.1 Milliards', info: 'FCFA', type: 'primary' },
-        { titre: 'Écart CCB', valeur: '300 Millions', info: 'FCFA - À rapprocher', type: 'warning' },
-        { titre: 'Taux Concordance', valeur: '97.6%', info: 'Stable', type: 'success' }
+        { titre: 'Taux Rapprochement Auto', valeur: '92.4%', info: 'Seuil > 85%', type: 'success' },
+        { titre: 'Délai Moy. Rapprochement', valeur: '1.2 Jours', info: 'Objectif < 3j', type: 'success' },
+        { titre: 'Écart BCEAO/ACCT', valeur: '0.04%', info: 'Seuil < 0.1%', type: 'primary' },
+        { titre: 'Taux de Régularisation', valeur: '88.5%', info: 'Seuil > 90%', type: 'warning' }
     ];
 
 }
