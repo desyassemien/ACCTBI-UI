@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card.component';
 import { KpiCard } from '../../core/models/kpi-card.model';
 import { Alerte } from '../../core/models/alerte.model';
+import { VoiceService } from '../../core/services/voice.service';
+
 
 @Component({
     selector: 'app-dashboard',
@@ -13,6 +15,8 @@ import { Alerte } from '../../core/models/alerte.model';
     styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
+    public voiceService = inject(VoiceService);
+
     // Chart selected type state
     dashChartType: string = 'bar';
     // Mock KPIs aligned with Section 11.3.A
@@ -23,6 +27,27 @@ export class DashboardComponent {
         { id: '4', titre: 'Solde Bancaire Consolidé', valeur: 15423000000, unite: 'FCFA', couleur: '#D4A017', icone: 'fas fa-university', tendance: 'neutral', variation: 0 },
         { id: '5', titre: 'Opérations en Attente', valeur: 12, unite: 'NOMBRE', couleur: '#E65100', icone: 'fas fa-clock', tendance: 'up', variation: 1.5 }
     ];
+
+    constructor() {
+        // Observer voice transcript to trigger commands
+        effect(() => {
+            const text = this.voiceService.transcript().toLowerCase();
+            if (text) {
+                this.handleVoiceCommand(text);
+            }
+        });
+    }
+
+    private handleVoiceCommand(text: string) {
+        console.log('🎙️ Traitement commande vocale:', text);
+        
+        if (text.includes('barre') || text.includes('histogramme')) {
+            this.dashChartType = 'bar';
+        } else if (text.includes('ligne') || text.includes('courbe')) {
+            this.dashChartType = 'line';
+        }
+        // Additional commands can be added here
+    }
 
     // Mock Alerts aligned with Section 11.3.B
     alertes: Alerte[] = [

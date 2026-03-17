@@ -29,7 +29,7 @@
     <div class="row g-4 mb-4 align-items-stretch">
         @for (item of activiteJour; track item.label) {
         <div class="col-6 col-lg-3 d-flex">
-            <div class="card border-0 shadow-sm w-100 h-100 transition-all">
+            <div class="card border-0 shadow-sm w-100 h-100 transition-all card-hover">
                 <div class="card-body p-4 d-flex flex-column justify-content-between">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
@@ -69,11 +69,21 @@
 
         <!-- Left Column: Treasury Evolution -->
         <div class="col-12 col-xxl-8">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0 shadow-sm h-100 card-hover">
                 <div
                     class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0">Évolution de la Trésorerie (12 mois)</h6>
                     <div class="d-flex gap-2 align-items-center">
+                        <!-- Voice Command Button -->
+                        <button class="btn btn-sm rounded-pill d-flex align-items-center gap-2 px-3 transition-all"
+                            [class.btn-outline-danger]="voiceService.isListening()"
+                            [class.btn-outline-secondary]="!voiceService.isListening()"
+                            (click)="voiceService.isListening() ? voiceService.stopListening() : voiceService.startListening()"
+                            [title]="voiceService.isListening() ? 'Arrêter l\'écoute' : 'Parler (ex: Afficher lignes)'">
+                            <i class="fas fa-microphone" [class.fa-pulse]="voiceService.isListening()"></i>
+                            <span class="small fw-bold">{{ voiceService.isListening() ? 'Écoute...' : 'Micro' }}</span>
+                        </button>
+
                         <!-- Chart Type Toggle -->
                         <div class="btn-group" role="group">
                             <input type="radio" class="btn-check" name="dashChartType" id="d1_bar" value="bar"
@@ -165,7 +175,7 @@
         <div class="col-12 col-xxl-4 d-flex flex-column gap-4">
 
             <!-- Budget Allocation Chart (Section 11.4 - G2) -->
-            <div class="card border-0 shadow-sm flex-grow-1">
+            <div class="card border-0 shadow-sm flex-grow-1 card-hover">
                 <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
                     <h6 class="fw-bold mb-0">Répartition Budgétaire Fonctionnement/Investissement</h6>
                 </div>
@@ -208,7 +218,7 @@
 
         <!-- Alerts Table & Top Posts -->
         <div class="col-12 col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0 shadow-sm h-100 card-hover">
                 <div
                     class="card-header bg-white border-bottom pt-4 pb-3 d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0">
@@ -256,7 +266,7 @@
 
         <!-- Top Accounting Posts -->
         <div class="col-12 col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0 shadow-sm h-100 card-hover">
                 <div class="card-header bg-white border-bottom pt-4 pb-3">
                     <h6 class="fw-bold mb-0">Top Postes Comptables Approvisionnés</h6>
                 </div>
