@@ -29,7 +29,6 @@ export const routes: Routes = [
                 path: 'comptabilite',
                 loadComponent: () => import('./features/comptabilite/comptabilite.component').then(m => m.ComptabiliteComponent)
             },
-            // Placeholder routes for navigation items to prevent errors
             {
                 path: 'tresorerie',
                 loadComponent: () => import('./features/tresorerie/tresorerie.component').then(m => m.TresorerieComponent)
@@ -42,9 +41,11 @@ export const routes: Routes = [
                 path: 'regies',
                 loadComponent: () => import('./features/regies/regies.component').then(m => m.RegiesComponent)
             },
+            // Other dashboard features (currently redirected to dashboard)
             { path: 'statistiques', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
             { path: 'compte-gestion', loadComponent: () => import('./features/gestion-compte/gestion-compte.component').then(m => m.GestionCompteComponent) },
-            { path: 'reglement', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+            { path: 'compte-gestion', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+            { path: 'reglement', loadComponent: () => import('./features/reglement/reglement.component').then(m => m.ReglementComponent) },
             { path: 'admin', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) }
         ]
     },

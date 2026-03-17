@@ -34,10 +34,10 @@ export class DashboardComponent {
 
     // Mock Daily Activity aligned with Section 11.3.C
     activiteJour = [
-        { label: 'Règlements effectués', valeur: '45', tendance: '+3', icone: 'fas fa-check-circle', couleur: 'text-success' },
-        { label: 'Mandats émis', valeur: '128', tendance: '+12', icone: 'fas fa-file-invoice-dollar', couleur: 'text-primary' },
-        { label: 'Nouveaux cautionnements', valeur: '8', tendance: '0', icone: 'fas fa-shield-alt', couleur: 'text-warning' },
-        { label: 'Recettes perçues (Régies)', valeur: '2.4B', tendance: '+15%', icone: 'fas fa-arrow-down', couleur: 'text-info' }
+        { label: 'Règlements effectués', valeur: '45', tendance: '+3', icone: 'fas fa-check-circle', couleur: 'text-success', montant: '1.2B FCFA' },
+        { label: 'Mandats émis', valeur: '128', tendance: '+12', icone: 'fas fa-file-invoice-dollar', couleur: 'text-primary', montant: '3.5B FCFA' },
+        { label: 'Nouveaux cautionnements', valeur: '8', tendance: '0', icone: 'fas fa-shield-alt', couleur: 'text-warning', montant: '850M FCFA' },
+        { label: 'Recettes perçues (Régies)', valeur: '2.4B', tendance: '+15%', icone: 'fas fa-arrow-down', couleur: 'text-info', montant: undefined }
     ];
 
     // Mock Top Posts

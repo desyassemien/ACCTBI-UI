@@ -17,150 +17,16 @@
     </div>
 
     <!-- Analyse Selector Area -->
-    <div class="card border-0 shadow-sm mb-4 bg-white rounded-3">
-        <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-filter text-primary-500 me-2"></i> Sélecteur d'Analyse Régies</h6>
-
-                <!-- Toggle Mode -->
-                <div class="btn-group" role="group">
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off"
-                        [checked]="!isDragDropMode" (change)="toggleMode('classic')">
-                    <label class="btn btn-outline-primary btn-sm px-3" for="btnradio1"><i
-                            class="fas fa-list-ul me-1"></i> Classique</label>
-
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
-                        [checked]="isDragDropMode" (change)="toggleMode('dragdrop')">
-                    <label class="btn btn-outline-primary btn-sm px-3" for="btnradio2"><i
-                            class="fas fa-arrows-alt me-1"></i> Dynamique</label>
-                </div>
-            </div>
-
-            @if (!isDragDropMode) {
-            <!-- Classic Mode Form -->
-            <div class="row g-4 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Période</label>
-                    <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium mb-1"
-                        style="height: 38px;" [(ngModel)]="selectedPeriod">
-                        <option value="Aujourd'hui">Aujourd'hui</option>
-                        <option value="Cette semaine">Cette semaine</option>
-                        <option value="Ce mois-ci">Ce mois-ci</option>
-                        <option value="Ce trimestre">Ce trimestre</option>
-                        <option value="Cette année">Cette année</option>
-                    </select>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Indicateurs (Max 6)</label>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary btn-sm w-100 text-start d-flex justify-content-between align-items-center text-dark"
-                            style="height: 38px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span>Recettes perçues, Taux Rotation</span>
-                            <i class="fas fa-chevron-down fs-8"></i>
-                        </button>
-                        <ul class="dropdown-menu w-100 shadow-sm border-0 p-2">
-                            <li><div class="form-check mb-2"><input class="form-check-input" type="checkbox" checked id="ind1"><label class="form-check-label" for="ind1">Recettes perçues</label></div></li>
-                            <li><div class="form-check mb-2"><input class="form-check-input" type="checkbox" checked id="ind2"><label class="form-check-label" for="ind2">Nombre de régies actives</label></div></li>
-                            <li><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="ind3"><label class="form-check-label" for="ind3">Taux de rotation</label></div></li>
-                            <li><div class="form-check"><input class="form-check-input" type="checkbox" id="ind4"><label class="form-check-label" for="ind4">Chèques impayés</label></div></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Axes (Max 3)</label>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary btn-sm w-100 text-start d-flex justify-content-between align-items-center text-dark"
-                            style="height: 38px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span>Organisationnel</span>
-                            <i class="fas fa-chevron-down fs-8"></i>
-                        </button>
-                        <ul class="dropdown-menu w-100 shadow-sm border-0 p-2">
-                            <li><div class="form-check mb-2"><input class="form-check-input" type="checkbox" checked id="axe1"><label class="form-check-label" for="axe1">Organisationnel (Min./Dir.)</label></div></li>
-                            <li><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="axe2"><label class="form-check-label" for="axe2">Régisseur / Agent</label></div></li>
-                            <li><div class="form-check border-top pt-2 mt-2"><input class="form-check-input" type="checkbox" id="axe3"><label class="form-check-label" for="axe3">Opérationnel (Nature/Type)</label></div></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="col-md-2 text-end">
-                    <button class="btn btn-primary btn-sm w-100 fw-medium shadow-sm" style="height: 38px;">
-                        <i class="fas fa-sync-alt me-2"></i> Actualiser
-                    </button>
-                </div>
-            </div>
-            } @else {
-            <!-- Drag and Drop Form -->
-            <div class="drag-drop-container pt-2">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 bg-light rounded-3 p-3 border">
-                    <div class="d-flex align-items-center gap-3 flex-wrap">
-                        <span class="form-label mb-0 text-secondary fs-8 fw-medium text-uppercase tracking-wider">Période:</span>
-                        <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium" style="width: 200px;" [(ngModel)]="selectedPeriod">
-                            <option value="Ce mois-ci">Ce mois-ci</option>
-                            <option value="Cette année">Cette année</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary btn-sm fw-medium shadow-sm">
-                        <i class="fas fa-sync-alt me-2"></i> Générer l'Analyse
-                    </button>
-                </div>
-
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="bg-light rounded-3 p-3 h-100 border shadow-sm">
-                            <h6 class="fs-8 fw-bold text-secondary text-uppercase tracking-wider mb-3">Éléments Disponibles</h6>
-                            <div class="mb-4">
-                                <div class="fs-9 text-secondary mb-2 fw-medium"><i class="fas fa-chart-line me-1"></i> Indicateurs</div>
-                                <div cdkDropList id="availableDocs" [cdkDropListData]="availableIndicators" [cdkDropListConnectedTo]="['selectedDocs']" class="drag-list" (cdkDropListDropped)="drop($event)">
-                                    @for (item of availableIndicators; track item) {
-                                    <div class="drag-item bg-white border shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab" cdkDrag>
-                                        <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
-                                    </div>
-                                    }
-                                </div>
-                            </div>
-                            <div>
-                                <div class="fs-9 text-secondary mb-2 fw-medium"><i class="fas fa-layer-group me-1"></i> Axes</div>
-                                <div cdkDropList id="availableAxes" [cdkDropListData]="availableAxes" [cdkDropListConnectedTo]="['selectedAxes']" class="drag-list" (cdkDropListDropped)="drop($event)">
-                                    @for (item of availableAxes; track item) {
-                                    <div class="drag-item bg-white border border-primary-100 shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab" cdkDrag>
-                                        <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
-                                    </div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="border border-2 border-dashed border-primary-200 rounded-3 p-4 h-100 bg-primary-50">
-                            <div class="mb-4">
-                                <h6 class="fs-8 fw-bold text-primary-900 text-uppercase tracking-wider mb-2">Indicateurs Actifs</h6>
-                                <div class="rounded-3 p-3 drag-drop-zone bg-white border" cdkDropList id="selectedDocs" [cdkDropListData]="selectedIndicators" [cdkDropListConnectedTo]="['availableDocs']" (cdkDropListDropped)="drop($event)">
-                                    @for (item of selectedIndicators; track item) {
-                                    <div class="drag-item bg-primary-100 border border-primary shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-bold text-primary-900 cursor-grab" cdkDrag>
-                                        <i class="fas fa-grip-vertical text-primary opacity-50 me-2"></i> {{ item }}
-                                    </div>
-                                    }
-                                </div>
-                            </div>
-                            <div>
-                                <h6 class="fs-8 fw-bold text-primary-900 text-uppercase tracking-wider mb-2">Axes Principaux</h6>
-                                <div class="rounded-3 p-3 drag-drop-zone bg-white border" cdkDropList id="selectedAxes" [cdkDropListData]="selectedAxes" [cdkDropListConnectedTo]="['availableAxes']" (cdkDropListDropped)="drop($event)">
-                                    @for (item of selectedAxes; track item) {
-                                    <div class="drag-item bg-accent-100 border border-accent shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-bold text-accent-900 cursor-grab" cdkDrag>
-                                        <i class="fas fa-grip-vertical text-accent opacity-50 me-2"></i> {{ item }}
-                                    </div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            }
-        </div>
-    </div>
+    <app-analyse-selector 
+        title="Sélecteur d'Analyse Régies"
+        [isDragDropMode]="isDragDropMode"
+        [(selectedPeriod)]="selectedPeriod"
+        [availableIndicators]="availableIndicators"
+        [selectedIndicators]="selectedIndicators"
+        [availableAxes]="availableAxes"
+        [selectedAxes]="selectedAxes"
+        (modeChanged)="isDragDropMode = $event === 'dragdrop'">
+    </app-analyse-selector>
 
     <!-- KPIs Grid -->
     <div class="row g-4 mb-4">

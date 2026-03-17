@@ -1,0 +1,203 @@
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark mb-1">Service Règlement</h4>
+            <p class="text-secondary mb-0">Gestion centralisée des paiements et rapprochements inter-agences</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm px-3 shadow-sm border-2">
+                <i class="fas fa-file-export me-2"></i> Exporter
+            </button>
+            <button class="btn btn-primary btn-sm px-3 shadow-sm">
+                <i class="fas fa-plus me-2"></i> Nouveau Règlement
+            </button>
+        </div>
+    </div>
+
+    <!-- Analyse Selector Component -->
+    <app-analyse-selector 
+        title="Configuration de l'Analyse Règlement" 
+        [isDragDropMode]="isDragDropMode"
+        [(selectedPeriod)]="selectedPeriod" 
+        [availableIndicators]="availableIndicators"
+        [selectedIndicators]="selectedIndicators" 
+        [availableAxes]="availableAxes" 
+        [selectedAxes]="selectedAxes"
+        (modeChanged)="toggleMode($event)" 
+        (analysisTriggered)="onAnalysisTriggered($event)">
+    </app-analyse-selector>
+
+    <!-- Main KPI Cards -->
+    <div class="row g-4 mb-4">
+        @for (kpi of kpis; track kpi.titre) {
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden bg-white rounded-3">
+                <div class="card-body p-4 position-relative">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="bg-{{kpi.type}}-soft p-2 rounded-3">
+                            <i class="fas" [ngClass]="{
+                                'fa-university': kpi.titre.includes('BCEAO') || kpi.titre.includes('Concordance'),
+                                'fa-money-bill-wave': kpi.titre.includes('Règlement'),
+                                'fa-sync-alt': kpi.titre.includes('Rapprochement'),
+                                'fa-file-invoice': kpi.titre.includes('Imputations')
+                            }" class="text-{{kpi.type}}"></i>
+                        </div>
+                        <span class="badge rounded-pill bg-{{kpi.type}}-soft text-{{kpi.type}} px-2 py-1 fs-9 fw-bold">
+                            {{ kpi.info }}
+                        </span>
+                    </div>
+                    <p class="text-secondary fs-8 fw-medium text-uppercase tracking-wider mb-1">{{ kpi.titre }}</p>
+                    <h3 class="fw-bold text-dark mb-0">{{ kpi.valeur }}</h3>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Charts & Secondary KPIs -->
+    <div class="row g-4 mb-4">
+        <!-- Main Chart -->
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm h-100 bg-white rounded-3">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-dark">Flux de Règlements par Nature</h6>
+                        <div class="btn-group">
+                            <button class="btn btn-light btn-sm px-3 active border">Débit</button>
+                            <button class="btn btn-light btn-sm px-3 border">Crédit</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-center bg-light border-dashed rounded-3 p-5" style="height: 320px;">
+                        <div class="text-center">
+                            <i class="fas fa-chart-bar fs-1 text-primary-200 mb-3"></i>
+                            <p class="text-secondary small">Graphique des Flux (Histogramme empilé)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary KPIs -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100 bg-white rounded-3">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h6 class="fw-bold mb-0 text-dark">Indicateurs de Performance</h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="vstack gap-4">
+                        @for (akpi of advancedKpis; track akpi.titre) {
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fs-8 fw-bold text-secondary text-uppercase">{{ akpi.titre }}</span>
+                                <span class="fs-8 fw-bold text-dark">{{ akpi.valeur }}</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-{{akpi.type}}" role="progressbar" 
+                                     [style.width]="akpi.valeur.replace('%', '') + '%'" 
+                                     aria-label="Progress"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <span class="fs-9 text-secondary fst-italic">{{ akpi.info }}</span>
+                                <i class="fas fa-check-circle text-success fs-9 ms-1" *ngIf="akpi.type === 'success'"></i>
+                                <i class="fas fa-exclamation-triangle text-warning fs-9 ms-1" *ngIf="akpi.type === 'warning'"></i>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Livrables Table -->
+    <div class="card border-0 shadow-sm bg-white rounded-3 overflow-hidden">
+        <div class="card-header bg-transparent border-0 p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-dark">Livrables et Documents de Règlement</h6>
+                <div class="input-group input-group-sm w-25">
+                    <span class="input-group-text bg-light border-end-0 border-secondary border-opacity-25 shadow-none">
+                        <i class="fas fa-search text-secondary"></i>
+                    </span>
+                    <input type="text" class="form-control bg-light border-start-0 border-secondary border-opacity-25 shadow-none" placeholder="Rechercher...">
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light border-bottom border-top border-secondary border-opacity-10">
+                    <tr>
+                        <th class="ps-4 py-3 text-secondary text-uppercase fs-9 fw-bold">Type de Document</th>
+                        <th class="py-3 text-secondary text-uppercase fs-9 fw-bold">Dernière Génération</th>
+                        <th class="py-3 text-secondary text-uppercase fs-9 fw-bold">Statut de Concordance</th>
+                        <th class="text-end pe-4 py-3 text-secondary text-uppercase fs-9 fw-bold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary-soft p-2 rounded-2 me-3">
+                                    <i class="fas fa-file-invoice text-primary fs-8"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fs-8 fw-bold">Certificat de Concordance Bancaire (CCB)</h6>
+                                    <span class="fs-9 text-secondary">Rapprochement BCEAO / ACCT</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="fs-8 fw-medium">12 Mars 2026, 09:45</span></td>
+                        <td><span class="badge bg-success-soft text-success px-3 fs-9">Équilibré (0.02%)</span></td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-link btn-sm text-primary p-0 me-3 shadow-none"><i class="fas fa-download"></i></button>
+                            <button class="btn btn-link btn-sm text-secondary p-0 shadow-none"><i class="fas fa-ellipsis-v"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-info-soft p-2 rounded-2 me-3">
+                                    <i class="fas fa-exchange-alt text-info fs-8"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fs-8 fw-bold">Rapprochement ACCT-ACCD</h6>
+                                    <span class="fs-9 text-secondary">Réconciliation inter-agences</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="fs-8 fw-medium">11 Mars 2026, 16:20</span></td>
+                        <td><span class="badge bg-success-soft text-success px-3 fs-9">Concordant (96.5%)</span></td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-link btn-sm text-primary p-0 me-3 shadow-none"><i class="fas fa-download"></i></button>
+                            <button class="btn btn-link btn-sm text-secondary p-0 shadow-none"><i class="fas fa-ellipsis-v"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning-soft p-2 rounded-2 me-3">
+                                    <i class="fas fa-file-signature text-warning fs-8"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fs-8 fw-bold">Compte d'Imputation Provisoire (CIP)</h6>
+                                    <span class="fs-9 text-secondary">Suivi des écritures en attente</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="fs-8 fw-medium">10 Mars 2026, 11:30</span></td>
+                        <td><span class="badge bg-warning-soft text-warning px-3 fs-9">Contrôle Requis (2.1%)</span></td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-link btn-sm text-primary p-0 me-3 shadow-none"><i class="fas fa-download"></i></button>
+                            <button class="btn btn-link btn-sm text-secondary p-0 shadow-none"><i class="fas fa-ellipsis-v"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-transparent border-0 p-4 text-center">
+            <button class="btn btn-outline-primary btn-sm px-4 shadow-sm border-2">Voir tous les documents</button>
+        </div>
+    </div>
+</div>
