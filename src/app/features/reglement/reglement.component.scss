@@ -1,0 +1,43 @@
+:host {
+    display: block;
+}
+
+// Custom soft colors for badges and icons based on primary colors
+.bg-primary-soft { background-color: rgba(0, 107, 255, 0.1); }
+.bg-success-soft { background-color: rgba(46, 213, 115, 0.1); }
+.bg-warning-soft { background-color: rgba(255, 165, 2, 0.1); }
+.bg-info-soft    { background-color: rgba(45, 152, 218, 0.1); }
+.bg-danger-soft  { background-color: rgba(255, 71, 87, 0.1); }
+
+.text-primary-200 { color: #80b5ff; }
+.text-primary-500 { color: #006bff; }
+.text-primary-900 { color: #002d6b; }
+
+.fs-7 { font-size: 0.95rem; }
+.fs-8 { font-size: 0.85rem; }
+.fs-9 { font-size: 0.75rem; }
+
+.tracking-wider { letter-spacing: 0.05em; }
+
+.border-dashed {
+    border-style: dashed !important;
+    border-width: 2px !important;
+}
+
+// Progress bar customization
+.progress {
+    background-color: #f1f2f6;
+    border-radius: 10px;
+}
+
+.table > :not(caption) > * > * {
+    padding: 1rem 0.5rem;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 107, 255, 0.02);
+}
+
+.btn-link {
+    text-decoration: none;
+}

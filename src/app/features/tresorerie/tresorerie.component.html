@@ -31,151 +31,16 @@
     </div>
 
     <!-- Analyse Selector Area -->
-    <div class="card border-0 shadow-sm mb-4 bg-white rounded-3">
-        <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-                <h6 class="fw-bold mb-0 text-dark">
-                    <i class="fas fa-search-plus text-primary-500 me-2"></i>
-                    Analyse: {{ activeSubDomain === 'la' ? 'Lettres d\'Avance' : 'Bons de Caisse' }}
-                </h6>
-
-                <!-- Toggle Mode -->
-                <div class="btn-group" role="group">
-                    <input type="radio" class="btn-check" name="modeRadio" id="classicMode" [checked]="!isDragDropMode" (change)="toggleMode('classic')">
-                    <label class="btn btn-outline-primary btn-sm px-3" for="classicMode">Classique</label>
-
-                    <input type="radio" class="btn-check" name="modeRadio" id="dragMode" [checked]="isDragDropMode" (change)="toggleMode('dragdrop')">
-                    <label class="btn btn-outline-primary btn-sm px-3" for="dragMode"><i
-                            class="fas fa-arrows-alt me-1"></i>Dynamique</label>
-                </div>
-            </div>
-
-            @if (!isDragDropMode) {
-                <!-- Classic Filters -->
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-3">
-                        <label class="form-label text-secondary fs-9 fw-bold text-uppercase">Période</label>
-                        <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium mb-1" style="height: 38px;" [(ngModel)]="selectedPeriod">
-                            <option value="Ce mois-ci">Ce mois-ci</option>
-                            <option value="Cette année">Cette année</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label text-secondary fs-9 fw-bold text-uppercase">Indicateurs clés (Max 6)</label>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary btn-sm w-100 text-start d-flex justify-content-between align-items-center text-dark"
-                                style="height: 38px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span>Indicateurs recommandés</span>
-                                <i class="fas fa-chevron-down fs-8"></i>
-                            </button>
-                            <ul class="dropdown-menu w-100 shadow-sm border-0 p-2" style="max-height: 300px; overflow-y: auto;">
-                                @for (ind of (activeSubDomain === 'la' ? selectedIndicatorsLA : selectedIndicatorsBC); track ind) {
-                                <li>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" checked id="ind_sel_{{$index}}">
-                                        <label class="form-check-label fs-8" for="ind_sel_{{$index}}">{{ind}}</label>
-                                    </div>
-                                </li>
-                                }
-                                @for (ind of (activeSubDomain === 'la' ? availableIndicatorsLA : availableIndicatorsBC); track ind) {
-                                <li>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="ind_avail_{{$index}}">
-                                        <label class="form-check-label fs-8" for="ind_avail_{{$index}}">{{ind}}</label>
-                                    </div>
-                                </li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label text-secondary fs-9 fw-bold text-uppercase">Axe d'Analyse (Max 3)</label>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary btn-sm w-100 text-start d-flex justify-content-between align-items-center text-dark"
-                                style="height: 38px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span>{{ activeSubDomain === 'la' ? 'Organisationnel' : 'Opérationnel' }}</span>
-                                <i class="fas fa-chevron-down fs-8"></i>
-                            </button>
-                            <ul class="dropdown-menu w-100 shadow-sm border-0 p-2" style="max-height: 300px; overflow-y: auto;">
-                                @for (axe of (activeSubDomain === 'la' ? selectedAxesLA : selectedAxesBC); track axe) {
-                                <li>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" checked id="axe_sel_{{$index}}">
-                                        <label class="form-check-label fs-8" for="axe_sel_{{$index}}">{{axe}}</label>
-                                    </div>
-                                </li>
-                                }
-                                @for (axe of (activeSubDomain === 'la' ? availableAxesLA : availableAxesBC); track axe) {
-                                <li>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="axe_avail_{{$index}}">
-                                        <label class="form-check-label fs-8" for="axe_avail_{{$index}}">{{axe}}</label>
-                                    </div>
-                                </li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="col-md-2">
-                        <button class="btn btn-primary btn-sm w-100 fw-bold" style="height: 38px;">Actualiser</button>
-                    </div>
-                </div>
-            } @else {
-                <!-- Drag and Drop Experience -->
-                <div class="row g-4 pt-2">
-                    <div class="col-md-4">
-                        <div class="bg-light rounded-3 p-3 border h-100">
-                            <h6 class="fs-9 fw-bold text-secondary text-uppercase mb-3">Bibliothèque BI</h6>
-                            <div class="mb-4">
-                                <div class="fs-10 text-uppercase fw-bold text-muted mb-2">Indicateurs</div>
-                                <div cdkDropList [cdkDropListData]="activeSubDomain === 'la' ? availableIndicatorsLA : availableIndicatorsBC"
-                                    [cdkDropListConnectedTo]="['activeInds']" class="drag-list" (cdkDropListDropped)="drop($event)">
-                                    @for (item of (activeSubDomain === 'la' ? availableIndicatorsLA : availableIndicatorsBC); track item) {
-                                        <div class="drag-item bg-white border rounded-2 p-2 mb-2 fs-8 cursor-grab shadow-xs" cdkDrag>{{ item }}</div>
-                                    }
-                                </div>
-                            </div>
-                            <div>
-                                <div class="fs-10 text-uppercase fw-bold text-muted mb-2">Dimensions</div>
-                                <div cdkDropList [cdkDropListData]="activeSubDomain === 'la' ? availableAxesLA : availableAxesBC"
-                                    [cdkDropListConnectedTo]="['activeAxes']" class="drag-list" (cdkDropListDropped)="drop($event)">
-                                    @for (item of (activeSubDomain === 'la' ? availableAxesLA : availableAxesBC); track item) {
-                                        <div class="drag-item bg-white border rounded-2 p-2 mb-2 fs-8 cursor-grab shadow-xs" cdkDrag>{{ item }}</div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="bg-primary-soft rounded-3 p-4 border-dashed h-100">
-                            <h6 class="fs-9 fw-bold text-primary text-uppercase mb-3">Zone d'Analyse Active</h6>
-                            <div class="mb-4">
-                                <div class="fs-10 text-uppercase fw-bold text-primary mb-2">Indicateurs Sélectionnés</div>
-                                <div cdkDropList id="activeInds" [cdkDropListData]="activeSubDomain === 'la' ? selectedIndicatorsLA : selectedIndicatorsBC"
-                                    [cdkDropListConnectedTo]="['availableDocs']" class="drag-drop-zone bg-white rounded-3 p-3 border shadow-sm" (cdkDropListDropped)="drop($event)">
-                                    @for (item of (activeSubDomain === 'la' ? selectedIndicatorsLA : selectedIndicatorsBC); track item) {
-                                        <div class="drag-item active-item bg-primary-100 border-primary-200 text-primary-900 rounded-2 p-2 mb-2 fs-8 fw-bold" cdkDrag>{{ item }}</div>
-                                    }
-                                </div>
-                            </div>
-                            <div>
-                                <div class="fs-10 text-uppercase fw-bold text-primary mb-2">Axes d'Analyse</div>
-                                <div cdkDropList id="activeAxes" [cdkDropListData]="activeSubDomain === 'la' ? selectedAxesLA : selectedAxesBC"
-                                    class="drag-drop-zone bg-white rounded-3 p-3 border shadow-sm" (cdkDropListDropped)="drop($event)">
-                                    @for (item of (activeSubDomain === 'la' ? selectedAxesLA : selectedAxesBC); track item) {
-                                        <div class="drag-item active-axis bg-accent-100 border-accent-200 text-accent-900 rounded-2 p-2 mb-2 fs-8 fw-bold" cdkDrag>{{ item }}</div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
+    <app-analyse-selector 
+        [title]="'Analyse: ' + (activeSubDomain === 'la' ? 'Lettres d\'Avance' : 'Bons de Caisse')"
+        [isDragDropMode]="isDragDropMode"
+        [(selectedPeriod)]="selectedPeriod"
+        [availableIndicators]="activeSubDomain === 'la' ? availableIndicatorsLA : availableIndicatorsBC"
+        [selectedIndicators]="activeSubDomain === 'la' ? selectedIndicatorsLA : selectedIndicatorsBC"
+        [availableAxes]="activeSubDomain === 'la' ? availableAxesLA : availableAxesBC"
+        [selectedAxes]="activeSubDomain === 'la' ? selectedAxesLA : selectedAxesBC"
+        (modeChanged)="isDragDropMode = $event === 'dragdrop'">
+    </app-analyse-selector>
 
     <!-- KPIs Row -->
     <div class="row g-4 mb-4">

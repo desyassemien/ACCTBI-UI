@@ -1,0 +1,32 @@
+:host {
+    display: block;
+}
+
+.cursor-grab {
+    cursor: grab;
+}
+
+.drag-list {
+    min-height: 40px;
+}
+
+.drag-drop-zone {
+    min-height: 100px;
+}
+
+.animate__animated {
+    animation-duration: 0.3s;
+}
+
+// Ensure compatibility with the premium look
+.form-select-sm {
+    font-size: 0.85rem;
+}
+
+.bg-primary-50 {
+    background-color: rgba(247, 127, 0, 0.03);
+}
+
+.border-primary-200 {
+    border-color: rgba(247, 127, 0, 0.2) !important;
+}

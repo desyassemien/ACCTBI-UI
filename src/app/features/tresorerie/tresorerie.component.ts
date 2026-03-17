@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
+import { AnalyseSelectorComponent } from '../../shared/components/analyse-selector/analyse-selector.component';
 
 @Component({
     selector: 'app-tresorerie',
     standalone: true,
-    imports: [CommonModule, CdkDrag, CdkDropList, FormsModule],
+    imports: [CommonModule, FormsModule, AnalyseSelectorComponent],
     templateUrl: './tresorerie.component.html',
     styleUrl: './tresorerie.component.scss'
 })
@@ -100,18 +100,5 @@ export class TresorerieComponent {
 
     toggleMode(mode: 'classic' | 'dragdrop') {
         this.isDragDropMode = mode === 'dragdrop';
-    }
-
-    drop(event: CdkDragDrop<string[]>) {
-        if (event.previousContainer === event.container) {
-            moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-        } else {
-            transferArrayItem(
-                event.previousContainer.data,
-                event.container.data,
-                event.previousIndex,
-                event.currentIndex,
-            );
-        }
     }
 }
