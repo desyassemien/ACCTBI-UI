@@ -1,7 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-
+import { NotificationService } from '../../core/services/notification.service';
+import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 @Component({
     selector: 'app-header',
     standalone: true,
@@ -12,9 +14,9 @@ import { AuthService } from '../../core/services/auth.service';
 export class HeaderComponent {
     private authService = inject(AuthService);
     private router = inject(Router);
+    public notificationService = inject(NotificationService);
 
     user = this.authService.currentUser;
-    notificationCount = 3;
     isDarkMode = false;
 
     // Navigation items (moved from sidebar)
@@ -39,6 +41,11 @@ export class HeaderComponent {
         }
     }
 
+    /** Helper to get service clean name without slash */
+    getServiceName(path: string): string {
+        return path?.replace('/', '') || '';
+    }
+
     /** Check if any service route is currently active (for dropdown highlight) */
     get isServicesActive(): boolean {
         const url = this.router.url;
@@ -61,5 +68,23 @@ export class HeaderComponent {
 
     logout() {
         this.authService.logout();
+    }
+
+    markAsRead(id: string, event: Event) {
+        event.stopPropagation();
+        this.notificationService.markAsRead(id);
+    }
+
+    markAllAsRead(event: Event) {
+        event.stopPropagation();
+        this.notificationService.markAllAsRead();
+    }
+
+    testPushNotification(event: Event) {
+        event.stopPropagation();
+        const alertes = this.notificationService.alertes();
+        if (alertes && alertes.length > 0) {
+            this.notificationService.triggerSystemNotification(alertes[0]);
+        }
     }
 }
