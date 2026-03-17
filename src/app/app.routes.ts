@@ -43,7 +43,7 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/regies/regies.component').then(m => m.RegiesComponent)
             },
             { path: 'statistiques', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
-            { path: 'compte-gestion', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+            { path: 'compte-gestion', loadComponent: () => import('./features/gestion-compte/gestion-compte.component').then(m => m.GestionCompteComponent) },
             { path: 'reglement', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
             { path: 'admin', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) }
         ]

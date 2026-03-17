@@ -1,0 +1,420 @@
+<div class="gestion-compte-container">
+  <!-- Page Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 gap-md-0">
+    <div>
+      <h4 class="fw-bold text-primary-900 mb-1">Gestion de Compte</h4>
+      <p class="text-secondary mb-0">SYGACUT-BI / Services / Gestion de Compte</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm" (click)="exportExcel()">
+        <i class="far fa-file-excel me-2 text-success"></i> Export Excel
+      </button>
+      <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm" (click)="generateReport()">
+        <i class="far fa-file-pdf me-2 text-danger"></i> Export PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Analyse Selector Area -->
+  <div class="card border-0 shadow-sm mb-4 bg-white rounded-3">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-filter text-primary-500 me-2"></i> Sélecteur d'Analyse Actif</h6>
+
+        <!-- Toggle Mode -->
+        <div class="btn-group" role="group">
+          <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off"
+            [checked]="!isDragDropMode" (change)="toggleMode('classic')">
+          <label class="btn btn-outline-primary btn-sm px-3" for="btnradio1"><i class="fas fa-list-ul me-1"></i> Classique</label>
+
+          <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
+            [checked]="isDragDropMode" (change)="toggleMode('dragdrop')">
+          <label class="btn btn-outline-primary btn-sm px-3" for="btnradio2"><i class="fas fa-arrows-alt me-1"></i> Drag & Drop</label>
+        </div>
+      </div>
+
+      @if (!isDragDropMode) {
+      <!-- Classic Mode Form -->
+      <div class="row g-4 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Période</label>
+          <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium mb-1"
+            style="height: 38px;" [(ngModel)]="selectedPeriod">
+            <option value="Aujourd'hui">Aujourd'hui</option>
+            <option value="Cette semaine">Cette semaine</option>
+            <option value="Ce mois-ci">Ce mois-ci</option>
+            <option value="Ce trimestre">Ce trimestre</option>
+            <option value="Cette année">Cette année</option>
+            <option value="Personnalisé...">Personnalisé...</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Indicateurs</label>
+          <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium mb-1" style="height: 38px;">
+            <option>Balance à 3 chiffres, Imputations provisoires</option>
+            <option>Développement dépenses, Disponibilités</option>
+            <option>Tous les indicateurs</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Axes d'Analyse</label>
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-between shadow-none"
+              type="button" data-bs-toggle="dropdown" style="height: 38px;">
+              <span class="text-dark fw-medium">Classe comptable, Ministère</span>
+              <i class="fas fa-chevron-down text-secondary"></i>
+            </button>
+            <ul class="dropdown-menu w-100 shadow-sm border-secondary">
+              @for (axe of selectedAxes; track axe) {
+              <li>
+                <div class="form-check mb-2 ms-3">
+                  <input class="form-check-input" type="checkbox" checked id="axe_sel_{{$index}}">
+                  <label class="form-check-label" for="axe_sel_{{$index}}">{{axe}}</label>
+                </div>
+              </li>
+              }
+              @for (axe of availableAxes; track axe) {
+              <li>
+                <div class="form-check mb-2 ms-3">
+                  <input class="form-check-input" type="checkbox" id="axe_avail_{{$index}}">
+                  <label class="form-check-label" for="axe_avail_{{$index}}">{{axe}}</label>
+                </div>
+              </li>
+              }
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-md-2 text-end">
+          <button class="btn btn-primary btn-sm w-100 fw-medium shadow-sm" style="height: 38px;" (click)="refreshAnalysis()">
+            <i class="fas fa-sync-alt me-2"></i> Actualiser
+          </button>
+        </div>
+      </div>
+
+      @if (selectedPeriod === 'Personnalisé...') {
+      <!-- Custom Date Range Row -->
+      <div class="row g-4 mt-1 animate__animated animate__fadeIn">
+        <div class="col-12 col-md-5 d-flex gap-2 align-items-center bg-light p-2 rounded-3 border">
+          <i class="far fa-calendar-alt text-secondary ms-2"></i>
+          <span class="fs-8 fw-medium text-secondary text-nowrap">Du :</span>
+          <input type="date" class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white" title="Date de début">
+          <span class="fs-8 fw-medium text-secondary text-nowrap ms-2">Au :</span>
+          <input type="date" class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white" title="Date de fin">
+        </div>
+      </div>
+      }
+      } @else {
+      <!-- Drag and Drop Form -->
+      <div class="drag-drop-container pt-2">
+        <!-- Top section: Period & Refresh block -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 bg-light rounded-3 p-3 border">
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <label class="form-label mb-0 text-secondary fs-8 fw-medium text-uppercase tracking-wider flex-shrink-0">Période:</label>
+            <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium" style="width: 200px;" [(ngModel)]="selectedPeriod">
+              <option value="Aujourd'hui">Aujourd'hui</option>
+              <option value="Cette semaine">Cette semaine</option>
+              <option value="Ce mois-ci">Ce mois-ci</option>
+              <option value="Ce trimestre">Ce trimestre</option>
+              <option value="Cette année">Cette année</option>
+              <option value="Personnalisé...">Personnalisé...</option>
+            </select>
+
+            @if (selectedPeriod === 'Personnalisé...') {
+            <div class="d-flex gap-2 align-items-center animate__animated animate__fadeIn">
+              <input type="date" class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none" placeholder="Du" title="Date de début">
+              <i class="fas fa-arrow-right text-secondary fs-9"></i>
+              <input type="date" class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none" placeholder="Au" title="Date de fin">
+            </div>
+            }
+          </div>
+          <button class="btn btn-primary btn-sm fw-medium shadow-sm" (click)="refreshAnalysis()">
+            <i class="fas fa-sync-alt me-2"></i> Générer l'Analyse
+          </button>
+        </div>
+
+        <div class="row g-4">
+          <!-- Column 1: Available Elements -->
+          <div class="col-12 col-md-4">
+            <div class="bg-light rounded-3 p-3 h-100 border border-secondary border-opacity-10 shadow-sm">
+              <h6 class="fs-8 fw-bold text-secondary text-uppercase tracking-wider mb-3">Éléments Disponibles</h6>
+
+              <div class="mb-4">
+                <div class="fs-9 text-secondary mb-2 fw-medium"><i class="fas fa-chart-line me-1"></i> Indicateurs</div>
+                <div cdkDropList id="availableIndicatorsList" [cdkDropListData]="availableIndicators"
+                  [cdkDropListConnectedTo]="['selectedIndicatorsList']" class="drag-list" (cdkDropListDropped)="drop($event)">
+                  @for (item of availableIndicators; track item) {
+                  <div class="drag-item bg-white border shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab" cdkDrag>
+                    <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
+                  </div>
+                  }
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <div class="fs-9 text-secondary mb-2 fw-medium"><i class="fas fa-layer-group me-1"></i> Axes d'Analyse</div>
+                <div cdkDropList id="availableAxesList" [cdkDropListData]="availableAxes"
+                  [cdkDropListConnectedTo]="['selectedAxesList']" class="drag-list" (cdkDropListDropped)="drop($event)">
+                  @for (item of availableAxes; track item) {
+                  <div class="drag-item bg-white border shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab" cdkDrag>
+                    <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
+                  </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Selected Elements -->
+          <div class="col-12 col-md-4">
+            <div class="bg-primary-100 rounded-3 p-3 h-100 border border-primary border-opacity-25 shadow-sm">
+              <h6 class="fs-8 fw-bold text-primary-900 text-uppercase tracking-wider mb-3">Éléments Sélectionnés</h6>
+
+              <div class="mb-4">
+                <div class="fs-9 text-primary-700 mb-2 fw-medium"><i class="fas fa-chart-line me-1"></i> Indicateurs</div>
+                <div cdkDropList id="selectedIndicatorsList" [cdkDropListData]="selectedIndicators"
+                  [cdkDropListConnectedTo]="['availableIndicatorsList']" class="drag-list" (cdkDropListDropped)="drop($event)">
+                  @for (item of selectedIndicators; track item) {
+                  <div class="drag-item bg-white border shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab" cdkDrag>
+                    <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
+                  </div>
+                  }
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <div class="fs-9 text-primary-700 mb-2 fw-medium"><i class="fas fa-layer-group me-1"></i> Axes d'Analyse</div>
+                <div cdkDropList id="selectedAxesList" [cdkDropListData]="selectedAxes"
+                  [cdkDropListConnectedTo]="['availableAxesList']" class="drag-list" (cdkDropListDropped)="drop($event)">
+                  @for (item of selectedAxes; track item) {
+                  <div class="drag-item bg-white border shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab" cdkDrag>
+                    <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
+                  </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 3: Preview -->
+          <div class="col-12 col-md-4">
+            <div class="bg-white rounded-3 p-3 h-100 border border-secondary border-opacity-10 shadow-sm">
+              <h6 class="fs-8 fw-bold text-secondary text-uppercase tracking-wider mb-3">Aperçu de l'Analyse</h6>
+
+              <div class="text-center py-4">
+                <i class="fas fa-chart-bar text-secondary fs-1 mb-3 opacity-50"></i>
+                <p class="text-secondary fs-8 mb-2">Configurez vos indicateurs et axes</p>
+                <p class="text-muted fs-9">L'aperçu s'affichera automatiquement</p>
+              </div>
+
+              <div class="mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fs-9 text-secondary">Indicateurs:</span>
+                  <span class="badge bg-primary text-white fs-9">{{ selectedIndicators.length }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="fs-9 text-secondary">Axes:</span>
+                  <span class="badge bg-primary text-white fs-9">{{ selectedAxes.length }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Balance à 3 chiffres -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">
+        <i class="fas fa-balance-scale me-2"></i>
+        Balance à 3 chiffres
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Classe</th>
+              <th class="text-end">Débit</th>
+              <th class="text-end">Crédit</th>
+              <th class="text-end">Solde</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of balanceData(); track item.classe) {
+            <tr>
+              <td>{{ item.classe }}</td>
+              <td class="text-end">{{ item.debit | number:'1.0-0' }} FCFA</td>
+              <td class="text-end">{{ item.credit | number:'1.0-0' }} FCFA</td>
+              <td class="text-end" [class]="item.solde >= 0 ? 'text-success' : 'text-danger'">
+                {{ item.solde | number:'1.0-0' }} FCFA
+              </td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary" (click)="onDrillDown(item.classe)">
+                  <i class="fas fa-search-plus"></i> Détail
+                </button>
+              </td>
+            </tr>
+            }
+          </tbody>
+          <tfoot class="table-light fw-bold">
+            <tr>
+              <td>Total</td>
+              <td class="text-end">{{ totalDebit() | number:'1.0-0' }} FCFA</td>
+              <td class="text-end">{{ totalCredit() | number:'1.0-0' }} FCFA</td>
+              <td class="text-end">{{ totalSolde() | number:'1.0-0' }} FCFA</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Situation sur les Imputations Provisoires -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+      <h5 class="mb-0">
+        <i class="fas fa-chart-bar me-2"></i>
+        Situation sur les Imputations Provisoires
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Type</th>
+                  <th class="text-end">Stock Initial</th>
+                  <th class="text-end">Nouvelles Entrées</th>
+                  <th class="text-end">Régularisations</th>
+                  <th class="text-end">Stock Final</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of imputationsData(); track item.type) {
+                <tr>
+                  <td>{{ item.type }}</td>
+                  <td class="text-end">{{ item.stockInitial | number:'1.0-0' }}</td>
+                  <td class="text-end">{{ item.nouvellesEntrees | number:'1.0-0' }}</td>
+                  <td class="text-end">{{ item.regularisations | number:'1.0-0' }}</td>
+                  <td class="text-end">{{ item.stockFinal | number:'1.0-0' }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <canvas baseChart
+                  [data]="waterfallChartData"
+                  [options]="waterfallChartOptions"
+                  [type]="'bar'">
+          </canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Situation du développement des dépenses budgétaires -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-warning text-white">
+      <h5 class="mb-0">
+        <i class="fas fa-chart-pie me-2"></i>
+        Développement des Dépenses Budgétaires
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        @for (item of depensesData(); track item.ministere) {
+        <div class="col-md-6 col-lg-3 mb-3">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <h6 class="card-title">{{ item.ministere }}</h6>
+              <div class="mb-2">
+                <canvas baseChart
+                        [data]="{
+                          labels: ['Consommé', 'Restant'],
+                          datasets: [{
+                            data: [item.taux, 100 - item.taux],
+                            backgroundColor: ['#2E7D32', '#E0E0E0']
+                          }]
+                        }"
+                        [options]="{
+                          responsive: true,
+                          plugins: { legend: { display: false } },
+                          cutout: '70%'
+                        }"
+                        [type]="'doughnut'">
+                </canvas>
+              </div>
+              <div class="progress mb-2" style="height: 8px;">
+                <div class="progress-bar bg-success" [style.width.%]="item.taux"></div>
+              </div>
+              <small class="text-muted">{{ item.taux }}% consommé</small>
+              <div class="mt-2">
+                <small>Dépenses: {{ item.depenses | number:'1.0-0' }} FCFA</small><br>
+                <small>Crédits: {{ item.credits | number:'1.0-0' }} FCFA</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Situation sur les disponibilités -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-info text-white">
+      <h5 class="mb-0">
+        <i class="fas fa-chart-line me-2"></i>
+        Évolution des Disponibilités
+      </h5>
+    </div>
+    <div class="card-body">
+      <canvas baseChart
+              [data]="lineChartData"
+              [options]="lineChartOptions"
+              [type]="'line'">
+      </canvas>
+      <div class="mt-3">
+        <div class="row text-center">
+          <div class="col-md-3">
+            <div class="p-2 bg-light rounded">
+              <small class="text-muted">Solde Actuel</small>
+              <div class="fw-bold text-primary">{{ soldeActuel() | number:'1.0-0' }} FCFA</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="p-2 bg-light rounded">
+              <small class="text-muted">Évolution 7j</small>
+              <div class="fw-bold text-success">+{{ evolution7j() | number:'1.1-1' }}%</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="p-2 bg-light rounded">
+              <small class="text-muted">Solde Moyen</small>
+              <div class="fw-bold">{{ soldeMoyen() | number:'1.0-0' }} FCFA</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="p-2 bg-light rounded">
+              <small class="text-muted">Volatilité</small>
+              <div class="fw-bold text-warning">±{{ 15000 | number:'1.0-0' }} FCFA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
