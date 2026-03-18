@@ -41,9 +41,20 @@ export const routes: Routes = [
                 path: 'regies',
                 loadComponent: () => import('./features/regies/regies.component').then(m => m.RegiesComponent)
             },
+            {
+                path: 'gestion-compte',
+                loadComponent: () => import('./features/gestion-compte/gestion-compte.component').then(m => m.GestionCompteComponent)
+            },
             // Other dashboard features (currently redirected to dashboard)
-            { path: 'statistiques', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
-            { path: 'compte-gestion', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+            {
+                path: 'statistiques',
+                loadComponent: () => import('./features/statistiques/statistiques.component').then(m => m.StatistiquesComponent)
+            },
+            {
+                path: 'statistiques/rapport/:id',
+                loadComponent: () => import('./features/statistiques/rapports/rapport-detail.component').then(m => m.RapportDetailComponent)
+            },
+            { path: 'compte-gestion', loadComponent: () => import('./features/gestion-compte/gestion-compte.component').then(m => m.GestionCompteComponent) },
             { path: 'reglement', loadComponent: () => import('./features/reglement/reglement.component').then(m => m.ReglementComponent) },
             { path: 'admin', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) }
         ]
