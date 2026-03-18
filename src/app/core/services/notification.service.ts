@@ -61,8 +61,11 @@ export class NotificationService {
         body: alerte.description,
         icon: '/icons/icon-192x192.png', // Icône générée par PWA
         badge: '/icons/icon-72x72.png',
-        tag: alerte.id // Évite de dupliquer la même alerte
-      });
+        tag: alerte.id, // Évite de dupliquer la même alerte
+        renotify: true, // Force le "ping" même si le tag est identique
+        vibrate: [200, 100, 200], // Vibration pour mobile
+        silent: false // S'assurer que ce n'est pas silencieux
+      } as any);
 
       notification.onclick = () => {
         window.focus();

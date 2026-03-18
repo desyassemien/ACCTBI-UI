@@ -21,10 +21,10 @@
         title="Sélecteur d'Analyse Actif"
         [isDragDropMode]="isDragDropMode"
         [(selectedPeriod)]="selectedPeriod"
-        [availableIndicators]="availableIndicators"
-        [selectedIndicators]="selectedIndicators"
-        [availableAxes]="availableAxes"
-        [selectedAxes]="selectedAxes"
+        [(availableIndicators)]="availableIndicators"
+        [(selectedIndicators)]="selectedIndicators"
+        [(availableAxes)]="availableAxes"
+        [(selectedAxes)]="selectedAxes"
         (modeChanged)="isDragDropMode = $event === 'dragdrop'">
     </app-analyse-selector>
 

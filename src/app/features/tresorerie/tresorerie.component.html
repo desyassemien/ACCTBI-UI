@@ -36,9 +36,13 @@
         [isDragDropMode]="isDragDropMode"
         [(selectedPeriod)]="selectedPeriod"
         [availableIndicators]="activeSubDomain === 'la' ? availableIndicatorsLA : availableIndicatorsBC"
+        (availableIndicatorsChange)="updateAvailableIndicators($event)"
         [selectedIndicators]="activeSubDomain === 'la' ? selectedIndicatorsLA : selectedIndicatorsBC"
+        (selectedIndicatorsChange)="updateIndicators($event)"
         [availableAxes]="activeSubDomain === 'la' ? availableAxesLA : availableAxesBC"
+        (availableAxesChange)="updateAvailableAxes($event)"
         [selectedAxes]="activeSubDomain === 'la' ? selectedAxesLA : selectedAxesBC"
+        (selectedAxesChange)="updateAxes($event)"
         (modeChanged)="isDragDropMode = $event === 'dragdrop'">
     </app-analyse-selector>
 
