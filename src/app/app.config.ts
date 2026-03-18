@@ -9,17 +9,13 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
-<<<<<<< HEAD
     provideRouter(routes),
-    provideCharts(withDefaultRegisterables())
-=======
-    provideRouter(routes), provideServiceWorker('ngsw-worker.js', {
+    provideCharts(withDefaultRegisterables()),
+    provideServiceWorker('ngsw-worker.js', {
             enabled: !isDevMode(),
             registrationStrategy: 'registerWhenStable:30000'
-          }), provideServiceWorker('ngsw-worker.js', {
-            enabled: !isDevMode(),
-            registrationStrategy: 'registerWhenStable:30000'
-          })
->>>>>>> origin/diguinan
+          }), 
+          
   ]
 };
+
