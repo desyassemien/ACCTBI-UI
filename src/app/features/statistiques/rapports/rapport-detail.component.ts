@@ -19,13 +19,15 @@ export class RapportDetailComponent implements OnInit {
     rapport: any = null;
     chartType: string = 'bar';
     selectedFilter = '';
-    selectedPeriod: string = 'ytd';
+    selectedPeriod: string = 'Ce mois-ci';
     
     periodOptions = [
-        { value: 'mtd', label: 'Mois courant (MTD)' },
-        { value: 'qtd', label: 'Trimestre courant (QTD)' },
-        { value: 'ytd', label: `D'année à ce jour (YTD)` },
-        { value: 'all', label: 'Tous les mois' }
+        { value: "Aujourd'hui", label: "Aujourd'hui" },
+        { value: 'Cette semaine', label: 'Cette semaine' },
+        { value: 'Ce mois-ci', label: 'Ce mois-ci' },
+        { value: 'Ce trimestre', label: 'Ce trimestre' },
+        { value: 'Cette année', label: 'Cette année' },
+        { value: 'Personnalisé...', label: 'Personnalisé...' }
     ];
 
     ngOnInit() {

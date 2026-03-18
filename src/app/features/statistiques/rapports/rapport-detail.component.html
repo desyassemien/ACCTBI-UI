@@ -55,6 +55,20 @@
                             }
                         </select>
                     </div>
+
+                    <!-- Custom Date Range (shown when "Personnalisé..." is selected) -->
+                    @if (selectedPeriod === 'Personnalisé...') {
+                    <div class="d-flex gap-2 align-items-center animate__animated animate__fadeIn">
+                        <span class="fs-8 fw-medium text-secondary text-nowrap">Du :</span>
+                        <input type="date"
+                            class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white"
+                            title="Date de début">
+                        <span class="fs-8 fw-medium text-secondary text-nowrap">Au :</span>
+                        <input type="date"
+                            class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white"
+                            title="Date de fin">
+                    </div>
+                    }
                 </div>
 
                 <!-- Right: Chart Types -->
