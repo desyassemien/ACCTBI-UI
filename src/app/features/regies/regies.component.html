@@ -1,0 +1,137 @@
+<div class="comptabilite-container"> <!-- Reusing container class for consistent spacing -->
+
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 gap-md-0">
+        <div>
+            <h4 class="fw-bold text-primary-900 mb-1">Service des Régies</h4>
+            <p class="text-secondary mb-0">SYGACUT-BI / Services / Régies</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
+                <i class="far fa-file-excel me-2 text-success"></i> Export Excel
+            </button>
+            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
+                <i class="far fa-file-pdf me-2 text-danger"></i> Export PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Analyse Selector Area -->
+    <app-analyse-selector 
+        title="Sélecteur d'Analyse Régies"
+        [isDragDropMode]="isDragDropMode"
+        [(selectedPeriod)]="selectedPeriod"
+        [(availableIndicators)]="availableIndicators"
+        [(selectedIndicators)]="selectedIndicators"
+        [(availableAxes)]="availableAxes"
+        [(selectedAxes)]="selectedAxes"
+        (modeChanged)="isDragDropMode = $event === 'dragdrop'">
+    </app-analyse-selector>
+
+    <!-- KPIs Grid -->
+    <div class="row g-4 mb-4">
+        @for (kpi of kpis; track kpi.titre) {
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 bg-white rounded-3 kpi-card">
+                <div class="card-body p-4">
+                    <h6 class="text-secondary fw-semibold mb-3">{{ kpi.titre }}</h6>
+                    <h3 class="fw-bold text-dark mb-1">{{ kpi.valeur }}</h3>
+                    <span class="fs-8 fw-medium" [class.text-success]="kpi.type === 'success'" [class.text-secondary]="kpi.type === 'primary'">
+                        {{ kpi.info }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Main Analysis Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Chart 1: Opérationnel -->
+        <div class="col-12 col-xl-7">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Evolution Recettes vs Dépenses (Régies)</h6>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Bar Chart Mockup -->
+                    <div class="d-flex align-items-end gap-3 h-100 pt-5" style="min-height: 200px;">
+                        <div class="flex-grow-1 bg-primary rounded-top" style="height: 60%;"></div>
+                        <div class="flex-grow-1 bg-success rounded-top" style="height: 45%;"></div>
+                        <div class="flex-grow-1 bg-primary rounded-top" style="height: 80%;"></div>
+                        <div class="flex-grow-1 bg-success rounded-top" style="height: 65%;"></div>
+                        <div class="flex-grow-1 bg-primary rounded-top" style="height: 70%;"></div>
+                        <div class="flex-grow-1 bg-success rounded-top" style="height: 55%;"></div>
+                    </div>
+                    <div class="d-flex justify-content-center gap-4 mt-3">
+                        <span class="fs-9 text-secondary"><i class="fas fa-circle text-primary me-2"></i>Recettes</span>
+                        <span class="fs-9 text-secondary"><i class="fas fa-circle text-success me-2"></i>Dépenses</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 2: Temporel / Organisationnel -->
+        <div class="col-12 col-xl-5">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Répartition par Nature Recette</h6>
+                </div>
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+                    <div class="position-relative mb-4" style="width: 150px; height: 150px;">
+                        <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100">
+                            <path class="circle" stroke-dasharray="60, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--primary)" stroke-width="3" />
+                            <path class="circle" stroke-dasharray="30, 100" stroke-dashoffset="-60" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--success)" stroke-width="3" />
+                        </svg>
+                    </div>
+                    <div class="w-100 row g-2">
+                        <div class="col-6 fs-9"><i class="fas fa-circle text-primary me-2"></i>Fiscales (60%)</div>
+                        <div class="col-6 fs-9"><i class="fas fa-circle text-success me-2"></i>Domaines (30%)</div>
+                        <div class="col-6 fs-9"><i class="fas fa-circle text-warning me-2"></i>Autres (10%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table: Situation Mensuelle -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Livrables: Suivi des Régisseurs et Situation Mensuelle</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-secondary fs-8 text-uppercase tracking-wider">
+                                <tr>
+                                    <th class="ps-4 fw-medium border-0 py-3">Réf Régie</th>
+                                    <th class="fw-medium border-0 py-3">Régisseur / Ministère</th>
+                                    <th class="fw-medium border-0 py-3">Localité</th>
+                                    <th class="fw-medium border-0 py-3 text-end pe-4">Solde de Caisse (FCFA)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of deliverables; track item.ref) {
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">{{ item.ref }}</div>
+                                        <div class="text-secondary fs-8">Statut: {{ item.statut }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium text-dark">{{ item.regisseur }}</div>
+                                        <div class="text-secondary fs-9">{{ item.ministere }}</div>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark fw-medium border">{{ item.localite }}</span></td>
+                                    <td class="text-end pe-4 fw-bold">{{ item.solde }}</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

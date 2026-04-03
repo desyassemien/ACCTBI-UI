@@ -1,0 +1,46 @@
+<div class="card kpi-card border-0 shadow-sm h-100 transition-all">
+    <div class="card-body p-4 position-relative overflow-hidden">
+        <!-- Decorative background icon -->
+        <i [class]="data().icone + ' bg-icon position-absolute'" [style.color]="data().couleur"></i>
+
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h6 class="text-secondary fw-semibold mb-1 text-uppercase tracking-wider small">{{ data().titre }}</h6>
+            </div>
+            <div class="icon-wrapper d-flex align-items-center justify-content-center rounded-circle p-2"
+                [style.background-color]="data().couleur + '1A'" [style.color]="data().couleur">
+                <i [class]="data().icone + ' fs-5'"></i>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h3 class="fw-bold text-dark mb-2 tracking-tight">
+                @if (data().unite === 'FCFA') {
+                {{ data().valeur | number:'1.0-0' }} <span class="fs-6 text-secondary fw-medium">FCFA</span>
+                } @else if (data().unite === 'PERCENT') {
+                {{ data().valeur }}<span class="fs-5 text-secondary fw-medium">%</span>
+                } @else {
+                {{ data().valeur | number:'1.0-0' }}
+                }
+            </h3>
+
+            @if (data().variation !== undefined && data().tendance) {
+            <div class="d-flex align-items-center mt-2">
+                <span class="badge rounded-pill me-2 d-flex align-items-center px-2 py-1"
+                    [class.bg-success-subtle]="data().tendance === 'up' && data().variation! > 0"
+                    [class.text-success]="data().tendance === 'up' && data().variation! > 0"
+                    [class.bg-danger-subtle]="data().tendance === 'down' || (data().tendance === 'up' && data().variation! < 0)"
+                    [class.text-danger]="data().tendance === 'down' || (data().tendance === 'up' && data().variation! < 0)"
+                    [class.bg-secondary-subtle]="data().tendance === 'neutral'"
+                    [class.text-secondary]="data().tendance === 'neutral'">
+
+                    <i class="fas me-1 small" [class.fa-arrow-up]="data().variation! > 0"
+                        [class.fa-arrow-down]="data().variation! < 0" [class.fa-minus]="data().variation === 0"></i>
+                    {{ data().variation! > 0 ? '+' : '' }}{{ data().variation }}%
+                </span>
+                <span class="text-secondary small fw-medium">vs mois précédent</span>
+            </div>
+            }
+        </div>
+    </div>
+</div>

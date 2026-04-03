@@ -1,0 +1,291 @@
+<div class="rapport-container">
+
+    <!-- Page Header with Breadcrumb -->
+    <div class="mb-4">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <a routerLink="/statistiques" class="text-primary text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>Retour à Statistiques
+            </a>
+        </div>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-4 gap-3 gap-md-0">
+            <div>
+                <h4 class="fw-bold text-primary-900 mb-1">{{ rapport?.titre }}</h4>
+                <p class="text-secondary mb-0">{{ rapport?.description }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm"
+                    (click)="exportData('excel')">
+                    <i class="far fa-file-excel me-2 text-success"></i> Excel
+                </button>
+                <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm"
+                    (click)="exportData('pdf')">
+                    <i class="far fa-file-pdf me-2 text-danger"></i> PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (rapport) {
+    <!-- Filters Section -->
+    @if (rapport.filtres && rapport.filtres.length > 0) {
+    <div class="card border-0 shadow-sm bg-white rounded-3 mb-4">
+        <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+            <h6 class="fw-bold mb-0">Filtres et Paramètres</h6>
+        </div>
+        <div class="card-body p-4">
+            <div class="d-flex align-items-flex-end gap-3 justify-content-between flex-wrap">
+                <!-- Left: Filters -->
+                <div class="d-flex align-items-flex-end gap-3">
+                    <!-- Filtre -->
+                    <div class="filter-group">
+                        <label class="form-label fw-semibold mb-2">Filtre</label>
+                        <select class="form-select" [(ngModel)]="selectedFilter">
+                            @for (filtre of rapport.filtres; track filtre) {
+                            <option [value]="filtre">{{ filtre }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Période -->
+                    <div class="filter-group">
+                        <label class="form-label fw-semibold mb-2">Période</label>
+                        <select class="form-select" [(ngModel)]="selectedPeriod">
+                            @for (period of periodOptions; track period.value) {
+                            <option [value]="period.value">{{ period.label }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Custom Date Range (shown when "Personnalisé..." is selected) -->
+                    @if (selectedPeriod === 'Personnalisé...') {
+                    <div class="d-flex gap-2 align-items-center animate__animated animate__fadeIn">
+                        <span class="fs-8 fw-medium text-secondary text-nowrap">Du :</span>
+                        <input type="date"
+                            class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white"
+                            title="Date de début">
+                        <span class="fs-8 fw-medium text-secondary text-nowrap">Au :</span>
+                        <input type="date"
+                            class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white"
+                            title="Date de fin">
+                    </div>
+                    }
+                </div>
+
+                <!-- Right: Chart Types -->
+                <div class="chart-buttons-group ms-auto">
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="chartType" id="chart_bar" value="bar"
+                            autocomplete="off" [(ngModel)]="chartType">
+                        <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="chart_bar"
+                            title="Histogramme"><i class="fas fa-chart-bar fs-9"></i></label>
+
+                        <input type="radio" class="btn-check" name="chartType" id="chart_line" value="line"
+                            autocomplete="off" [(ngModel)]="chartType">
+                        <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="chart_line"
+                            title="Courbe"><i class="fas fa-chart-line fs-9"></i></label>
+
+                        <input type="radio" class="btn-check" name="chartType" id="chart_area" value="area"
+                            autocomplete="off" [(ngModel)]="chartType">
+                        <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="chart_area"
+                            title="Zone"><i class="fas fa-chart-area fs-9"></i></label>
+
+                        <input type="radio" class="btn-check" name="chartType" id="chart_table" value="table"
+                            autocomplete="off" [(ngModel)]="chartType">
+                        <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="chart_table"
+                            title="Tableau"><i class="fas fa-table fs-9"></i></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Main Content Area -->
+    <div class="row g-4">
+
+        <!-- Chart Section -->
+        @if (chartType !== 'table') {
+        <div [class]="chartType === 'table' ? 'col-12' : 'col-12 col-lg-8'">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">{{ rapport?.titre }} - Visualisation</h6>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="downloadChartImage()">
+                        <i class="fas fa-download me-2"></i> PNG
+                    </button>
+                </div>
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center"
+                    style="min-height: 400px;">
+
+                    @if (chartType === 'bar') {
+                    <!-- Bar Chart Mockup -->
+                    <div class="w-100 h-100 d-flex align-items-end justify-content-around gap-4 animate__animated animate__fadeIn"
+                        style="min-height: 300px; padding: 20px;">
+                        <div class="d-flex flex-column gap-2 align-items-center">
+                            <div class="bg-primary rounded-top" style="height: 250px; width: 50px;"></div>
+                            <small class="text-secondary">Catégorie 1</small>
+                        </div>
+                        <div class="d-flex flex-column gap-2 align-items-center">
+                            <div class="bg-success rounded-top" style="height: 200px; width: 50px;"></div>
+                            <small class="text-secondary">Catégorie 2</small>
+                        </div>
+                        <div class="d-flex flex-column gap-2 align-items-center">
+                            <div class="bg-warning rounded-top" style="height: 180px; width: 50px;"></div>
+                            <small class="text-secondary">Catégorie 3</small>
+                        </div>
+                        <div class="d-flex flex-column gap-2 align-items-center">
+                            <div class="bg-danger rounded-top" style="height: 220px; width: 50px;"></div>
+                            <small class="text-secondary">Catégorie 4</small>
+                        </div>
+                    </div>
+                    }
+
+                    @if (chartType === 'area') {
+                    <!-- Area Chart Mockup -->
+                    <svg class="w-100" style="height: 300px;" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet">
+                        <!-- Grid -->
+                        <g stroke="#f1f5f9" stroke-width="1">
+                            <line x1="0" y1="50" x2="1000" y2="50" />
+                            <line x1="0" y1="100" x2="1000" y2="100" />
+                            <line x1="0" y1="150" x2="1000" y2="150" />
+                            <line x1="0" y1="200" x2="1000" y2="200" />
+                            <line x1="0" y1="250" x2="1000" y2="250" />
+                        </g>
+                        <!-- Area 1 -->
+                        <polygon points="50,200 200,150 350,120 500,140 650,100 800,130 950,90 950,300 50,300"
+                            fill="#2563eb" opacity="0.3" />
+                        <!-- Area 2 -->
+                        <polygon points="50,220 200,200 350,180 500,190 650,160 800,170 950,150 950,300 50,300"
+                            fill="#16a34a" opacity="0.3" />
+                        <!-- Lines -->
+                        <polyline points="50,200 200,150 350,120 500,140 650,100 800,130 950,90" fill="none"
+                            stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <polyline points="50,220 200,200 350,180 500,190 650,160 800,170 950,150" fill="none"
+                            stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <!-- Points -->
+                        <circle cx="950" cy="90" r="5" fill="white" stroke="#2563eb" stroke-width="2" />
+                        <circle cx="950" cy="150" r="5" fill="white" stroke="#16a34a" stroke-width="2" />
+                    </svg>
+
+                    <!-- Legend -->
+                    <div class="mt-3 text-center">
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="bg-primary rounded-circle" style="width: 12px; height: 12px;"></span>
+                                <small class="text-secondary">Catégorie 1</small>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="bg-success rounded-circle" style="width: 12px; height: 12px;"></span>
+                                <small class="text-secondary">Catégorie 2</small>
+                            </div>
+                        </div>
+                    </div>
+                    }
+
+                    @if (chartType === 'line') {
+                    <!-- Line Chart Mockup -->
+                    <svg class="w-100" style="height: 300px;" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet">
+                        <!-- Grid -->
+                        <g stroke="#f1f5f9" stroke-width="1">
+                            <line x1="0" y1="50" x2="1000" y2="50" />
+                            <line x1="0" y1="100" x2="1000" y2="100" />
+                            <line x1="0" y1="150" x2="1000" y2="150" />
+                            <line x1="0" y1="200" x2="1000" y2="200" />
+                            <line x1="0" y1="250" x2="1000" y2="250" />
+                        </g>
+                        <!-- Lines -->
+                        <polyline points="50,200 200,150 350,120 500,140 650,100 800,130 950,90" fill="none"
+                            stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <polyline points="50,220 200,200 350,180 500,190 650,160 800,170 950,150" fill="none"
+                            stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <!-- Points -->
+                        <circle cx="950" cy="90" r="5" fill="white" stroke="#2563eb" stroke-width="2" />
+                        <circle cx="950" cy="150" r="5" fill="white" stroke="#16a34a" stroke-width="2" />
+                    </svg>
+                    }
+
+                </div>
+            </div>
+        </div>
+        }
+
+        <!-- Summary Stats -->
+        <div [class]="chartType === 'table' ? 'col-12' : 'col-12 col-lg-4'">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                    <h6 class="fw-bold mb-0">Synthèse et KPI</h6>
+                </div>
+                <div class="card-body p-4">
+                    @for (stat of rapport.stats; track stat.label) {
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-secondary fw-semibold mb-0">{{ stat.label }}</h6>
+                            <h4 class="fw-bold text-dark mb-0">{{ stat.valeur }}</h4>
+                        </div>
+                        @if (stat.tendance) {
+                        <small [class]="'fw-medium ' + (stat.tendance === 'up' ? 'text-success' : stat.tendance === 'down' ? 'text-danger' : 'text-secondary')">
+                            <i [class]="'fas fa-arrow-' + (stat.tendance === 'up' ? 'up' : stat.tendance === 'down' ? 'down' : 'right') + ' me-1'"></i>
+                            {{ stat.info }}
+                        </small>
+                        }
+                        @if (!stat.tendance) {
+                        <small class="text-secondary">{{ stat.info }}</small>
+                        }
+                    </div>
+                    }
+
+                    <hr class="my-4">
+
+                    <!-- Period Info -->
+                    <div class="bg-light rounded-2 p-3">
+                        <h6 class="fw-bold text-dark mb-2">Période Couverte</h6>
+                        <p class="text-secondary fs-9 mb-0">{{ rapport.periodeDebut }} - {{ rapport.periodeFin }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card border-0 shadow-sm bg-white rounded-3 mt-4">
+        <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold mb-0">Données Détaillées</h6>
+            <small class="text-secondary">{{ rapport.donnees?.length || 0 }} enregistrement(s)</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            @for (col of rapport.colonnes; track col) {
+                            <th class="fw-bold text-secondary px-4 py-3">{{ col }}</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (row of rapport.donnees; track $index; let last = $last) {
+                        <tr [class.border-bottom-0]="last">
+                            @for (col of rapport.colonnes; track col) {
+                            <td class="px-4 py-3">{{ getColumnValue(row, col) }}</td>
+                            }
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    } @else {
+    <!-- Not Found -->
+    <div class="card border-0 shadow-sm bg-white rounded-3 p-5 text-center">
+        <i class="fas fa-file-slash text-secondary mb-3" style="font-size: 3rem;"></i>
+        <h4 class="text-secondary fw-bold">Rapport non trouvé</h4>
+        <p class="text-secondary">Le rapport demandé n'existe pas ou n'est pas accessible.</p>
+        <a routerLink="/statistiques" class="btn btn-primary mt-3">
+            <i class="fas fa-arrow-left me-2"></i>Retour aux Statistiques
+        </a>
+    </div>
+    }
+
+</div>

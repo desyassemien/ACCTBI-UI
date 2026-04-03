@@ -1,0 +1,268 @@
+<div class="kpi-detail-container">
+    <!-- Header avec bouton retour -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <button class="btn btn-outline-secondary me-3" (click)="goBack()">
+                <i class="fas fa-arrow-left me-2"></i> Retour
+            </button>
+            <h3 class="d-inline fw-bold text-primary-900">{{ kpiTitle }}</h3>
+        </div>
+        <div class="kpi-value-display">
+            <span class="fs-2 fw-bold text-primary">{{ kpiValue }}</span>
+            <span class="text-secondary ms-2">{{ kpiUnit }}</span>
+        </div>
+    </div>
+
+    <!-- Main Content: Graphique + Tableau -->
+    <div class="row g-4">
+        <!-- Graphique à gauche -->
+        <div class="col-12 col-lg-7">
+            <div class="card border-0 shadow-sm h-100 card-hover">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Évolution</h6>
+                    <div class="d-flex align-items-center gap-3">
+                        <label class="mb-0 text-muted" for="periodeSelect">Période :</label>
+                        <select id="periodeSelect" class="form-select form-select-sm" style="width: 170px;" [(ngModel)]="selectedPeriod" (change)="onPeriodChange($event)">
+                            <option *ngFor="let periode of periodes" [value]="periode">{{ periode }}</option>
+                        </select>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Type de graphique">
+                        @for (type of chartTypes; track type.id) {
+                        <button type="button" class="btn" [class.btn-primary]="chartType===type.id" [class.btn-outline-secondary]="chartType!==type.id" (click)="selectChartType(type.id)">
+                            <i [class]="type.icon"></i>
+                        </button>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (chartData) {
+                    <div class="chart-container">
+
+
+                        @if (chartType === 'line' || chartType === 'area') {
+                        <!-- Line/Area Chart SVG Mock -->
+                        <div class="chart-line-wrapper">
+                            <svg class="w-100" style="height: 350px;" viewBox="0 0 1200 350" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" [attr.stop-color]="getAreaColor()" stop-opacity="0.25" />
+                                        <stop offset="100%" [attr.stop-color]="getAreaColor()" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+
+                                @for (i of [1,2,3,4,5]; track i) {
+                                <line x1="0" [attr.y1]="(350 / 5) * i" x2="1200" [attr.y2]="(350 / 5) * i" 
+                                    stroke="#e0e0e0" stroke-width="1" />
+                                }
+
+                                @if (chartType === 'area') {
+                                <path [attr.d]="getAreaPath()" fill="url(#areaGradient)" stroke="none" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));"></path>
+                                }
+
+                                <path [attr.d]="getLinePath()" fill="none" [attr.stroke]="getLineColor()" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></path>
+
+                                <ng-container>
+                                    @for (value of chartData.data; track $index) {
+                                    <circle 
+                                        [attr.cx]="($index / (chartData.data.length - 1 || 1)) * 1200"
+                                        [attr.cy]="350 - ((value / getMaxValue()) * 330)"
+                                        r="5" 
+                                        [attr.fill]="getLineColor()" 
+                                        stroke="white" 
+                                        stroke-width="2"
+                                        style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); cursor: pointer; transition: r 0.2s ease;"
+                                        (mouseenter)="showTooltip($event, chartData.labels[$index], value); onCircleHover($event, true)"
+                                        (mouseleave)="hideTooltip(); onCircleHover($event, false)" />
+                                    }
+                                </ng-container>
+                            </svg>
+                        </div>
+                        }
+
+                        @if (chartType === 'pie' || chartType === 'donut') {
+                        <div class="chart-pie-wrapper d-flex flex-column justify-content-center align-items-center" style="height: 350px; gap: 12px;">
+                            <svg width="340" height="340" viewBox="0 0 340 340" aria-label="Pie chart" style="filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));">
+                                <defs>
+                                    @for (segment of getPieSegments(); track segment.gradientId) {
+                                    <radialGradient [attr.id]="segment.gradientId" cx="50%" cy="50%" r="65%">
+                                        <stop offset="20%" [attr.stop-color]="segment.inner" stop-opacity="1" />
+                                        <stop offset="100%" [attr.stop-color]="segment.fill" stop-opacity="1" />
+                                    </radialGradient>
+                                    }
+                                </defs>
+
+                                @for (segment of getPieSegments(); track segment.label) {
+                                <path [attr.d]="segment.d" [attr.fill]="'url(#' + segment.gradientId + ')'" [attr.title]="segment.label"
+                                    style="stroke: white; stroke-width: 2; cursor: pointer; transition: transform 0.2s ease;"
+                                    (mouseenter)="showTooltip($event, segment.label, segment.value); onPieHover($event, true)"
+                                    (mouseleave)="hideTooltip(); onPieHover($event, false)"></path>
+                                }
+
+                                @for (segment of getPieSegments(); track segment.label) {
+                                <text [attr.x]="segment.labelX" [attr.y]="segment.labelY" fill="white" text-anchor="middle" alignment-baseline="middle" font-size="12" font-weight="700" style="text-shadow: 0 0 4px rgba(0,0,0,0.5); pointer-events: none;">
+                                    {{ segment.label }}
+                                </text>
+                                }
+
+                                @if (chartType === 'donut') {
+                                <circle [attr.cx]="getDonutInner().cx" [attr.cy]="getDonutInner().cy" [attr.r]="getDonutInner().r" fill="white"></circle>
+                                <text [attr.x]="getDonutInner().cx" [attr.y]="getDonutInner().cy" fill="#333" text-anchor="middle" alignment-baseline="middle" font-size="18" font-weight="700">{{ chartData.data.length }}</text>
+                                }
+                            </svg>
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+<!-- Tableau détaillé à droite -->
+<div class="col-12 col-lg-5">
+  <div class="card border-0 shadow-sm h-100 card-hover">
+    <div class="card-header bg-white border-bottom pt-4 pb-3">
+      <h6 class="fw-bold mb-0">Détails</h6>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+
+          <!-- HEADER -->
+          <thead class="bg-light">
+            <tr>
+              @for (header of tableHeaders; track header) {
+                <th class="ps-4 fw-medium text-secondary fs-8 text-uppercase border-0">
+                  {{ header }}
+                </th>
+              }
+            </tr>
+          </thead>
+
+          <!-- BODY -->
+          <tbody>
+
+            @for (row of tableData; track $index) {
+              <tr class="drill-row" (click)="openRowDetail(row)">
+                @for (header of tableHeaders; track header) {
+                  <td class="ps-4 fw-medium text-dark">
+                    {{ getColumnValue(row, header) }}
+                  </td>
+                }
+              </tr>
+            }
+
+            @if (tableData.length === 0) {
+              <tr>
+                <td colspan="100%" class="text-center text-secondary py-4">
+                  Aucune donnée disponible
+                </td>
+              </tr>
+            }
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tooltip -->
+@if (tooltipData.show) {
+  <div class="chart-tooltip"
+       [style.left.px]="tooltipData.x"
+       [style.top.px]="tooltipData.y">
+    <div class="tooltip-content">
+      <div class="fw-semibold">{{ tooltipData.label }}</div>
+      <div class="text-primary">{{ tooltipData.value }}</div>
+    </div>
+  </div>
+}
+
+<!-- Drill-through modal -->
+@if (detailModalOpen && selectedRow) {
+
+  <div class="modal fade show d-block"
+       tabindex="-1"
+       style="background: rgba(0,0,0,0.35);"
+       role="dialog">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+
+        <!-- HEADER -->
+        <div class="modal-header">
+          <h5 class="modal-title">Détails de la ligne</h5>
+          <button type="button"
+                  class="btn-close"
+                  (click)="closeDetailModal()">
+          </button>
+        </div>
+
+        <!-- BODY -->
+        <div class="modal-body">
+
+          @if (selectedRow && isArray(selectedRow['details']); as details) {
+
+            @if (details.length > 0) {
+
+              <div class="table-responsive">
+                <table class="table table-sm table-striped mb-0">
+
+                  <thead>
+                    <tr>
+                      @for (detailHeader of getDetailHeaders(); track detailHeader) {
+                        <th>{{ detailHeader }}</th>
+                      }
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    @for (detailRow of details; track $index) {
+                      <tr>
+                        @for (detailHeader of getDetailHeaders(); track detailHeader) {
+                          <td>
+                            {{ getColumnValue(detailRow, detailHeader) }}
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+
+                </table>
+              </div>
+
+            } @else {
+
+              <p class="text-center text-muted">Aucun détail disponible</p>
+
+            }
+
+          } @else {
+
+            <ul class="list-group">
+              @for (header of tableHeaders; track header) {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span class="fw-semibold">{{ header }}</span>
+                  <span>{{ getColumnValue(selectedRow, header) }}</span>
+                </li>
+              }
+            </ul>
+
+          }
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="modal-footer">
+          <button type="button"
+                  class="btn btn-secondary"
+                  (click)="closeDetailModal()">
+            Fermer
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+}
