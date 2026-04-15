@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import Keycloak from 'keycloak-js';
 
 @Component({
     selector: 'app-header',
@@ -9,15 +9,32 @@ import { AuthService } from '../../core/services/auth.service';
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss'
 })
-export class HeaderComponent {
-    private authService = inject(AuthService);
+export class HeaderComponent implements OnInit {
     private router = inject(Router);
+    private keycloak = inject(Keycloak);
 
-    user = this.authService.currentUser;
+    userProfile: any | null = null;
     notificationCount = 3;
     isDarkMode = false;
 
-    // Navigation items (moved from sidebar)
+    async ngOnInit() {
+        try {
+            // En v21 API native, on vérifie .authenticated
+            if (this.keycloak.authenticated) {
+                this.userProfile = await this.keycloak.loadUserProfile();
+            }
+        } catch (err) {
+            console.error('Erreur lors du chargement du profil Keycloak:', err);
+        }
+    }
+
+    /** Check if any service route is currently active (for dropdown highlight) */
+    get isServicesActive(): boolean {
+        const url = this.router.url;
+        return this.serviceItems.some(item => url.startsWith(item.path));
+    }
+
+    // Navigation items
     readonly serviceItems = [
         { path: '/comptabilite', icon: 'fas fa-book', label: 'Comptabilité' },
         { path: '/tresorerie', icon: 'fas fa-money-bill-wave', label: 'Trésorerie' },
@@ -39,12 +56,6 @@ export class HeaderComponent {
         }
     }
 
-    /** Check if any service route is currently active (for dropdown highlight) */
-    get isServicesActive(): boolean {
-        const url = this.router.url;
-        return this.serviceItems.some(item => url.startsWith(item.path));
-    }
-
     toggleTheme() {
         this.isDarkMode = !this.isDarkMode;
         this.applyTheme();
@@ -59,7 +70,10 @@ export class HeaderComponent {
         }
     }
 
-    logout() {
-        this.authService.logout();
+    async logout() {
+        console.log('[Header] Tentative de déconnexion via l\'instance native Keycloak...');
+        await this.keycloak.logout({
+            redirectUri: window.location.origin
+        });
     }
 }

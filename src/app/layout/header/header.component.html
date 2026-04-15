@@ -25,15 +25,15 @@
                     <!-- Services Dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle px-3 py-2 rounded-2" href="#" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false"
-                            [class.active]="isServicesActive">
+                            data-bs-toggle="dropdown" aria-expanded="false" [class.active]="isServicesActive">
                             <i class="fas fa-layer-group me-2"></i>Services
                         </a>
                         <div class="dropdown-menu dropdown-menu-services border-0 shadow-lg mt-1 rounded-3 py-2">
                             @for (item of serviceItems; track item.path) {
                             <a class="dropdown-item d-flex align-items-center px-3 py-2" [routerLink]="item.path"
                                 routerLinkActive="active-item">
-                                <i [class]="item.icon + ' me-3 text-secondary'" style="width: 18px; text-align: center;"></i>
+                                <i [class]="item.icon + ' me-3 text-secondary'"
+                                    style="width: 18px; text-align: center;"></i>
                                 <span class="fw-medium">{{ item.label }}</span>
                             </a>
                             }
@@ -61,16 +61,14 @@
                 <!-- Theme Toggle -->
                 <button class="topbar-action-btn" (click)="toggleTheme()"
                     [title]="isDarkMode ? 'Mode clair' : 'Mode sombre'">
-                    <i class="fs-6" [class.fas]="true" [class.fa-sun]="isDarkMode"
-                        [class.fa-moon]="!isDarkMode"></i>
+                    <i class="fs-6" [class.fas]="true" [class.fa-sun]="isDarkMode" [class.fa-moon]="!isDarkMode"></i>
                 </button>
 
                 <!-- Notifications -->
                 <button class="topbar-action-btn position-relative">
                     <i class="far fa-bell fs-6"></i>
                     @if (notificationCount > 0) {
-                    <span
-                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                         style="font-size: 0.6rem; padding: 0.2em 0.45em;">
                         {{ notificationCount }}
                     </span>
@@ -79,11 +77,10 @@
 
                 <!-- User Profile Dropdown -->
                 <div class="dropdown">
-                    <button
-                        class="topbar-user-btn d-flex align-items-center gap-2"
-                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="topbar-user-btn d-flex align-items-center gap-2" data-bs-toggle="dropdown"
+                        aria-expanded="false">
                         <div class="avatar-circle">
-                            {{ user()?.prenom?.charAt(0) || 'U' }}{{ user()?.nom?.charAt(0) || '' }}
+                            {{ userProfile?.firstName?.charAt(0) || 'U' }}{{ userProfile?.lastName?.charAt(0) || '' }}
                         </div>
                         <div class="d-none d-md-flex align-items-center">
                             <span class="fs-7 fw-bold text-white me-1">Mon Profil</span>
@@ -94,8 +91,8 @@
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 rounded-3 py-2">
                         <li>
                             <div class="px-3 py-2 d-md-none border-bottom mb-2">
-                                <div class="fw-bold fs-7">{{ user()?.prenom }} {{ user()?.nom }}</div>
-                                <div class="text-secondary fs-8">{{ user()?.role }}</div>
+                                <div class="fw-bold fs-7">{{ userProfile?.firstName }} {{ userProfile?.lastName }}</div>
+                                <div class="text-secondary fs-8">{{ userProfile?.username }}</div>
                             </div>
                         </li>
                         <li><a class="dropdown-item py-2 px-3 fw-medium" routerLink="/profil">

@@ -1,0 +1,90 @@
+<!-- ===================== FLOATING CHAT WIDGET ===================== -->
+<div class="chat-widget-container">
+
+  <!-- ── Chat Panel ── -->
+  <div class="chat-panel" [class.chat-panel--open]="isOpen()">
+
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar">
+          <i class="bi bi-robot"></i>
+          <span class="online-dot"></span>
+        </div>
+        <div>
+          <div class="chat-title">Assistant ACCTBI</div>
+          <div class="chat-subtitle">En ligne · répond instantanément</div>
+        </div>
+      </div>
+      <button class="chat-close-btn" (click)="closeChat()" title="Fermer">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" #messagesContainer>
+      @for (msg of messages(); track msg.id) {
+        <div class="chat-message" [class.chat-message--user]="msg.role === 'user'">
+          @if (msg.role === 'assistant') {
+            <div class="msg-avatar">
+              <i class="bi bi-robot"></i>
+            </div>
+          }
+          <div class="msg-bubble">
+            <p class="msg-text">{{ msg.text }}</p>
+            <span class="msg-time">{{ msg.time }}</span>
+          </div>
+        </div>
+      }
+
+      <!-- Typing indicator -->
+      @if (isTyping()) {
+        <div class="chat-message">
+          <div class="msg-avatar">
+            <i class="bi bi-robot"></i>
+          </div>
+          <div class="msg-bubble msg-bubble--typing">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-area">
+      <textarea
+        class="chat-input"
+        [(ngModel)]="userInput"
+        (keydown)="onKeydown($event)"
+        placeholder="Écrivez votre message…"
+        rows="1"
+      ></textarea>
+      <button
+        class="chat-send-btn"
+        (click)="sendMessage()"
+        [disabled]="!userInput.trim()"
+        title="Envoyer"
+      >
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ── FAB Toggle Button ── -->
+  <button
+    class="chat-fab"
+    (click)="toggleChat()"
+    [class.chat-fab--active]="isOpen()"
+    [title]="isOpen() ? 'Fermer le chat' : 'Ouvrir le chat'"
+  >
+    <span class="chat-fab-icon">
+      <i class="bi bi-chat-dots-fill" [class.d-none]="isOpen()"></i>
+      <i class="bi bi-x-lg" [class.d-none]="!isOpen()"></i>
+    </span>
+    <span class="chat-fab-badge" [class.d-none]="isOpen()">1</span>
+  </button>
+
+</div>

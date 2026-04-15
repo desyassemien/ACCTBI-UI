@@ -1,0 +1,408 @@
+<div class="kpi-detail-container">
+
+  <!-- HEADER -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-outline-secondary" (click)="goBack()">
+        <i class="fas fa-arrow-left me-2"></i> Retour
+      </button>
+      <div>
+        <h4 class="fw-bold mb-1">{{ kpiTitle }}</h4>
+        <p class="text-secondary mb-0">
+          Détails et analyse - {{ kpiValue }} {{ kpiUnit }}
+        </p>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-success btn-sm shadow-sm d-flex align-items-center gap-2" (click)="prepareExport('excel')">
+        <i class="fas fa-file-excel"></i>
+        <span class="d-none d-md-inline">Exporter Excel</span>
+      </button>
+      <button class="btn btn-sm shadow-sm d-flex align-items-center gap-2 text-white" 
+              (click)="prepareExport('pdf')" 
+              style="background-color: #fd7e14; border-color: #fd7e14;">
+        <i class="fas fa-file-pdf"></i>
+        <span class="d-none d-md-inline">Exporter PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- CHART -->
+    <div class="col-12 col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="fw-bold mb-0">Graphique</h6>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <!-- PERIOD -->
+            <div class="d-flex align-items-center gap-1">
+              <i class="bi bi-calendar3 text-secondary" style="font-size: 0.8rem;"></i>
+              <span class="text-secondary fw-medium" style="font-size: 0.75rem; white-space: nowrap;">Période :</span>
+              <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium"
+                style="width: 150px; height: 31px;"
+                [(ngModel)]="selectedPeriod" (change)="onPeriodChange($event)">
+                @for (periode of periodes; track periode) {
+                <option [value]="periode">{{ periode }}</option>
+                }
+              </select>
+            </div>
+            <div class="dropdown me-1">
+              <button class="btn btn-outline-secondary btn-sm shadow-none border-secondary d-flex align-items-center justify-content-center" 
+                      type="button" data-bs-toggle="dropdown" aria-expanded="false" style="height: 31px; width: 34px;" title="Changer le thème">
+                <i class="fas fa-palette"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end p-2 shadow border-0" style="min-width: 150px; border-radius: 12px;">
+                <li><h6 class="dropdown-header px-1 pb-2">Choisir une couleur</h6></li>
+                <li class="d-flex flex-wrap gap-2 p-1">
+                  @for (p of modernPalettes; track p.color) {
+                    <button class="btn p-0 border-0 rounded-circle" 
+                            [style.backgroundColor]="p.color"
+                            [style.width.px]="28" [style.height.px]="28"
+                            [title]="p.name"
+                            (click)="changeChartColor(p.color)"
+                            style="cursor: pointer; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.2)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                    </button>
+                  }
+                  <button class="btn btn-light btn-sm w-100 mt-2 py-1" style="font-size: 0.7rem;" (click)="changeChartColor(chartData?.color || '')">
+                    Réinitialiser
+                  </button>
+                </li>
+              </ul>
+            </div>
+            <!-- CHART TYPE -->
+            <div class="btn-group btn-group-sm" role="group" style="height: 31px;">
+              @for (ct of chartTypes; track ct.id) {
+              <input type="radio" class="btn-check" [id]="'chart-' + ct.id" [value]="ct.id"
+                (change)="selectChartType(ct.id)" [checked]="chartType === ct.id" />
+              <label class="btn btn-outline-secondary px-2 d-flex align-items-center"
+                [for]="'chart-' + ct.id" [title]="ct.title">
+                <i [class]="ct.icon"></i>
+              </label>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- CHART BODY -->
+        <div class="card-body">
+          @if (chartData?.data?.length) {
+          <div class="chart-container position-relative" style="min-height: 400px;">
+
+            <!-- LINE / AREA avec Axes X/Y -->
+            @if (chartType === 'line' || chartType === 'area') {
+            <div class="w-100 h-100 d-flex" style="min-height: 360px; padding: 16px 16px 40px 60px; box-sizing: border-box;">
+              <svg class="w-100 h-100" viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet" style="overflow: visible;">
+                <defs>
+                  <linearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" [attr.stop-color]="getAreaColor()" stop-opacity="0.25" />
+                    <stop offset="100%" [attr.stop-color]="getAreaColor()" stop-opacity="0" />
+                  </linearGradient>
+                  <clipPath id="chartClip">
+                    <rect x="60" y="10" width="820" height="260" />
+                  </clipPath>
+                </defs>
+
+                <!-- GRILLE HORIZONTALE (lignes Y) -->
+                @for (yLabel of getYAxisLabels(); track yLabel; let yi = $index) {
+                  <line
+                    [attr.x1]="60"
+                    [attr.y1]="270 - (yi / 5) * 260"
+                    [attr.x2]="880"
+                    [attr.y2]="270 - (yi / 5) * 260"
+                    stroke="#e9ecef" stroke-width="1" stroke-dasharray="4,4" />
+                  <text
+                    [attr.x]="52"
+                    [attr.y]="274 - (yi / 5) * 260"
+                    text-anchor="end" fill="#6c757d" style="font-size: 10px;">
+                    {{ yLabel }}
+                  </text>
+                }
+
+                <!-- AXE Y -->
+                <line x1="60" y1="10" x2="60" y2="270" stroke="#dee2e6" stroke-width="2" />
+
+                <!-- AXE X -->
+                <line x1="60" y1="270" x2="880" y2="270" stroke="#dee2e6" stroke-width="2" />
+
+                <!-- ZONE GRAPHIQUE CLIPPÉE -->
+                <g clip-path="url(#chartClip)">
+                  @if (chartType === 'area') {
+                  <path [attr.d]="getScaledAreaPath()" fill="url(#areaGrad)" />
+                  }
+                  <path [attr.d]="getScaledLinePath()" fill="none" [attr.stroke]="getLineColor()" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </g>
+
+                <!-- POINTS + LABELS AXE X -->
+                @for (label of getXAxisLabels(); track label; let i = $index) {
+                  <line
+                    [attr.x1]="60 + (i / ((chartData!.labels.length - 1) || 1)) * 820"
+                    y1="270"
+                    [attr.x2]="60 + (i / ((chartData!.labels.length - 1) || 1)) * 820"
+                    y2="276"
+                    stroke="#dee2e6" stroke-width="2" />
+                  <text
+                    [attr.x]="60 + (i / ((chartData!.labels.length - 1) || 1)) * 820"
+                    y="292"
+                    text-anchor="middle" fill="#6c757d" style="font-size: 11px;">
+                    {{ label }}
+                  </text>
+                  <circle
+                    [attr.cx]="60 + (i / ((chartData!.labels.length - 1) || 1)) * 820"
+                    [attr.cy]="270 - ((chartData!.data[i] / (getMaxValue() || 1)) * 260)"
+                    r="5"
+                    [attr.fill]="getLineColor()"
+                    stroke="white" stroke-width="2.5"
+                    (mouseenter)="onCircleHover($event, true, i)"
+                    (mouseleave)="onCircleHover($event, false, i)"
+                    style="cursor: pointer;" />
+                }
+
+                <!-- TITRE AXE Y -->
+                <text x="-155" y="14" transform="rotate(-90)" text-anchor="middle" fill="#adb5bd" style="font-size: 10px; letter-spacing: 1px;">
+                  {{ kpiUnit || 'Valeur' }}
+                </text>
+              </svg>
+            </div>
+            }
+
+
+            <!-- PIE -->
+            @else if (chartType === 'pie') {
+            <div class="d-flex justify-content-center">
+              <svg viewBox="0 0 340 340" style="width: 300px; height: 300px;">
+                <defs>
+                  @for (segment of getPieSegments(); track segment.gradientId) {
+                  <linearGradient [attr.id]="segment.gradientId">
+                    <stop offset="0%" [attr.stop-color]="segment.fill" />
+                    <stop offset="100%" [attr.stop-color]="segment.fill" stop-opacity="0.8" />
+                  </linearGradient>
+                  }
+                </defs>
+                @for (segment of getPieSegments(); track segment.gradientId) {
+                <path [attr.d]="segment.d" [attr.fill]="'url(#' + segment.gradientId + ')'"
+                  (mouseenter)="onPieHover($event, true, segment)" (mouseleave)="onPieHover($event, false, segment)"
+                  style="cursor: pointer;" />
+                <text [attr.x]="segment.labelX" [attr.y]="segment.labelY" text-anchor="middle"
+                  dominant-baseline="middle" class="text-white fw-bold" style="font-size: 12px">
+                  {{ segment.percentage }}%
+                </text>
+                }
+              </svg>
+            </div>
+            }
+
+            <!-- DONUT -->
+            @else if (chartType === 'donut') {
+            <div class="d-flex justify-content-center">
+              <svg viewBox="0 0 340 340" style="width: 300px; height: 300px;">
+                <defs>
+                  @for (segment of getPieSegments(); track segment.gradientId) {
+                  <linearGradient [attr.id]="segment.gradientId">
+                    <stop offset="0%" [attr.stop-color]="segment.fill" />
+                    <stop offset="100%" [attr.stop-color]="segment.fill" stop-opacity="0.8" />
+                  </linearGradient>
+                  }
+                </defs>
+                @for (segment of getPieSegments(); track segment.gradientId) {
+                <path [attr.d]="segment.d" [attr.fill]="'url(#' + segment.gradientId + ')'"
+                  (mouseenter)="onPieHover($event, true, segment)" (mouseleave)="onPieHover($event, false, segment)"
+                  style="cursor: pointer;" />
+                }
+                <circle [attr.cx]="getDonutInner().cx" [attr.cy]="getDonutInner().cy" [attr.r]="getDonutInner().r"
+                  fill="white" />
+                <text [attr.x]="getDonutInner().cx" [attr.y]="getDonutInner().cy" text-anchor="middle"
+                  dominant-baseline="middle" class="fw-bold" style="font-size: 24px">
+                  {{ kpiValue }}
+                </text>
+              </svg>
+            </div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE (DROITE) -->
+    <div class="col-12 col-lg-5">
+      <div class="card border-0 shadow-sm h-100 card-hover" style="transition: all 0.3s ease;">
+        <div class="card-header bg-white border-bottom pt-4 pb-3">
+          <h6 class="fw-bold mb-0">Détails</h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light">
+                <tr>
+                  @for (header of tableHeaders; track header) {
+                  <th class="ps-4 fw-medium text-secondary text-uppercase border-0">
+                    {{ header }}
+                  </th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of tableData; track $index) {
+                <tr class="drill-row" (click)="openRowDetail(row)">
+                  @for (header of tableHeaders; track header) {
+                  <td class="ps-4 fw-medium text-dark">
+                    @if (isTrendColumn(header)) {
+                      <span [class]="getTrendClass(row[header])" style="font-size: 1.1rem; font-weight: bold;">
+                        @if (row[header] === '↑') { <i class="fas fa-arrow-up"></i> }
+                        @else if (row[header] === '↓') { <i class="fas fa-arrow-down"></i> }
+                        @else { <span class="ms-1">-</span> }
+                      </span>
+                    } @else if (isStatusColumn(header)) {
+                      <span class="badge rounded-pill border fw-bold px-2 py-1" [class]="getStatusClass(row[header])">
+                        {{ row[header] }}
+                      </span>
+                    } @else {
+                      {{ getColumnValue(row, header) }}
+                    }
+                  </td>
+                  }
+                </tr>
+                }
+                @if (!tableData || tableData.length === 0) {
+                <tr>
+                  <td [attr.colspan]="tableHeaders.length || 1" class="text-center text-secondary py-4">
+                    Aucune donnée disponible
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- MODAL -->
+  @if (detailModalOpen && selectedRow) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" (click)="closeDetailModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title">Détails</h5>
+          <button type="button" class="btn-close" (click)="closeDetailModal()"></button>
+        </div>
+        <div class="modal-body p-0">
+          @if (getDetailHeaders().length > 0) {
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  @for (header of getDetailHeaders(); track header) {
+                  <th class="small text-secondary fw-semibold px-3 py-2">
+                    {{ header }}
+                  </th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (detail of getDetailsArray(); track $index) {
+                <tr>
+                  @for (header of getDetailHeaders(); track header) {
+                  <td class="px-3">
+                    @if (isStatusColumn(header)) {
+                      <span class="badge rounded-pill border fw-bold px-2 py-1" [class]="getStatusClass(detail[header])">
+                        {{ detail[header] }}
+                      </span>
+                    } @else {
+                      {{ detail[header] }}
+                    }
+                  </td>
+                  }
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          } @else {
+          <p class="text-secondary text-center py-4 mb-0">Aucun détail disponible</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (tooltipData.show) {
+  <div class="position-fixed bg-dark text-white p-2 rounded shadow text-center" 
+       [style.left.px]="tooltipData.x" 
+       [style.top.px]="tooltipData.y" 
+       style="z-index: 1050; transform: translate(-50%, -100%); pointer-events: none; min-width: 120px;">
+    <div class="fw-bold mb-1" [style.color]="tooltipData.color">{{ tooltipData.label }}</div>
+    <div class="fs-5">{{ tooltipData.value }}</div>
+    @if(tooltipData.percentage) {
+      <small class="text-white-50">{{ tooltipData.percentage }}</small>
+    }
+  </div>
+  }
+
+  <!-- EXPORT CONFIRMATION MODAL -->
+  @if (showExportConfirm) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 2000;">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 15px; overflow: hidden;">
+        <div class="modal-body p-4 text-center">
+          <div class="mb-3">
+            @if (pendingExportType === 'excel') {
+              <div class="bg-success-subtle text-success rounded-circle d-inline-flex p-3 mb-2">
+                <i class="fas fa-file-excel fs-2"></i>
+              </div>
+            } @else {
+              <div class="rounded-circle d-inline-flex p-3 mb-2" style="background-color: rgba(253, 126, 20, 0.1); color: #fd7e14;">
+                <i class="fas fa-file-pdf fs-2"></i>
+              </div>
+            }
+          </div>
+          <h5 class="fw-bold">Confirmer l'exportation</h5>
+          <p class="text-secondary small mb-3">Veuillez vérifier les détails avant de générer le fichier {{ pendingExportType?.toUpperCase() }} :</p>
+          
+          <div class="bg-light rounded-3 p-3 mb-4 text-start shadow-sm border border-light-subtle">
+            <div class="mb-2">
+              <span class="text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px; font-size: 0.65rem;">Indicateur</span>
+              <div class="fw-bold text-dark">{{ kpiTitle }}</div>
+            </div>
+            <div class="row g-2">
+              <div class="col-6 border-end">
+                <span class="text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px; font-size: 0.65rem;">Période</span>
+                <div class="fw-bold text-primary">{{ selectedPeriod }}</div>
+              </div>
+              <div class="col-6 ps-3">
+                <span class="text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px; font-size: 0.65rem;">Volume</span>
+                <div class="fw-bold text-dark">{{ tableData.length }} ligne(s)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 justify-content-center">
+            <button type="button" class="btn btn-light px-4 fw-bold" (click)="cancelExport()" style="border-radius: 8px; font-size: 0.85rem;">
+              ANNULER
+            </button>
+            <button type="button" class="btn px-4 fw-bold text-white shadow-sm" 
+                    [ngClass]="pendingExportType === 'excel' ? 'btn-success' : ''"
+                    [style.backgroundColor]="pendingExportType === 'pdf' ? '#fd7e14' : ''"
+                    [style.borderColor]="pendingExportType === 'pdf' ? '#fd7e14' : ''"
+                    (click)="confirmExport()" style="border-radius: 8px; font-size: 0.85rem;">
+              CONTINUER
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>
