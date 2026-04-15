@@ -1,18 +1,20 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection, isDevMode } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import {
-  provideKeycloak,
-  includeBearerTokenInterceptor,
+import { 
+  provideKeycloak, 
+  includeBearerTokenInterceptor, 
   INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
-  KeycloakService
+  KeycloakService 
 } from 'keycloak-angular';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { provideServiceWorker } from '@angular/service-worker';
 
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // 1. Initialisation de Keycloak
+    // 1. Initialisation de Keycloak (Priorité sécurité)
     provideKeycloak({
       config: {
         url: 'http://localhost:8080',
@@ -26,7 +28,7 @@ export const appConfig: ApplicationConfig = {
       }
     }),
 
-    // 2. Ajout explicite du service (pour compatibilité avec les composants injectants KeycloakService)
+    // 2. Compatibilité KeycloakService
     KeycloakService,
 
     // 3. Core Angular providers
@@ -34,7 +36,14 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes),
 
-    // 4. Configuration de l'intercepteur
+    // 4. Graphiques & PWA (Nouveautés Diguinan)
+    provideCharts(withDefaultRegisterables()),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
+
+    // 5. Configuration de l'intercepteur & HTTP
     {
       provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
       useValue: [
@@ -44,7 +53,6 @@ export const appConfig: ApplicationConfig = {
         }
       ]
     },
-
     provideHttpClient(
       withInterceptors([includeBearerTokenInterceptor])
     )

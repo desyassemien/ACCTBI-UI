@@ -101,4 +101,36 @@ export class TresorerieComponent {
     toggleMode(mode: 'classic' | 'dragdrop') {
         this.isDragDropMode = mode === 'dragdrop';
     }
+
+    updateIndicators(indicators: string[]) {
+        if (this.activeSubDomain === 'la') {
+            this.selectedIndicatorsLA = indicators;
+        } else {
+            this.selectedIndicatorsBC = indicators;
+        }
+    }
+
+    updateAvailableIndicators(indicators: string[]) {
+        if (this.activeSubDomain === 'la') {
+            this.availableIndicatorsLA = indicators;
+        } else {
+            this.availableIndicatorsBC = indicators;
+        }
+    }
+
+    updateAxes(axes: string[]) {
+        if (this.activeSubDomain === 'la') {
+            this.selectedAxesLA = axes;
+        } else {
+            this.selectedAxesBC = axes;
+        }
+    }
+
+    updateAvailableAxes(axes: string[]) {
+        if (this.activeSubDomain === 'la') {
+            this.availableAxesLA = axes;
+        } else {
+            this.availableAxesBC = axes;
+        }
+    }
 }

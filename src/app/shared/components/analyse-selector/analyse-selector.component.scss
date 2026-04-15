@@ -30,3 +30,63 @@
 .border-primary-200 {
     border-color: rgba(247, 127, 0, 0.2) !important;
 }
+
+// Custom styles for the selector to improve readability and branding
+.dropdown-menu li {
+    padding: 0.25rem 0.75rem;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    margin: 2px 0;
+
+    &:hover {
+        background-color: #f8f9fa; // Very light gray
+        color: var(--primary-700); // UI Primary color (Orange)
+        
+        .form-check-label {
+            color: var(--primary-700);
+        }
+    }
+}
+
+// Remove flashy blue on focus for inputs and buttons
+.form-select, .form-control, .btn {
+    &:focus {
+        border-color: rgba(247, 127, 0, 0.4) !important; // Orange translucent
+        box-shadow: 0 0 0 0.25rem rgba(247, 127, 0, 0.1) !important;
+    }
+}
+
+// Ensure checkboxes are orange instead of blue
+.form-check-input:checked {
+    background-color: var(--primary-700) !important;
+    border-color: var(--primary-700) !important;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(247, 127, 0, 0.1) !important;
+    border-color: rgba(247, 127, 0, 0.4) !important;
+}
+
+// Overwrite secondary border (often too dark/blue)
+.border-secondary {
+    border-color: #cbd5e1 !important; // Neutral gray
+}
+
+// Fix dropdown button hover/active/expanded states
+.btn-outline-secondary {
+    border-color: #cbd5e1 !important;
+    color: var(--text-primary) !important;
+    background-color: transparent !important;
+
+    &:hover, &:focus, &:active, &.show, &[aria-expanded="true"] {
+        background-color: #f8f9fa !important; // Light gray instead of dark blue
+        border-color: var(--primary-700) !important; // Orange highlight
+        color: var(--primary-700) !important;
+        box-shadow: 0 0 0 0.25rem rgba(247, 127, 0, 0.1) !important;
+        
+        // Ensure chevron also takes the highlight color
+        i.fa-chevron-down {
+            color: var(--primary-700) !important;
+        }
+    }
+}

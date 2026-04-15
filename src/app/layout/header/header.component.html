@@ -30,22 +30,21 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-services border-0 shadow-lg mt-1 rounded-3 py-2">
                             @for (item of serviceItems; track item.path) {
-                            <a class="dropdown-item d-flex align-items-center px-3 py-2" [routerLink]="item.path"
+                            <a class="dropdown-item d-flex align-items-center justify-content-between px-3 py-2" [routerLink]="item.path"
                                 routerLinkActive="active-item">
-                                <i [class]="item.icon + ' me-3 text-secondary'"
-                                    style="width: 18px; text-align: center;"></i>
-                                <span class="fw-medium">{{ item.label }}</span>
+                                <div class="d-flex align-items-center">
+                                    <i [class]="item.icon + ' me-3 text-secondary'" style="width: 18px; text-align: center;"></i>
+                                    <span class="fw-medium">{{ item.label }}</span>
+                                </div>
+                                @if (notificationService.unreadCountByService()[getServiceName(item.path)]) {
+                                <span class="badge rounded-pill bg-danger ms-2">
+                                    {{ notificationService.unreadCountByService()[getServiceName(item.path)] }}
+                                </span>
+                                }
                             </a>
                             }
                         </div>
                     </li>
-
-                    <!-- Administration -->
-                    <!-- <li class="nav-item">
-                        <a class="nav-link px-3 py-2 rounded-2" routerLink="/admin" routerLinkActive="active">
-                            <i class="fas fa-cog me-2"></i>Administration
-                        </a>
-                    </li> -->
                 </ul>
             </div>
 
@@ -65,15 +64,102 @@
                 </button>
 
                 <!-- Notifications -->
-                <button class="topbar-action-btn position-relative">
-                    <i class="far fa-bell fs-6"></i>
-                    @if (notificationCount > 0) {
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                        style="font-size: 0.6rem; padding: 0.2em 0.45em;">
-                        {{ notificationCount }}
-                    </span>
-                    }
-                </button>
+                <div class="dropdown">
+                    <button class="topbar-action-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                        <i class="far fa-bell fs-6"></i>
+                        @if (notificationService.unreadCount() > 0) {
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                            style="font-size: 0.6rem; padding: 0.2em 0.45em;">
+                            {{ notificationService.unreadCount() }}
+                        </span>
+                        }
+                    </button>
+
+                    <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 rounded-3 p-0" style="width: 380px; max-width: 100vw;">
+                        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top-3">
+                            <h6 class="m-0 fw-bold">Notifications</h6>
+                            @if (notificationService.unreadCount() > 0) {
+                            <button class="btn btn-sm btn-link text-decoration-none p-0" (click)="markAllAsRead($event)">
+                                Tout marquer comme lu
+                            </button>
+                            }
+                        </div>
+
+                        <!-- TEST BUTTON FOR PUSH NOTIFICATION -->
+                        <div class="px-3 py-2 border-bottom bg-warning-subtle text-center">
+                            <button class="btn btn-sm btn-warning w-100 fw-bold" (click)="testPushNotification($event)">
+                                <i class="fas fa-desktop me-2"></i> Tester la notification Push
+                            </button>
+                        </div>
+
+                        <div class="notification-list" style="max-height: 400px; overflow-y: auto;">
+                            @if (notificationService.alertes().length === 0) {
+                            <div class="p-4 text-center text-muted">
+                                <i class="far fa-bell-slash fs-3 mb-2 opacity-50"></i>
+                                <p class="mb-0 fs-7">Aucune notification</p>
+                            </div>
+                            } @else {
+                                @for (alerte of notificationService.alertes(); track alerte.id) {
+                                <div class="notification-item p-3 border-bottom position-relative" [class.bg-light-opacity-50]="!alerte.lue">
+                                    <a [routerLink]="alerte.routeAction" class="text-decoration-none text-body d-flex gap-3">
+                                        
+                                        <!-- Icon based on type -->
+                                        <div class="flex-shrink-0 mt-1">
+                                            @if (alerte.type === 'DANGER') {
+                                                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                </div>
+                                            } @else if (alerte.type === 'WARNING') {
+                                                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                </div>
+                                            } @else {
+                                                <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <!-- Content -->
+                                        <div class="flex-grow-1 min-w-0">
+                                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                                <h6 class="mb-0 fs-7 fw-bold text-truncate pe-3" [class.text-muted]="alerte.lue">{{ alerte.titre }}</h6>
+                                            </div>
+                                            <p class="mb-1 fs-8 text-secondary text-wrap" style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" [class.opacity-75]="alerte.lue">
+                                                {{ alerte.description }}
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                <span class="fs-9 text-uppercase tracking-wider fw-bold" [class.text-danger]="alerte.type === 'DANGER'" [class.text-warning]="alerte.type === 'WARNING'" [class.text-info]="alerte.type === 'INFO'">{{ alerte.service }}</span>
+                                            </div>
+                                        </div>
+                                    </a>
+
+                                    <!-- Unread Dot Indicator & Action -->
+                                    <div class="position-absolute top-0 end-0 p-3 h-100 d-flex flex-column justify-content-between align-items-end">
+                                        @if (!alerte.lue) {
+                                            <span class="badge bg-primary p-1 rounded-circle" title="Non lu">
+                                                <span class="visually-hidden">Non lu</span>
+                                            </span>
+                                        } @else {
+                                            <span></span>
+                                        }
+                                        
+                                        @if (!alerte.lue) {
+                                        <button class="btn btn-sm btn-link text-secondary p-0 icon-hover" (click)="markAsRead(alerte.id, $event)" title="Marquer comme lu">
+                                            <i class="fas fa-check-double fs-8"></i>
+                                        </button>
+                                        }
+                                    </div>
+                                </div>
+                                }
+                            }
+                        </div>
+                        
+                        <div class="p-2 border-top text-center bg-light rounded-bottom-3">
+                            <a href="#" class="text-decoration-none fs-8 fw-bold">Voir toutes les notifications</a>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- User Profile Dropdown -->
                 <div class="dropdown">

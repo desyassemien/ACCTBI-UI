@@ -1,0 +1,94 @@
+.rapport-container {
+    .table {
+        th {
+            background-color: #f8fafc;
+            color: var(--text-secondary);
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            border-bottom-color: #f1f5f9;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+    }
+
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+        }
+    }
+
+    /* Chart Animations */
+    .animate__animated {
+        animation-duration: 0.6s;
+    }
+
+    .animate__fadeIn {
+        animation-name: fadeIn;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Form Controls */
+    .form-select,
+    .form-control {
+        border-color: #e2e8f0;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+        &:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.15);
+        }
+    }
+
+    /* Filter Groups */
+    .filter-group {
+        flex: 0 1 auto;
+        min-width: 160px;
+
+        .form-select {
+            max-width: 200px;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    .chart-buttons-group {
+        flex: 0 1 auto;
+        white-space: nowrap;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1rem !important;
+        }
+
+        .table {
+            font-size: 0.85rem;
+
+            th,
+            td {
+                padding: 0.5rem !important;
+            }
+        }
+    }
+}

@@ -1,25 +1,31 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import Keycloak from 'keycloak-js';
+import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-header',
     standalone: true,
-    imports: [RouterLink, RouterLinkActive],
+    imports: [RouterLink, RouterLinkActive, CommonModule],
+    providers: [DatePipe],
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss'
 })
 export class HeaderComponent implements OnInit {
     private router = inject(Router);
     private keycloak = inject(Keycloak);
+    private authService = inject(AuthService);
+    public notificationService = inject(NotificationService);
 
     userProfile: any | null = null;
     notificationCount = 3;
     isDarkMode = false;
+    user = this.authService.currentUser;
 
     async ngOnInit() {
         try {
-            // En v21 API native, on vérifie .authenticated
             if (this.keycloak.authenticated) {
                 this.userProfile = await this.keycloak.loadUserProfile();
             }
@@ -32,6 +38,11 @@ export class HeaderComponent implements OnInit {
     get isServicesActive(): boolean {
         const url = this.router.url;
         return this.serviceItems.some(item => url.startsWith(item.path));
+    }
+
+    /** Helper to get service clean name without slash */
+    getServiceName(path: string): string {
+        return path?.replace('/', '') || '';
     }
 
     // Navigation items
@@ -75,5 +86,23 @@ export class HeaderComponent implements OnInit {
         await this.keycloak.logout({
             redirectUri: window.location.origin
         });
+    }
+
+    markAsRead(id: string, event: Event) {
+        event.stopPropagation();
+        this.notificationService.markAsRead(id);
+    }
+
+    markAllAsRead(event: Event) {
+        event.stopPropagation();
+        this.notificationService.markAllAsRead();
+    }
+
+    testPushNotification(event: Event) {
+        event.stopPropagation();
+        const alertes = this.notificationService.alertes();
+        if (alertes && alertes.length > 0) {
+            this.notificationService.triggerSystemNotification(alertes[0]);
+        }
     }
 }

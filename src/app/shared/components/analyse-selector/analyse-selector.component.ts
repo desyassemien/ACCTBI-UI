@@ -25,6 +25,13 @@ export class AnalyseSelectorComponent {
 
   @Output() modeChanged = new EventEmitter<'classic' | 'dragdrop'>();
   @Output() selectedPeriodChange = new EventEmitter<string>();
+  
+  @Output() selectedIndicatorsChange = new EventEmitter<string[]>();
+  @Output() availableIndicatorsChange = new EventEmitter<string[]>();
+  
+  @Output() selectedAxesChange = new EventEmitter<string[]>();
+  @Output() availableAxesChange = new EventEmitter<string[]>();
+
   @Output() analysisTriggered = new EventEmitter<any>();
 
   toggleMode(mode: 'classic' | 'dragdrop') {
@@ -43,6 +50,50 @@ export class AnalyseSelectorComponent {
         event.currentIndex,
       );
     }
+    this.emitChanges();
+  }
+
+  toggleIndicator(ind: string, isSelected: boolean) {
+    if (isSelected) {
+      // Move from selected to available
+      const index = this.selectedIndicators.indexOf(ind);
+      if (index > -1) {
+        this.selectedIndicators.splice(index, 1);
+        this.availableIndicators.push(ind);
+      }
+    } else {
+      // Move from available to selected
+      const index = this.availableIndicators.indexOf(ind);
+      if (index > -1 && this.selectedIndicators.length < 6) {
+        this.availableIndicators.splice(index, 1);
+        this.selectedIndicators.push(ind);
+      }
+    }
+    this.emitChanges();
+  }
+
+  toggleAxe(axe: string, isSelected: boolean) {
+    if (isSelected) {
+      const index = this.selectedAxes.indexOf(axe);
+      if (index > -1) {
+        this.selectedAxes.splice(index, 1);
+        this.availableAxes.push(axe);
+      }
+    } else {
+      const index = this.availableAxes.indexOf(axe);
+      if (index > -1 && this.selectedAxes.length < 3) {
+        this.availableAxes.splice(index, 1);
+        this.selectedAxes.push(axe);
+      }
+    }
+    this.emitChanges();
+  }
+
+  private emitChanges() {
+    this.selectedIndicatorsChange.emit([...this.selectedIndicators]);
+    this.availableIndicatorsChange.emit([...this.availableIndicators]);
+    this.selectedAxesChange.emit([...this.selectedAxes]);
+    this.availableAxesChange.emit([...this.availableAxes]);
   }
 
   onRefresh() {

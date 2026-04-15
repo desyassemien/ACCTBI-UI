@@ -1,90 +1,126 @@
-<!-- ===================== FLOATING CHAT WIDGET ===================== -->
-<div class="chat-widget-container">
+<!-- Floating Action Button -->
+<button 
+  class="chat-fab shadow-lg border-0 transition-all rounded-circle d-flex align-items-center justify-content-center"
+  (click)="toggleChat()"
+  [class.active]="isOpen()"
+>
+  <i class="fas" [class.fa-comment-dots]="!isOpen()" [class.fa-times]="isOpen()"></i>
+  @if (!isOpen() && chatService.threads().length > 1) {
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+      {{ chatService.threads().length }}
+    </span>
+  }
+</button>
 
-  <!-- ── Chat Panel ── -->
-  <div class="chat-panel" [class.chat-panel--open]="isOpen()">
-
-    <!-- Header -->
-    <div class="chat-header">
-      <div class="chat-header-info">
-        <div class="chat-avatar">
-          <i class="bi bi-robot"></i>
-          <span class="online-dot"></span>
+<!-- Chat Window -->
+<div class="chat-window shadow-xl border-0 rounded-4 overflow-hidden d-flex flex-column transition-all" [class.show]="isOpen()">
+  
+  <!-- Header -->
+  <div class="chat-header p-3 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-2">
+      @if (showHistory()) {
+        <button class="btn btn-sm btn-icon btn-glass me-1" (click)="toggleHistory()">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      } @else {
+        <div class="ai-avatar rounded-circle bg-white bg-opacity-20 d-flex align-items-center justify-content-center">
+          <i class="fas fa-robot text-white"></i>
         </div>
-        <div>
-          <div class="chat-title">Assistant ACCTBI</div>
-          <div class="chat-subtitle">En ligne · répond instantanément</div>
-        </div>
-      </div>
-      <button class="chat-close-btn" (click)="closeChat()" title="Fermer">
-        <i class="bi bi-x-lg"></i>
-      </button>
-    </div>
-
-    <!-- Messages -->
-    <div class="chat-messages" #messagesContainer>
-      @for (msg of messages(); track msg.id) {
-        <div class="chat-message" [class.chat-message--user]="msg.role === 'user'">
-          @if (msg.role === 'assistant') {
-            <div class="msg-avatar">
-              <i class="bi bi-robot"></i>
-            </div>
+      }
+      <div>
+        <h6 class="m-0 text-white fw-bold fs-7">{{ showHistory() ? 'Historique' : 'Assistant Sygacut-BI' }}</h6>
+        <span class="fs-9 text-white-50">
+          @if (showHistory()) {
+            {{ chatService.threads().length }} conversations
+          } @else {
+            <i class="fas fa-circle text-success me-1 tiny"></i> En ligne
           }
-          <div class="msg-bubble">
-            <p class="msg-text">{{ msg.text }}</p>
-            <span class="msg-time">{{ msg.time }}</span>
-          </div>
-        </div>
-      }
-
-      <!-- Typing indicator -->
-      @if (isTyping()) {
-        <div class="chat-message">
-          <div class="msg-avatar">
-            <i class="bi bi-robot"></i>
-          </div>
-          <div class="msg-bubble msg-bubble--typing">
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-          </div>
-        </div>
-      }
+        </span>
+      </div>
     </div>
-
-    <!-- Input -->
-    <div class="chat-input-area">
-      <textarea
-        class="chat-input"
-        [(ngModel)]="userInput"
-        (keydown)="onKeydown($event)"
-        placeholder="Écrivez votre message…"
-        rows="1"
-      ></textarea>
-      <button
-        class="chat-send-btn"
-        (click)="sendMessage()"
-        [disabled]="!userInput.trim()"
-        title="Envoyer"
-      >
-        <i class="bi bi-send-fill"></i>
+    <div class="d-flex gap-2">
+      @if (!showHistory()) {
+        <button class="btn btn-sm btn-icon btn-glass" (click)="toggleHistory()" title="Voir l'historique">
+          <i class="fas fa-history fs-9"></i>
+        </button>
+      }
+      <button class="btn btn-sm btn-icon btn-glass" (click)="toggleChat()">
+        <i class="fas fa-times"></i>
       </button>
     </div>
-
   </div>
 
-  <!-- ── FAB Toggle Button ── -->
-  <button
-    class="chat-fab"
-    (click)="toggleChat()"
-    [class.chat-fab--active]="isOpen()"
-    [title]="isOpen() ? 'Fermer le chat' : 'Ouvrir le chat'"
-  >
-    <span class="chat-fab-icon">
-      <i class="bi bi-chat-dots-fill" [class.d-none]="isOpen()"></i>
-      <i class="bi bi-x-lg" [class.d-none]="!isOpen()"></i>
-    </span>
-    <span class="chat-fab-badge" [class.d-none]="isOpen()">1</span>
-  </button>
+  <!-- Content Area -->
+  <div class="flex-grow-1 overflow-hidden d-flex flex-column bg-light-subtle">
+    @if (showHistory()) {
+      <!-- History List View -->
+      <div class="chat-history p-3 flex-grow-1 overflow-y-auto">
+        <div class="d-grid gap-2 mb-3">
+          <button class="btn btn-primary btn-sm rounded-pill fw-bold py-2" (click)="startNewChat()">
+            <i class="fas fa-plus me-2"></i> Nouvelle discussion
+          </button>
+        </div>
+        
+        <div class="list-group list-group-flush rounded-3 shadow-sm">
+          @for (thread of chatService.threads(); track thread.id) {
+            <button 
+              class="list-group-item list-group-item-action border-bottom-0 p-3 d-flex flex-column gap-1"
+              [class.active-thread]="thread.id === chatService.activeThreadId()"
+              (click)="selectThread(thread.id)"
+            >
+              <div class="d-flex justify-content-between align-items-start">
+                <span class="fw-bold fs-7 text-truncate pe-2">{{ thread.title }}</span>
+                <span class="fs-9 text-muted opacity-75">{{ thread.lastUpdated | date:'dd/MM' }}</span>
+              </div>
+              <p class="m-0 fs-8 text-secondary text-truncate opacity-75">
+                {{ thread.messages[thread.messages.length - 1].content }}
+              </p>
+            </button>
+          }
+        </div>
 
+        <div class="mt-4 text-center">
+          <button class="btn btn-link btn-sm text-danger text-decoration-none fs-9" (click)="clearHistory()">
+            <i class="fas fa-trash-alt me-1"></i> Tout effacer
+          </button>
+        </div>
+      </div>
+    } @else {
+      <!-- Messages List View -->
+      <div class="chat-messages p-3 flex-grow-1" #scrollContainer>
+        @for (msg of chatService.activeMessages(); track msg.timestamp.getTime()) {
+          <div class="message-wrapper d-flex flex-column mb-3" [class.message-user]="msg.role === 'user'" [class.message-assistant]="msg.role === 'assistant'">
+            <div class="message-content p-3 rounded-4 shadow-sm">
+              {{ msg.content }}
+            </div>
+            <span class="message-time fs-9 text-secondary mt-1 px-1">
+              {{ msg.timestamp | date:'HH:mm' }}
+            </span>
+          </div>
+        }
+      </div>
+
+      <!-- Input Area (Only in chat view) -->
+      <div class="chat-footer p-3 bg-white border-top">
+        <form (submit)="sendMessage(); $event.preventDefault()" class="d-flex gap-2">
+          <input 
+            type="text" 
+            class="form-control form-control-sm border-0 bg-light rounded-pill px-3 py-2" 
+            placeholder="Tapez votre question..." 
+            [(ngModel)]="userInput" 
+            name="chatInput"
+            autoComplete="off"
+          >
+          <button 
+            type="submit" 
+            class="btn btn-primary rounded-circle btn-icon p-0 d-flex align-items-center justify-content-center" 
+            style="width: 36px; height: 36px;"
+            [disabled]="!userInput().trim()"
+          >
+            <i class="fas fa-paper-plane fs-8"></i>
+          </button>
+        </form>
+      </div>
+    }
+  </div>
 </div>

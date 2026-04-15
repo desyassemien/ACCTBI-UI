@@ -20,10 +20,10 @@
         title="Configuration de l'Analyse Règlement" 
         [isDragDropMode]="isDragDropMode"
         [(selectedPeriod)]="selectedPeriod" 
-        [availableIndicators]="availableIndicators"
-        [selectedIndicators]="selectedIndicators" 
-        [availableAxes]="availableAxes" 
-        [selectedAxes]="selectedAxes"
+        [(availableIndicators)]="availableIndicators"
+        [(selectedIndicators)]="selectedIndicators" 
+        [(availableAxes)]="availableAxes" 
+        [(selectedAxes)]="selectedAxes"
         (modeChanged)="toggleMode($event)" 
         (analysisTriggered)="onAnalysisTriggered($event)">
     </app-analyse-selector>
