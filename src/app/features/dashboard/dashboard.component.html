@@ -5,71 +5,65 @@
             <h4 class="fw-bold text-primary-900 mb-1">Vue Consolidée</h4>
             <p class="text-secondary mb-0">Aperçu global de la situation financière du Trésor Public</p>
         </div>
-
-        <div class="d-none d-md-flex gap-2">
-            <button class="btn btn-outline-primary bg-white d-flex align-items-center">
-                <i class="fas fa-file-excel me-2"></i> Export Excel
-            </button>
-            <button class="btn btn-primary d-flex align-items-center">
-                <i class="fas fa-file-pdf me-2"></i> Rapport PDF
-            </button>
-        </div>
     </div>
 
-    <!-- KPIs Grid -->
-    <div class="row g-4 mb-4 align-items-stretch">
-        @for (kpi of kpis; track kpi.id) {
-        <div class="col-12 col-md-6 col-xl d-flex">
-            <app-kpi-card [data]="kpi" class="w-100"></app-kpi-card>
-        </div>
-        }
-    </div>
+    <!-- Service Cards Group (9 cards: 5 KPIs + 4 activités) -->
+    <div class="cards-group">
 
-    <!-- Daily Activity Counters (Section 11.3.C) -->
-    <div class="row g-4 mb-4 align-items-stretch">
-        @for (item of activiteJour; track item.label) {
-        <div class="col-6 col-lg-3 d-flex">
-            <div class="card border-0 shadow-sm w-100 h-100 transition-all card-hover">
-                <div class="card-body p-4 d-flex flex-column justify-content-between">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <h6 class="text-secondary fw-semibold mb-1 text-uppercase tracking-wider small">{{ item.label }}</h6>
-                        </div>
-                        <div class="activity-icon rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; flex-shrink: 0;">
-                            <i [class]="item.icone + ' ' + item.couleur + ' fs-5'"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="d-flex align-items-baseline gap-2 flex-wrap mb-1">
-                            <span class="fs-3 fw-bold text-dark lh-1">{{ item.valeur }}</span>
-                            @if (item.montant) {
-                                <span class="fs-6 fw-medium text-secondary">({{ item.montant }})</span>
-                            }
-                        </div>
-                        @if (item.tendance !== '0') {
-                            <div class="d-flex align-items-center mt-2">
-                                <span class="badge rounded-pill me-2 d-flex align-items-center px-2 py-1"
-                                    [class.bg-success-subtle]="item.tendance.includes('+')"
-                                    [class.text-success]="item.tendance.includes('+')">
-                                    <i class="fas fa-arrow-up me-1 small"></i>
-                                    {{ item.tendance }}
-                                </span>
-                                <span class="text-secondary small fw-medium">vs hier</span>
+        <!-- KPIs Grid -->
+        <div class="row g-4 mb-4 align-items-stretch">
+            @for (kpi of kpis; track kpi.id) {
+            <div class="col-12 col-md-6 col-xl d-flex service-card-col" (click)="goToDetail(kpi.id)" style="cursor: pointer;">
+                <app-kpi-card [data]="kpi" class="w-100"></app-kpi-card>
+            </div>
+            }
+        </div>
+
+        <!-- Daily Activity Counters (Section 11.3.C) -->
+        <div class="row g-4 mb-4 align-items-stretch">
+            @for (item of activiteJour; track item.label) {
+            <div class="col-6 col-lg-3 d-flex service-card-col" (click)="goToActiviteDetail(item.label)">
+                <div class="card border-0 shadow-sm w-100 h-100 transition-all card-hover" style="cursor: pointer;" [title]="'Voir les détails : ' + item.label">
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="text-secondary fw-semibold mb-1 text-uppercase tracking-wider small">{{ item.label }}</h6>
+                                <div class="d-flex align-items-baseline gap-2 flex-wrap mb-1">
+                                    <span class="fs-3 fw-bold text-dark lh-1">{{ item.valeur }}</span>
+                                    @if (item.montant) {
+                                        <span class="fs-6 fw-medium text-secondary">({{ item.montant }})</span>
+                                    }
+                                </div>
+                                @if (item.tendance !== '0') {
+                                    <div class="d-flex align-items-center mt-2">
+                                        <span class="badge rounded-pill me-2 d-flex align-items-center px-2 py-1"
+                                            [class.bg-success-subtle]="item.tendance.includes('+')"
+                                            [class.text-success]="item.tendance.includes('+')">
+                                            <i class="fas fa-arrow-up me-1 small"></i>
+                                            {{ item.tendance }}
+                                        </span>
+                                        <span class="text-secondary small fw-medium">vs hier</span>
+                                    </div>
+                                }
                             </div>
-                        }
+                            <div class="activity-icon rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; flex-shrink: 0;">
+                                <i [class]="item.icone + ' ' + item.couleur + ' fs-5'"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            }
         </div>
-        }
-    </div>
+
+    </div><!-- /cards-group -->
 
     <!-- Charts & Tables Section -->
     <div class="row g-4">
 
         <!-- Left Column: Treasury Evolution -->
         <div class="col-12 col-xxl-8">
-            <div class="card border-0 shadow-sm h-100 card-hover">
+            <div class="card border-0 shadow-sm h-100 card-hover" style="cursor: pointer;" (click)="goToChartDetail('chart-tresorerie')" title="Voir le détail de l'évolution de la trésorerie">
                 <div
                     class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0">Évolution de la Trésorerie (12 mois)</h6>
@@ -78,14 +72,14 @@
                         <button class="btn btn-sm rounded-pill d-flex align-items-center gap-2 px-3 transition-all"
                             [class.btn-outline-danger]="voiceService.isListening()"
                             [class.btn-outline-secondary]="!voiceService.isListening()"
-                            (click)="voiceService.isListening() ? voiceService.stopListening() : voiceService.startListening()"
+                            (click)="$event.stopPropagation(); voiceService.isListening() ? voiceService.stopListening() : voiceService.startListening()"
                             [title]="voiceService.isListening() ? 'Arrêter l\'écoute' : 'Parler (ex: Afficher lignes)'">
                             <i class="fas fa-microphone" [class.fa-pulse]="voiceService.isListening()"></i>
                             <span class="small fw-bold">{{ voiceService.isListening() ? 'Écoute...' : 'Micro' }}</span>
                         </button>
 
                         <!-- Chart Type Toggle -->
-                        <div class="btn-group" role="group">
+                        <div class="btn-group" role="group" (click)="$event.stopPropagation()">
                             <input type="radio" class="btn-check" name="dashChartType" id="d1_bar" value="bar"
                                 autocomplete="off" [(ngModel)]="dashChartType">
                             <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="d1_bar" title="Barre"><i
@@ -96,7 +90,7 @@
                             <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="d1_line"
                                 title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
                         </div>
-                        <div class="dropdown">
+                        <div class="dropdown" (click)="$event.stopPropagation()">
                             <button class="btn btn-sm btn-icon text-secondary" type="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
@@ -175,7 +169,7 @@
         <div class="col-12 col-xxl-4 d-flex flex-column gap-4">
 
             <!-- Budget Allocation Chart (Section 11.4 - G2) -->
-            <div class="card border-0 shadow-sm flex-grow-1 card-hover">
+            <div class="card border-0 shadow-sm flex-grow-1 card-hover" style="cursor: pointer;" (click)="goToChartDetail('chart-budget')" title="Voir le détail de la répartition budgétaire">
                 <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
                     <h6 class="fw-bold mb-0">Répartition Budgétaire Fonctionnement/Investissement</h6>
                 </div>
@@ -218,13 +212,13 @@
 
         <!-- Alerts Table & Top Posts -->
         <div class="col-12 col-lg-6">
-            <div class="card border-0 shadow-sm h-100 card-hover">
+            <div class="card border-0 shadow-sm h-100 card-hover" style="cursor: pointer;" (click)="goToChartDetail('alertes')" title="Voir toutes les alertes">
                 <div
                     class="card-header bg-white border-bottom pt-4 pb-3 d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0">
                         <i class="fas fa-exclamation-circle text-danger me-2"></i> Alertes et Signalements (Section 11.3.B)
                     </h6>
-                    <a href="#" class="fs-8 fw-medium text-decoration-none">Tout voir</a>
+                    <button class="btn btn-link fs-8 fw-medium text-decoration-none p-0 ms-auto" (click)="$event.stopPropagation(); goToChartDetail('alertes')">Tout voir</button>
                 </div>
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush">
@@ -266,7 +260,7 @@
 
         <!-- Top Accounting Posts -->
         <div class="col-12 col-lg-6">
-            <div class="card border-0 shadow-sm h-100 card-hover">
+            <div class="card border-0 shadow-sm h-100 card-hover" style="cursor: pointer;" (click)="goToChartDetail('top-postes')" title="Voir le détail des postes comptables">
                 <div class="card-header bg-white border-bottom pt-4 pb-3">
                     <h6 class="fw-bold mb-0">Top Postes Comptables Approvisionnés</h6>
                 </div>

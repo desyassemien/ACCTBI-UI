@@ -1,11 +1,11 @@
 import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card.component';
 import { KpiCard } from '../../core/models/kpi-card.model';
 import { Alerte } from '../../core/models/alerte.model';
 import { VoiceService } from '../../core/services/voice.service';
-
 
 @Component({
     selector: 'app-dashboard',
@@ -15,6 +15,7 @@ import { VoiceService } from '../../core/services/voice.service';
     styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
+    private router = inject(Router);
     public voiceService = inject(VoiceService);
 
     // Chart selected type state
@@ -81,5 +82,25 @@ export class DashboardComponent {
             case 'INFO': return 'fas fa-info-circle text-info';
             default: return 'fas fa-bell text-secondary';
         }
+    }
+
+    // Navigation logic from Aicha
+    goToDetail(kpiId: string) {
+        this.router.navigate(['/kpi-detail', kpiId]);
+    }
+
+    goToActiviteDetail(label: string) {
+        const idMap: { [key: string]: string } = {
+            'Règlements effectués': 'activite-reglements',
+            'Mandats émis': 'activite-mandats',
+            'Nouveaux cautionnements': 'activite-cautionnements',
+            'Recettes perçues (Régies)': 'activite-recettes'
+        };
+        const id = idMap[label];
+        if (id) this.router.navigate(['/kpi-detail', id]);
+    }
+
+    goToChartDetail(chartId: string) {
+        this.router.navigate(['/kpi-detail', chartId]);
     }
 }

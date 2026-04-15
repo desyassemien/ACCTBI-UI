@@ -1,25 +1,51 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import Keycloak from 'keycloak-js';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { CommonModule } from '@angular/common';
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
+
 @Component({
     selector: 'app-header',
     standalone: true,
-    imports: [RouterLink, RouterLinkActive],
+    imports: [RouterLink, RouterLinkActive, CommonModule],
+    providers: [DatePipe],
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss'
 })
-export class HeaderComponent {
-    private authService = inject(AuthService);
+export class HeaderComponent implements OnInit {
     private router = inject(Router);
+    private keycloak = inject(Keycloak);
+    private authService = inject(AuthService);
     public notificationService = inject(NotificationService);
 
-    user = this.authService.currentUser;
+    userProfile: any | null = null;
+    notificationCount = 3;
     isDarkMode = false;
+    user = this.authService.currentUser;
 
-    // Navigation items (moved from sidebar)
+    async ngOnInit() {
+        try {
+            if (this.keycloak.authenticated) {
+                this.userProfile = await this.keycloak.loadUserProfile();
+            }
+        } catch (err) {
+            console.error('Erreur lors du chargement du profil Keycloak:', err);
+        }
+    }
+
+    /** Check if any service route is currently active (for dropdown highlight) */
+    get isServicesActive(): boolean {
+        const url = this.router.url;
+        return this.serviceItems.some(item => url.startsWith(item.path));
+    }
+
+    /** Helper to get service clean name without slash */
+    getServiceName(path: string): string {
+        return path?.replace('/', '') || '';
+    }
+
+    // Navigation items
     readonly serviceItems = [
         { path: '/comptabilite', icon: 'fas fa-book', label: 'Comptabilité' },
         { path: '/tresorerie', icon: 'fas fa-money-bill-wave', label: 'Trésorerie' },
@@ -41,17 +67,6 @@ export class HeaderComponent {
         }
     }
 
-    /** Helper to get service clean name without slash */
-    getServiceName(path: string): string {
-        return path?.replace('/', '') || '';
-    }
-
-    /** Check if any service route is currently active (for dropdown highlight) */
-    get isServicesActive(): boolean {
-        const url = this.router.url;
-        return this.serviceItems.some(item => url.startsWith(item.path));
-    }
-
     toggleTheme() {
         this.isDarkMode = !this.isDarkMode;
         this.applyTheme();
@@ -66,8 +81,11 @@ export class HeaderComponent {
         }
     }
 
-    logout() {
-        this.authService.logout();
+    async logout() {
+        console.log('[Header] Tentative de déconnexion via l\'instance native Keycloak...');
+        await this.keycloak.logout({
+            redirectUri: window.location.origin
+        });
     }
 
     markAsRead(id: string, event: Event) {

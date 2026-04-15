@@ -1,7 +1,7 @@
 import { Component, inject, signal, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatService, ChatMessage } from '../../../core/services/chat.service';
+import { ChatService } from '../../../core/services/chat.service';
 
 @Component({
   selector: 'app-chat-widget',
