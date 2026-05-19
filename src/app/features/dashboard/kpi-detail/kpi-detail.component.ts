@@ -327,6 +327,13 @@ export class KpiDetailComponent implements OnInit {
     }
 
     isArray(value: any): value is any[] {
-  return Array.isArray(value);
-}
+        return Array.isArray(value);
+    }
+
+    getDetails(row: TableRow | null): TableRow[] | null {
+        if (row && Array.isArray(row['details'])) {
+            return row['details'] as TableRow[];
+        }
+        return null;
+    }
 }

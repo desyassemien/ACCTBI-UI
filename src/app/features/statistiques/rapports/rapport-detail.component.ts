@@ -1,8 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RapportService } from '../services/rapport.service';
+
+declare var flatpickr: any;
 
 @Component({
     selector: 'app-rapport-detail',
@@ -11,7 +13,7 @@ import { RapportService } from '../services/rapport.service';
     templateUrl: './rapport-detail.component.html',
     styleUrl: './rapport-detail.component.scss'
 })
-export class RapportDetailComponent implements OnInit {
+export class RapportDetailComponent implements OnInit, AfterViewInit {
     private route = inject(ActivatedRoute);
     private rapportService = inject(RapportService);
 
@@ -58,5 +60,41 @@ export class RapportDetailComponent implements OnInit {
 
     getColumnValue(row: any, col: string): any {
         return row[col.toLowerCase().replaceAll(' ', '_')];
+    }
+
+    ngAfterViewInit() {
+        this.initFlatpickr();
+    }
+
+    initFlatpickr() {
+        setTimeout(() => {
+            if (typeof flatpickr !== 'undefined') {
+                flatpickr('.flatpickr-range-input', {
+                    mode: 'range',
+                    dateFormat: 'd/m/Y',
+                    locale: 'fr',
+                    allowInput: true,
+                    onClose: (selectedDates: any[], dateStr: string, instance: any) => {
+                        if (selectedDates.length === 1) {
+                            const singleDate = instance.formatDate(selectedDates[0], 'd/m/Y');
+                            this.selectedPeriod = singleDate;
+                        } else if (selectedDates.length === 2) {
+                            const start = instance.formatDate(selectedDates[0], 'd/m/Y');
+                            const end = instance.formatDate(selectedDates[1], 'd/m/Y');
+                            const finalVal = start === end ? start : `${start} au ${end}`;
+                            this.selectedPeriod = finalVal;
+                        }
+                    },
+                    onChange: (selectedDates: any[], dateStr: string, instance: any) => {
+                        if (selectedDates.length === 2) {
+                            const start = instance.formatDate(selectedDates[0], 'd/m/Y');
+                            const end = instance.formatDate(selectedDates[1], 'd/m/Y');
+                            const finalVal = start === end ? start : `${start} au ${end}`;
+                            this.selectedPeriod = finalVal;
+                        }
+                    }
+                });
+            }
+        }, 150);
     }
 }

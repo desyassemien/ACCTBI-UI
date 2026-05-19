@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
+import { authKeycloakGuard } from './core/guards/auth.guard';
+import { roleRedirectGuard } from './core/guards/role-redirect.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
 export const routes: Routes = [
@@ -10,19 +11,21 @@ export const routes: Routes = [
     {
         path: '',
         component: MainLayoutComponent,
-        canActivate: [authGuard],
+        canActivateChild: [authKeycloakGuard],
         children: [
             {
                 path: '',
-                redirectTo: 'dashboard',
+                loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+                canActivate: [roleRedirectGuard],
                 pathMatch: 'full'
             },
             {
                 path: 'dashboard',
-                loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+                loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+                data: { roles: ['ADMIN'] }
             },
             {
-                path: 'dashboard/kpi/:id',
+                path: 'kpi-detail/:id',
                 loadComponent: () => import('./features/dashboard/kpi-detail/kpi-detail.component').then(m => m.KpiDetailComponent)
             },
             {
@@ -31,35 +34,38 @@ export const routes: Routes = [
             },
             {
                 path: 'comptabilite',
-                loadComponent: () => import('./features/comptabilite/comptabilite.component').then(m => m.ComptabiliteComponent)
+                loadComponent: () => import('./features/comptabilite/comptabilite.component').then(m => m.ComptabiliteComponent),
+                data: { roles: ['ADMIN', 'CHEF_COMPTA'] }
             },
             {
                 path: 'tresorerie',
-                loadComponent: () => import('./features/tresorerie/tresorerie.component').then(m => m.TresorerieComponent)
+                loadComponent: () => import('./features/tresorerie/tresorerie.component').then(m => m.TresorerieComponent),
+                data: { roles: ['ADMIN', 'CHEF_TRESORERIE'] }
             },
             {
                 path: 'cautionnement',
-                loadComponent: () => import('./features/cautionnement/cautionnement.component').then(m => m.CautionnementComponent)
+                loadComponent: () => import('./features/cautionnement/cautionnement.component').then(m => m.CautionnementComponent),
+                data: { roles: ['ADMIN'] }
             },
             {
                 path: 'regies',
-                loadComponent: () => import('./features/regies/regies.component').then(m => m.RegiesComponent)
+                loadComponent: () => import('./features/regies/regies.component').then(m => m.RegiesComponent),
+                data: { roles: ['ADMIN', 'CHEF_REGIE'] }
             },
-            {
-                path: 'gestion-compte',
-                loadComponent: () => import('./features/gestion-compte/gestion-compte.component').then(m => m.GestionCompteComponent)
+            // Other dashboard features
+            { 
+                path: 'statistiques', 
+                loadComponent: () => import('./features/statistiques/statistiques.component').then(m => m.StatistiquesComponent),
+                data: { roles: ['ADMIN'] }
             },
-            // Other dashboard features (currently redirected to dashboard)
-            {
-                path: 'statistiques',
-                loadComponent: () => import('./features/statistiques/statistiques.component').then(m => m.StatistiquesComponent)
+            { 
+                path: 'compte-gestion', 
+                loadComponent: () => import('./features/gestion-compte/gestion-compte.component').then(m => m.GestionCompteComponent),
+                data: { roles: ['ADMIN'] }
             },
-            {
-                path: 'statistiques/rapport/:id',
-                loadComponent: () => import('./features/statistiques/rapports/rapport-detail.component').then(m => m.RapportDetailComponent)
-            },
-            { path: 'compte-gestion', loadComponent: () => import('./features/gestion-compte/gestion-compte.component').then(m => m.GestionCompteComponent) },
-            { path: 'reglement', loadComponent: () => import('./features/reglement/reglement.component').then(m => m.ReglementComponent) },
+            { path: 'reglement',
+                 loadComponent: () => import('./features/reglement/reglement.component').then(m => m.ReglementComponent) 
+                },
             { path: 'admin', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) }
         ]
     },

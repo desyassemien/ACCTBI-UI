@@ -1,9 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { KeycloakService } from 'keycloak-angular';
 import { NotificationService } from '../../core/services/notification.service';
 import { CommonModule } from '@angular/common';
-import { DatePipe } from '@angular/common';
+
 @Component({
     selector: 'app-header',
     standalone: true,
@@ -11,15 +11,32 @@ import { DatePipe } from '@angular/common';
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss'
 })
-export class HeaderComponent {
-    private authService = inject(AuthService);
+export class HeaderComponent implements OnInit {
     private router = inject(Router);
+    private keycloak = inject(KeycloakService);
     public notificationService = inject(NotificationService);
 
-    user = this.authService.currentUser;
+    userProfile: any | null = null;
+    notificationCount = 3;
     isDarkMode = false;
 
-    // Navigation items (moved from sidebar)
+    async ngOnInit() {
+        try {
+            if (this.keycloak.isLoggedIn()) {
+                this.userProfile = await this.keycloak.loadUserProfile();
+            }
+        } catch (err) {
+            console.error('Erreur lors du chargement du profil Keycloak:', err);
+        }
+    }
+
+    /** Check if any service route is currently active (for dropdown highlight) */
+    get isServicesActive(): boolean {
+        const url = this.router.url;
+        return this.serviceItems.some(item => url.startsWith(item.path));
+    }
+
+    // Navigation items
     readonly serviceItems = [
         { path: '/comptabilite', icon: 'fas fa-book', label: 'Comptabilité' },
         { path: '/tresorerie', icon: 'fas fa-money-bill-wave', label: 'Trésorerie' },
@@ -30,6 +47,11 @@ export class HeaderComponent {
         { path: '/compte-gestion', icon: 'fas fa-clipboard-list', label: 'Compte de Gestion' }
     ];
 
+    /** Helper to get service clean name without slash */
+    getServiceName(path: string): string {
+        return path?.replace('/', '') || '';
+    }
+
     constructor() {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
@@ -39,17 +61,6 @@ export class HeaderComponent {
             this.isDarkMode = true;
             this.applyTheme();
         }
-    }
-
-    /** Helper to get service clean name without slash */
-    getServiceName(path: string): string {
-        return path?.replace('/', '') || '';
-    }
-
-    /** Check if any service route is currently active (for dropdown highlight) */
-    get isServicesActive(): boolean {
-        const url = this.router.url;
-        return this.serviceItems.some(item => url.startsWith(item.path));
     }
 
     toggleTheme() {
@@ -66,8 +77,9 @@ export class HeaderComponent {
         }
     }
 
-    logout() {
-        this.authService.logout();
+    async logout() {
+        console.log('[Header] Tentative de déconnexion via l\'instance native Keycloak...');
+        await this.keycloak.logout(window.location.origin);
     }
 
     markAsRead(id: string, event: Event) {

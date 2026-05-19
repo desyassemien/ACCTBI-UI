@@ -57,18 +57,15 @@
                     </div>
 
                     <!-- Custom Date Range (shown when "Personnalisé..." is selected) -->
-                    @if (selectedPeriod === 'Personnalisé...') {
-                    <div class="d-flex gap-2 align-items-center animate__animated animate__fadeIn">
-                        <span class="fs-8 fw-medium text-secondary text-nowrap">Du :</span>
-                        <input type="date"
-                            class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white"
-                            title="Date de début">
-                        <span class="fs-8 fw-medium text-secondary text-nowrap">Au :</span>
-                        <input type="date"
-                            class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white"
-                            title="Date de fin">
+                    <div class="d-flex gap-2 align-items-center animate__animated animate__fadeIn" [class.d-none]="selectedPeriod !== 'Personnalisé...'">
+                        <div class="d-flex gap-2 align-items-center bg-white px-3 py-1 rounded-3 border border-secondary border-opacity-25" style="width: 320px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                            <i class="far fa-calendar-alt text-primary"></i>
+                            <input type="text"
+                                class="form-control form-control-sm text-dark fw-semibold fs-7 border-0 p-0 shadow-none bg-transparent flatpickr-range-input"
+                                placeholder="Choisir une plage..." 
+                                style="height: 24px; cursor: pointer;">
+                        </div>
                     </div>
-                    }
                 </div>
 
                 <!-- Right: Chart Types -->

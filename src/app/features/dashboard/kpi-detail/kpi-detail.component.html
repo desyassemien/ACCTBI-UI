@@ -201,7 +201,7 @@
         <!-- BODY -->
         <div class="modal-body">
 
-          @if (selectedRow && isArray(selectedRow['details']); as details) {
+          @if (getDetails(selectedRow); as details) {
 
             @if (details.length > 0) {
 

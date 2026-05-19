@@ -176,7 +176,7 @@
                         class="topbar-user-btn d-flex align-items-center gap-2"
                         data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="avatar-circle">
-                            {{ user()?.prenom?.charAt(0) || 'U' }}{{ user()?.nom?.charAt(0) || '' }}
+                            {{ userProfile?.firstName?.charAt(0) || 'U' }}{{ userProfile?.lastName?.charAt(0) || '' }}
                         </div>
                         <div class="d-none d-md-flex align-items-center">
                             <span class="fs-7 fw-bold text-white me-1">Mon Profil</span>
@@ -187,8 +187,8 @@
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 rounded-3 py-2">
                         <li>
                             <div class="px-3 py-2 d-md-none border-bottom mb-2">
-                                <div class="fw-bold fs-7">{{ user()?.prenom }} {{ user()?.nom }}</div>
-                                <div class="text-secondary fs-8">{{ user()?.role }}</div>
+                                <div class="fw-bold fs-7">{{ userProfile?.firstName }} {{ userProfile?.lastName }}</div>
+                                <div class="text-secondary fs-8">{{ userProfile?.username }}</div>
                             </div>
                         </li>
                         <li><a class="dropdown-item py-2 px-3 fw-medium" routerLink="/profil">

@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { KeycloakService } from 'keycloak-angular';
 
 @Component({
     selector: 'app-sidebar',
@@ -10,10 +10,10 @@ import { AuthService } from '../../core/services/auth.service';
     styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {
-    private authService = inject(AuthService);
-
+    private keycloak = inject(KeycloakService);
+    
     logout() {
-        this.authService.logout();
+        this.keycloak.logout(window.location.origin);
     }
 
     // Navigation structure based on context

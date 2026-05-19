@@ -15,7 +15,7 @@
 
                     <div
                         class="avatar-lg bg-primary-100 text-primary-700 fw-bold d-flex align-items-center justify-content-center rounded-circle mb-4 position-relative">
-                        <span class="fs-1">{{ user()?.prenom?.charAt(0) || 'U' }}{{ user()?.nom?.charAt(0) || ''
+                        <span class="fs-1">{{ user?.prenom?.charAt(0) || 'U' }}{{ user?.nom?.charAt(0) || ''
                             }}</span>
                         <button class="btn btn-sm btn-primary btn-icon rounded-circle position-absolute bottom-0 end-0"
                             style="transform: translate(25%, 25%);">
@@ -23,8 +23,8 @@
                         </button>
                     </div>
 
-                    <h4 class="fw-bold text-dark mb-1">{{ user()?.prenom }} {{ user()?.nom }}</h4>
-                    <p class="text-secondary mb-3">{{ user()?.role }}</p>
+                    <h4 class="fw-bold text-dark mb-1">{{ user?.prenom }} {{ user?.nom }}</h4>
+                    <p class="text-secondary mb-3">{{ user?.role }}</p>
 
                     <div
                         class="badge bg-success-subtle text-success border border-success border-opacity-25 px-3 py-2 rounded-pill mb-4 w-100">
@@ -35,11 +35,11 @@
                         <div class="mb-3">
                             <label class="text-secondary fs-8 fw-medium text-uppercase tracking-wider">Service
                                 d'Affectation</label>
-                            <div class="fs-6 fw-medium text-dark mt-1">{{ user()?.service }}</div>
+                            <div class="fs-6 fw-medium text-dark mt-1">{{ user?.service }}</div>
                         </div>
                         <div class="mb-3">
                             <label class="text-secondary fs-8 fw-medium text-uppercase tracking-wider">Matricule</label>
-                            <div class="fs-6 fw-medium text-dark mt-1">{{ user()?.matricule }}</div>
+                            <div class="fs-6 fw-medium text-dark mt-1">{{ user?.matricule }}</div>
                         </div>
                         <div>
                             <label class="text-secondary fs-8 fw-medium text-uppercase tracking-wider">Dernière
@@ -64,12 +64,12 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="form-label text-secondary fs-7 fw-medium">Prénom</label>
-                                <input type="text" class="form-control bg-light border-0" [value]="user()?.prenom"
+                                <input type="text" class="form-control bg-light border-0" [value]="user?.prenom"
                                     readonly>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label text-secondary fs-7 fw-medium">Nom de famille</label>
-                                <input type="text" class="form-control bg-light border-0" [value]="user()?.nom"
+                                <input type="text" class="form-control bg-light border-0" [value]="user?.nom"
                                     readonly>
                             </div>
 

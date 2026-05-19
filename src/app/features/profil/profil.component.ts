@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../core/services/auth.service';
+import { KeycloakService } from 'keycloak-angular';
 
 @Component({
     selector: 'app-profil',
@@ -10,6 +10,12 @@ import { AuthService } from '../../core/services/auth.service';
     styleUrl: './profil.component.scss'
 })
 export class ProfilComponent {
-    private authService = inject(AuthService);
-    user = this.authService.currentUser;
+    private keycloak = inject(KeycloakService);
+    user: any = null;
+
+    async ngOnInit() {
+        if (this.keycloak.isLoggedIn()) {
+            this.user = await this.keycloak.loadUserProfile();
+        }
+    }
 }

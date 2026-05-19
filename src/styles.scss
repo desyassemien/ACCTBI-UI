@@ -157,3 +157,99 @@ h6,
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+// Surcharge premium Flatpickr avec le bleu de l'application (#1B3A6B)
+.flatpickr-calendar {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px -5px rgba(27, 58, 107, 0.15) !important;
+  border: 1px solid rgba(27, 58, 107, 0.15) !important;
+  font-family: 'Poppins', 'Open Sans', sans-serif !important;
+  overflow: hidden !important;
+  
+  .flatpickr-months {
+    background: #1B3A6B !important;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 6px 0 !important;
+    
+    span.flatpickr-prev-month, span.flatpickr-next-month {
+      color: #ffffff !important;
+      fill: #ffffff !important;
+      padding: 8px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        svg, i {
+          fill: #F77F00 !important;
+          color: #F77F00 !important;
+        }
+      }
+    }
+  }
+
+  .flatpickr-month {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+
+  .flatpickr-current-month {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    
+    .numInputWrapper span.arrowUp:after {
+      border-bottom-color: #ffffff !important;
+    }
+    .numInputWrapper span.arrowDown:after {
+      border-top-color: #ffffff !important;
+    }
+    input.cur-year {
+      font-weight: 600 !important;
+    }
+  }
+
+  .flatpickr-weekdays {
+    background: #1B3A6B !important;
+    padding: 2px 0 6px 0 !important;
+  }
+
+  span.flatpickr-weekday {
+    background: #1B3A6B !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 600 !important;
+  }
+
+  .flatpickr-day {
+    border-radius: 6px !important;
+    transition: all 0.15s ease !important;
+
+    &.today {
+      border-color: #1B3A6B !important;
+      color: #1B3A6B !important;
+      font-weight: 700 !important;
+      &:hover {
+        background: rgba(27, 58, 107, 0.1) !important;
+        color: #1B3A6B !important;
+      }
+    }
+
+    &.selected, &.startRange, &.endRange, &.selected.inRange, &.startRange.inRange, &.endRange.inRange, &.selected:focus, &.startRange:focus, &.endRange:focus, &.selected:hover, &.startRange:hover, &.endRange:hover {
+      background: #1B3A6B !important;
+      border-color: #1B3A6B !important;
+      color: #ffffff !important;
+      font-weight: 600 !important;
+    }
+
+    &.inRange, &.inRange:hover {
+      background: rgba(27, 58, 107, 0.12) !important;
+      border-color: transparent !important;
+      color: #1B3A6B !important;
+    }
+    
+    &:hover {
+      background: #f1f5f9 !important;
+      color: #1e293b !important;
+    }
+  }
+}
