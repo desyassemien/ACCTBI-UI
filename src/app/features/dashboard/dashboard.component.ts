@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -14,6 +14,7 @@ import { Alerte } from '../../core/models/alerte.model';
 })
 export class DashboardComponent implements OnInit {
     private router = inject(Router);
+    private cdr = inject(ChangeDetectorRef);
 
     isLoading: boolean = true;
     selectedPeriod: string = 'MOIS';
@@ -65,6 +66,7 @@ export class DashboardComponent implements OnInit {
         this.isLoading = true;
         setTimeout(() => {
             this.isLoading = false;
+            this.cdr.detectChanges();
         }, 40);
     }
 
@@ -98,6 +100,7 @@ export class DashboardComponent implements OnInit {
         setTimeout(() => {
             this.generateData();
             this.isLoading = false;
+            this.cdr.detectChanges();
         }, 30);
     }
 
