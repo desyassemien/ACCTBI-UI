@@ -1,0 +1,102 @@
+<!-- Desktop Sidebar -->
+<nav class="sidebar bg-primary-dark text-white d-none d-xl-flex flex-column transition-all">
+
+    <!-- Logo Section -->
+    <div class="sidebar-brand d-flex align-items-center px-4">
+        <div class="brand-icon me-3">
+            <i class="fas fa-landmark text-accent fs-4"></i>
+        </div>
+        <span class="fs-5 fw-bold tracking-tight">SYGACUT-BI</span>
+    </div>
+
+    <div class="sidebar-scrollable flex-grow-1 py-4">
+
+        <!-- Primary Action: Dashboard -->
+        <div class="px-3 mb-4">
+            <a routerLink="/dashboard" routerLinkActive="active"
+                class="nav-item-link dashboard-link d-flex align-items-center rounded-3 px-3 py-2 text-decoration-none transition-all">
+                <i class="fas fa-chart-pie me-3 fs-5"></i>
+                <span class="fw-medium">Tableau de Bord</span>
+            </a>
+        </div>
+
+        <!-- Menu Sections -->
+        @for (section of menuItems; track section.title) {
+        <div class="nav-section mb-4">
+            <h6 class="nav-section-title px-4 mb-2 text-primary-100 opacity-75 small fw-bold tracking-wider">
+                {{ section.title }}
+            </h6>
+
+            <ul class="nav flex-column mb-0">
+                @for (item of section.items; track item.path) {
+                <li class="nav-item">
+                    <a [routerLink]="item.path" routerLinkActive="active"
+                        class="nav-item-link d-flex align-items-center px-4 py-2 text-decoration-none transition-all position-relative overflow-hidden">
+                        <i [class]="item.icon + ' me-3'"></i>
+                        <span>{{ item.label }}</span>
+                        <!-- Active Indicator Bar -->
+                        <div class="active-indicator"></div>
+                    </a>
+                </li>
+                }
+            </ul>
+        </div>
+        }
+    </div>
+
+    <!-- Logout Section -->
+    <div class="sidebar-footer px-3 py-3 border-top border-primary-500">
+        <a href="#"
+            class="nav-item-link text-danger d-flex align-items-center px-3 py-2 text-decoration-none rounded-3 transition-all"
+            (click)="$event.preventDefault()">
+            <i class="fas fa-sign-out-alt me-3"></i>
+            <span class="fw-medium">Déconnexion</span>
+        </a>
+    </div>
+</nav>
+
+<!-- Mobile Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start bg-primary-dark text-white" tabindex="-1" id="mobileSidebar"
+    aria-labelledby="mobileSidebarLabel">
+    <div class="offcanvas-header border-bottom border-primary-500 sidebar-brand px-4 py-3">
+        <div class="d-flex align-items-center">
+            <div class="brand-icon me-3">
+                <i class="fas fa-landmark text-accent fs-4"></i>
+            </div>
+            <h5 class="offcanvas-title fw-bold mb-0 text-white" id="mobileSidebarLabel">SYGACUT-BI</h5>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body p-0 pt-3">
+        <!-- Duplicate Desktop Content for Mobile -->
+        <div class="px-3 mb-4">
+            <a routerLink="/dashboard" routerLinkActive="active" data-bs-dismiss="offcanvas"
+                class="nav-item-link dashboard-link d-flex align-items-center rounded-3 px-3 py-2 text-decoration-none transition-all">
+                <i class="fas fa-chart-pie me-3 fs-5"></i>
+                <span class="fw-medium">Tableau de Bord</span>
+            </a>
+        </div>
+
+        @for (section of menuItems; track section.title) {
+        <div class="nav-section mb-4">
+            <h6 class="nav-section-title px-4 mb-2 text-primary-100 opacity-75 small fw-bold tracking-wider">
+                {{ section.title }}
+            </h6>
+
+            <ul class="nav flex-column mb-0">
+                @for (item of section.items; track item.path) {
+                <li class="nav-item">
+                    <a [routerLink]="item.path" routerLinkActive="active" data-bs-dismiss="offcanvas"
+                        class="nav-item-link d-flex align-items-center px-4 py-2 text-decoration-none transition-all position-relative overflow-hidden">
+                        <i [class]="item.icon + ' me-3'"></i>
+                        <span>{{ item.label }}</span>
+                        <div class="active-indicator"></div>
+                    </a>
+                </li>
+                }
+            </ul>
+        </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,206 @@
+:root {
+  --primary-900: #cc6600;
+  --primary-700: #F77F00;
+  --primary-500: #ff9833;
+  --primary-100: #fff0e0;
+  --accent-900: #1b5e20;
+  --accent-500: #2E7D32;
+  --accent-100: #e8f5e9;
+  --bg-body: #F8F9FA;
+  --surface: #FFFFFF;
+  --text-primary: #2D3748;
+  --text-secondary: #5A6578;
+  --border: #DEE2E6;
+  --danger: #B71C1C;
+}
+
+body {
+    margin: 0;
+    font-family: 'Open Sans', 'Poppins', sans-serif;
+    background-color: var(--bg-body);
+}
+
+.login-container {
+    overflow-x: hidden;
+}
+
+.bg-primary-dark {
+    background-color: #1A365D; /* Bleu Nuit */
+    background-image: linear-gradient(135deg, #1A365D 0%, #2D3748 100%);
+}
+
+.auth-banner {
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+}
+
+.auth-banner .brand-title {
+    letter-spacing: -1px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.auth-banner .text-primary-100 {
+    color: var(--primary-100);
+    opacity: 0.9;
+}
+
+.auth-banner .feature-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, background 0.3s ease;
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+
+.auth-banner .feature-badge:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-banner .feature-badge i {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.auth-banner .feature-badge span {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Abstract shapes */
+.bg-shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.4;
+    z-index: 0;
+}
+
+.shape-1 {
+    width: 500px;
+    height: 500px;
+    background: var(--primary-700);
+    top: -100px;
+    left: -100px;
+    opacity: 0.3;
+}
+
+.shape-2 {
+    width: 400px;
+    height: 400px;
+    background: var(--accent-500);
+    bottom: -50px;
+    right: -100px;
+    opacity: 0.2;
+}
+
+.auth-form-wrapper {
+    max-width: 480px;
+    width: 100%;
+}
+
+.text-primary-700 {
+    color: var(--primary-700);
+}
+
+.text-accent {
+    color: var(--accent-500);
+    text-decoration: none;
+}
+
+.text-accent:hover {
+    color: var(--accent-900);
+}
+
+.form-floating > .form-control {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    height: 60px;
+    background-color: #F8FAFC;
+    transition: all 0.2s ease-in-out;
+}
+
+.form-floating > .form-control:focus {
+    border-color: var(--primary-700);
+    background-color: var(--surface);
+    box-shadow: 0 0 0 4px rgba(247, 127, 0, 0.1);
+    outline: none;
+}
+
+.form-floating > label {
+    padding: 1rem 1.25rem;
+    color: var(--text-secondary);
+}
+
+.custom-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 4px;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: var(--primary-700);
+    border: none;
+    color: white;
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(247, 127, 0, 0.2);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-900);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(247, 127, 0, 0.3);
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.alert-danger {
+    background-color: #FEF2F2;
+    border-left: 4px solid var(--danger);
+    color: var(--danger);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.alert-danger i {
+    margin-right: 10px;
+}
+
+/* Keycloak specific overrides */
+#kc-content {
+    padding: 0;
+}
+
+#kc-header {
+    display: none;
+}
+
+.content-wrapper {
+    position: relative;
+    z-index: 1;
+}

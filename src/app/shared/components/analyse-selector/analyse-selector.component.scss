@@ -1,0 +1,155 @@
+:host {
+    display: block;
+}
+
+.cursor-grab {
+    cursor: grab;
+}
+
+.drag-list {
+    min-height: 40px;
+}
+
+.drag-drop-zone {
+    min-height: 100px;
+}
+
+.animate__animated {
+    animation-duration: 0.3s;
+}
+
+// Ensure compatibility with the premium look
+.form-select-sm {
+    font-size: 0.85rem;
+}
+
+.bg-primary-50 {
+    background-color: rgba(247, 127, 0, 0.03);
+}
+
+.border-primary-200 {
+    border-color: rgba(247, 127, 0, 0.2) !important;
+}
+
+// Custom styles for the selector to improve readability and branding
+.dropdown-menu li {
+    padding: 0.25rem 0.75rem;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    margin: 2px 0;
+
+    &:hover {
+        background-color: #f8f9fa; // Very light gray
+        color: var(--primary-700); // UI Primary color (Orange)
+        
+        .form-check-label {
+            color: var(--primary-700);
+        }
+    }
+}
+
+// Remove flashy blue on focus for inputs and buttons
+.form-select, .form-control, .btn {
+    &:focus {
+        border-color: rgba(247, 127, 0, 0.4) !important; // Orange translucent
+        box-shadow: 0 0 0 0.25rem rgba(247, 127, 0, 0.1) !important;
+    }
+}
+
+// Ensure checkboxes are orange instead of blue
+.form-check-input:checked {
+    background-color: var(--primary-700) !important;
+    border-color: var(--primary-700) !important;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(247, 127, 0, 0.1) !important;
+    border-color: rgba(247, 127, 0, 0.4) !important;
+}
+
+// Overwrite secondary border (often too dark/blue)
+.border-secondary {
+    border-color: #cbd5e1 !important; // Neutral gray
+}
+
+// Fix dropdown button hover/active/expanded states
+.btn-outline-secondary {
+    border-color: #cbd5e1 !important;
+    color: var(--text-primary) !important;
+    background-color: transparent !important;
+
+    &:hover, &:focus, &:active, &.show, &[aria-expanded="true"] {
+        background-color: #f8f9fa !important; // Light gray instead of dark blue
+        border-color: var(--primary-700) !important; // Orange highlight
+        color: var(--primary-700) !important;
+        box-shadow: 0 0 0 0.25rem rgba(247, 127, 0, 0.1) !important;
+        
+        // Ensure chevron also takes the highlight color
+        i.fa-chevron-down {
+            color: var(--primary-700) !important;
+        }
+    }
+}
+
+// Premium Glassmorphism & Stylized compact mode
+.premium-compact-card {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1.5px solid rgba(27, 58, 107, 0.12) !important;
+    box-shadow: 0 10px 30px -5px rgba(27, 58, 107, 0.1) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease;
+
+    &:hover {
+        box-shadow: 0 15px 35px -5px rgba(27, 58, 107, 0.16) !important;
+        transform: translateY(-2px);
+        border-color: rgba(27, 58, 107, 0.2) !important;
+    }
+}
+
+.premium-title-bar {
+    border-left: 3px solid #1B3A6B !important; // Sleek deep blue indicator
+    padding-left: 10px !important;
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+}
+
+.premium-select-input {
+    border-radius: 8px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    background-color: rgba(248, 250, 252, 0.8) !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+        border-color: #1B3A6B !important;
+        background-color: #ffffff !important;
+    }
+
+    &:focus {
+        border-color: #1B3A6B !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(27, 58, 107, 0.15) !important;
+    }
+}
+
+.premium-btn-refresh {
+    background: linear-gradient(135deg, #F77F00 0%, #E85D04 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 12px rgba(247, 127, 0, 0.25) !important;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 15px rgba(247, 127, 0, 0.4) !important;
+        filter: brightness(1.1);
+    }
+
+    &:active {
+        transform: translateY(1px);
+    }
+}

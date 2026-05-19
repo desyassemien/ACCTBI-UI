@@ -1,0 +1,621 @@
+﻿
+> sygacut-bi@0.0.0 build
+> ng build --progress=false
+
+[35mPrerendered 0 static routes.[39m
+Application bundle generation failed. [6.273 seconds] - 2026-03-08T15:42:04.912Z
+
+npm : 
+[1m[33m[33mÔû▓ [43
+;33m[[43;30mWARNING[
+43;33m][0m 
+[1mNG8113: 
+CurrencyPipe is not 
+used within the 
+template of 
+KpiCardComponent[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+Au caractère Ligne:1 
+: 1
++ npm run build -- 
+--progress=false 2>&1 
+| Out-File -Encoding 
+utf8 buil ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: ([1m[33m   
+ [33mÔ...r-compile    
+r][0m:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.ts:8:14:
+[37m      8 Ôöé     
+imports: [[32mCurrenc
+yPipe[37m, 
+DecimalPipe],
+        ÔòÁ           
+    
+[32m~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ [43;33m[[43
+;30mWARNING[43;33m][
+0m 
+[1mDeprecation[0m 
+[1m[35m[plugin 
+angular-sass][0m
+
+    src/app/features/a
+uth/login/login.compon
+ent.scss:78:19:
+[37m      78 Ôöé     
+        color: [32m[
+37mdarken(#D4A017, 
+10%);
+         ÔòÁ          
+          [32m^[0m
+
+
+  Global built-in 
+functions are 
+deprecated and will 
+be removed in Dart 
+Sass 3.0.0.
+  Use color.adjust 
+instead.
+  
+  More info and 
+automated migrator: [
+4mhttps://sass-lang.co
+m/d/import[0m
+
+
+[33mÔû▓ [43;33m[[43
+;30mWARNING[43;33m][
+0m 
+[1mDeprecation[0m 
+[1m[35m[plugin 
+angular-sass][0m
+
+    src/app/features/a
+uth/login/login.compon
+ent.scss:78:19:
+[37m      78 Ôöé     
+        color: [32m[
+37mdarken(#D4A017, 
+10%);
+         ÔòÁ          
+          [32m^[0m
+
+
+  darken() is 
+deprecated. 
+Suggestions:
+  
+  color.scale($color, 
+$lightness: 
+-21.7021276596%)
+  
+color.adjust($color, 
+$lightness: -10%)
+  
+  More info: [4mhttps
+://sass-lang.com/d/col
+or-functions[0m
+
+
+[33mÔû▓ [43;33m[[43
+;30mWARNING[43;33m][
+0m 
+[1mDeprecation[0m 
+[1m[35m[plugin 
+angular-sass][0m
+
+    
+src/styles.scss:4:8:
+[37m      4 Ôöé 
+@import [32m[37m"boo
+tstrap/scss/functions"
+;
+        ÔòÁ         
+[32m^[0m
+
+
+  Sass @import rules 
+are deprecated and 
+will be removed in 
+Dart Sass 3.0.0.
+  
+  More info and 
+automated migrator: [
+4mhttps://sass-lang.co
+m/d/import[0m
+
+  The plugin 
+"angular-sass" was 
+triggered by this 
+import
+
+    angular:styles/glo
+bal:styles:1:8:
+[37m      1 Ôöé 
+@import [32m'src/styl
+es.scss'[37m;
+        ÔòÁ         [
+32m~~~~~~~~~~~~~~~~~[
+0m
+
+
+[33mÔû▓ [43;33m[[43
+;30mWARNING[43;33m][
+0m 
+[1mDeprecation[0m 
+[1m[35m[plugin 
+angular-sass][0m
+
+    
+src/styles.scss:5:8:
+[37m      5 Ôöé 
+@import [32m[37m"boo
+tstrap/scss/variables"
+;
+        ÔòÁ         
+[32m^[0m
+
+
+  Sass @import rules 
+are deprecated and 
+will be removed in 
+Dart Sass 3.0.0.
+  
+  More info and 
+automated migrator: [
+4mhttps://sass-lang.co
+m/d/import[0m
+
+  The plugin 
+"angular-sass" was 
+triggered by this 
+import
+
+    angular:styles/glo
+bal:styles:1:8:
+[37m      1 Ôöé 
+@import [32m'src/styl
+es.scss'[37m;
+        ÔòÁ         [
+32m~~~~~~~~~~~~~~~~~[
+0m
+
+
+[33mÔû▓ [43;33m[[43
+;30mWARNING[43;33m][
+0m 
+[1mDeprecation[0m 
+[1m[35m[plugin 
+angular-sass][0m
+
+    
+src/styles.scss:15:8:
+[37m      15 Ôöé 
+@import [32m[37m"boo
+tstrap/scss/bootstrap"
+;
+         ÔòÁ         
+[32m^[0m
+
+
+  Sass @import rules 
+are deprecated and 
+will be removed in 
+Dart Sass 3.0.0.
+  
+  More info and 
+automated migrator: [
+4mhttps://sass-lang.co
+m/d/import[0m
+
+  The plugin 
+"angular-sass" was 
+triggered by this 
+import
+
+    angular:styles/glo
+bal:styles:1:8:
+[37m      1 Ôöé 
+@import [32m'src/styl
+es.scss'[37m;
+        ÔòÁ         [
+32m~~~~~~~~~~~~~~~~~[
+0m
+
+
+[33mÔû▓ [43;33m[[43
+;30mWARNING[43;33m][
+0m 
+[1mDeprecation[0m 
+[1m[35m[plugin 
+angular-sass][0m
+
+    
+src/styles.scss:20:8:
+[37m      20 Ôöé 
+@import [32m[37m"@fo
+rtawesome/fontawesome-
+free/scss/fontawesome.
+scss";
+         ÔòÁ         
+[32m^[0m
+
+
+  Sass @import rules 
+are deprecated and 
+will be removed in 
+Dart Sass 3.0.0.
+  
+  More info and 
+automated migrator: [
+4mhttps://sass-lang.co
+m/d/import[0m
+
+  The plugin 
+"angular-sass" was 
+triggered by this 
+import
+
+    angular:styles/glo
+bal:styles:1:8:
+[37m      1 Ôöé 
+@import [32m'src/styl
+es.scss'[37m;
+        ÔòÁ         [
+32m~~~~~~~~~~~~~~~~~[
+0m
+
+
+[33mÔû▓ [43;33m[[43
+;30mWARNING[43;33m][
+0m 
+[1mDeprecation[0m 
+[1m[35m[plugin 
+angular-sass][0m
+
+    
+src/styles.scss:21:8:
+[37m      21 Ôöé 
+@import [32m[37m"@fo
+rtawesome/fontawesome-
+free/scss/solid.scss";
+         ÔòÁ         
+[32m^[0m
+
+
+  Sass @import rules 
+are deprecated and 
+will be removed in 
+Dart Sass 3.0.0.
+  
+  More info and 
+automated migrator: [
+4mhttps://sass-lang.co
+m/d/import[0m
+
+  The plugin 
+"angular-sass" was 
+triggered by this 
+import
+
+    angular:styles/glo
+bal:styles:1:8:
+[37m      1 Ôöé 
+@import [32m'src/styl
+es.scss'[37m;
+        ÔòÁ         [
+32m~~~~~~~~~~~~~~~~~[
+0m
+
+
+[33mÔû▓ [43;33m[[43
+;30mWARNING[43;33m][
+0m [1m2 repetitive 
+deprecation warnings 
+omitted.
+Run in verbose mode 
+to see all 
+warnings.[0m 
+[1m[35m[plugin 
+angular-sass][0m
+
+    angular:styles/glo
+bal:styles:1:8:
+[37m      1 Ôöé 
+@import [32m'src/styl
+es.scss'[37m;
+        ÔòÁ         [
+32m~~~~~~~~~~~~~~~~~[
+0m
+
+  null
+
+[39m[22m
+[1m[31m[31mX [41;3
+1m[[41;97mERROR[41;3
+1m][0m [1mTS2532: 
+Object is possibly 
+'undefined'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.html:30:
+75:
+[37m      30 Ôöé ...s
+uccess-subtle]="data()
+.tendance === 'up' && 
+[32mdata().variation 
+> 0[37m"
+         ÔòÁ          
+                      
+                 [32m
+~~~~~~~~~~~~~~~~~~~~[
+0m
+
+  Error occurs in the 
+template of component 
+KpiCardComponent.
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.ts:9:17:
+[37m      9 Ôöé     
+templateUrl: [32m'./k
+pi-card.component.html
+'[37m,
+        ÔòÁ           
+       [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2532: Object is 
+possibly 
+'undefined'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.html:31:
+70:
+[37m      31 Ôöé ...s
+.text-success]="data()
+.tendance === 'up' && 
+[32mdata().variation 
+> 0[37m"
+         ÔòÁ          
+                      
+                 [32m
+~~~~~~~~~~~~~~~~~~~~[
+0m
+
+  Error occurs in the 
+template of component 
+KpiCardComponent.
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.ts:9:17:
+[37m      9 Ôöé     
+templateUrl: [32m'./k
+pi-card.component.html
+'[37m,
+        ÔòÁ           
+       [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2532: Object is 
+possibly 
+'undefined'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.html:32:
+105:
+[37m      32 Ôöé ... 
+=== 'down' || 
+(data().tendance === 
+'up' && 
+[32mdata().variation 
+< 0[37m)"
+         ÔòÁ          
+                      
+                [32m~
+~~~~~~~~~~~~~~~~~~~[0
+m
+
+  Error occurs in the 
+template of component 
+KpiCardComponent.
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.ts:9:17:
+[37m      9 Ôöé     
+templateUrl: [32m'./k
+pi-card.component.html
+'[37m,
+        ÔòÁ           
+       [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2532: Object is 
+possibly 
+'undefined'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.html:33:
+100:
+[37m      33 Ôöé ... 
+=== 'down' || 
+(data().tendance === 
+'up' && 
+[32mdata().variation 
+< 0[37m)"
+         ÔòÁ          
+                      
+                [32m~
+~~~~~~~~~~~~~~~~~~~[0
+m
+
+  Error occurs in the 
+template of component 
+KpiCardComponent.
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.ts:9:17:
+[37m      9 Ôöé     
+templateUrl: [32m'./k
+pi-card.component.html
+'[37m,
+        ÔòÁ           
+       [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2532: Object is 
+possibly 
+'undefined'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.html:37:
+67:
+[37m      37 Ôöé ... 
+class="fas me-1 
+small" [class.fa-arrow
+-up]="[32mdata().vari
+ation > 0[37m"
+         ÔòÁ          
+                      
+                 [32m
+~~~~~~~~~~~~~~~~~~~~[
+0m
+
+  Error occurs in the 
+template of component 
+KpiCardComponent.
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.ts:9:17:
+[37m      9 Ôöé     
+templateUrl: [32m'./k
+pi-card.component.html
+'[37m,
+        ÔòÁ           
+       [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2532: Object is 
+possibly 
+'undefined'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.html:38:
+47:
+[37m      38 Ôöé ...c
+lass.fa-arrow-down]="
+[32mdata().variation 
+< 0[37m" 
+[class.fa-minus]="d...
+         ÔòÁ          
+                [32m~
+~~~~~~~~~~~~~~~~~~~[0
+m
+
+  Error occurs in the 
+template of component 
+KpiCardComponent.
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.ts:9:17:
+[37m      9 Ôöé     
+templateUrl: [32m'./k
+pi-card.component.html
+'[37m,
+        ÔòÁ           
+       [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2532: Object is 
+possibly 
+'undefined'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.html:39:
+23:
+[37m      39 Ôöé     
+                {{ 
+[32mdata().variation 
+> 0[37m ? '+' : '' 
+}}{{ data()...
+         ÔòÁ          
+              [32m~~~
+~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the 
+template of component 
+KpiCardComponent.
+
+    src/app/shared/com
+ponents/kpi-card/kpi-c
+ard.component.ts:9:17:
+[37m      9 Ôöé     
+templateUrl: [32m'./k
+pi-card.component.html
+'[37m,
+        ÔòÁ           
+       [32m~~~~~~~~~~
+~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

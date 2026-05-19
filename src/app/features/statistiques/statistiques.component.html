@@ -1,0 +1,667 @@
+<div class="statistiques-container">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 gap-md-0">
+        <div>
+            <h4 class="fw-bold text-primary-900 mb-1">Statistiques</h4>
+            <p class="text-secondary mb-0">SYGACUT-BI / Services / Statistiques</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
+                <i class="far fa-file-excel me-2 text-success"></i> Export Excel
+            </button>
+            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
+                <i class="far fa-file-pdf me-2 text-danger"></i> Export PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Analyse Selector Area -->
+    <app-analyse-selector 
+        title="Sélecteur d'Analyse Actif"
+        [isDragDropMode]="isDragDropMode"
+        [(selectedPeriod)]="selectedPeriod"
+        [availableIndicators]="availableIndicators"
+        [selectedIndicators]="selectedIndicators"
+        [availableAxes]="availableAxes"
+        [selectedAxes]="selectedAxes"
+        (modeChanged)="isDragDropMode = $event === 'dragdrop'">
+    </app-analyse-selector>
+
+    <!-- Contextual KPIs based on filters - Most relevant -->
+    <div class="row g-4 mb-4">
+        @for (kpi of kpis | slice:0:4; track kpi.titre) {
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 bg-white rounded-3 kpi-card">
+                <div class="card-body p-4">
+                    <h6 class="text-secondary fw-semibold mb-3">{{ kpi.titre }}</h6>
+                    <h3 class="fw-bold text-dark mb-1">{{ kpi.valeur }}</h3>
+                    <span class="fs-8 fw-medium" [class.text-success]="kpi.type === 'success'"
+                        [class.text-warning]="kpi.type === 'warning'" [class.text-secondary]="kpi.type === 'primary'">
+                        {{ kpi.info }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Main Analysis Content -->
+
+    <!-- Charts Row 1 -->
+    <div class="row g-3 mb-3">
+
+        <!-- Chart 1: Exécution Subventions -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-3 pb-2 px-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Exécution des Subventions</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="chart1Type" id="c1_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="statChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c1_bar" title="Barre"><i
+                                    class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart1Type" id="c1_line" value="line"
+                                autocomplete="off" [(ngModel)]="statChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c1_line"
+                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart1Type" id="c1_pie" value="pie"
+                                autocomplete="off" [(ngModel)]="statChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c1_pie"
+                                title="Pie/Doughnut"><i class="fas fa-chart-pie fs-9"></i></label>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 2px; padding-bottom: 2px;">
+                                <i class="fas fa-download fs-9"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center">
+
+                    @if (statChart1Type === 'bar') {
+                    <!-- Bar Chart Mockup -->
+                    <div class="d-flex align-items-end justify-content-center gap-2 mb-4 mt-2 h-100 w-100 animate__animated animate__fadeIn"
+                        style="min-height: 160px;">
+                        <div class="bg-success rounded-top" style="height: 87.5%; width: 35px;" title="Exécuté: 87.5%">
+                        </div>
+                        <div class="bg-warning rounded-top" style="height: 12.5%; width: 35px;" title="Reste: 12.5%"></div>
+                    </div>
+                    }
+
+                    @if (statChart1Type === 'line') {
+                    <!-- Line Chart Mockup -->
+                    <div class="w-100 mb-4 mt-2 position-relative animate__animated animate__fadeIn"
+                        style="height: 160px;">
+                        <svg class="w-100 h-100" viewBox="0 0 200 100" preserveAspectRatio="none">
+                            <path d="M 0,30 L 50,35 L 100,25 L 150,20 L 200,15" fill="none" stroke="var(--success)"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <circle cx="200" cy="15" r="4" fill="var(--surface)" stroke="var(--success)"
+                                stroke-width="2" />
+                        </svg>
+                    </div>
+                    }
+
+                    @if (statChart1Type === 'pie') {
+                    <!-- CSS Mockup for Doughnut Chart -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 160px; height: 160px;">
+                        <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100">
+                            <path class="circle-bg" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3" />
+                            <path class="circle" stroke-dasharray="87.5, 100" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--success)" stroke-width="3"
+                                stroke-linecap="round" />
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center mt-1">
+                            <h3 class="fw-bold text-dark mb-0">87.5%</h3>
+                            <span class="fs-9 text-secondary text-uppercase tracking-wider">Exécuté</span>
+                        </div>
+                    </div>
+                    }
+
+                    <div class="w-100 px-2 mt-auto">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fs-8 text-secondary"><i
+                                    class="fas fa-circle text-success fs-9 me-2"></i>Exécuté</span>
+                            <span class="fs-8 fw-bold text-dark">12.45 Mds</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fs-8 text-secondary"><i
+                                    class="fas fa-circle text-warning fs-9 me-2"></i>Reste</span>
+                            <span class="fs-8 fw-bold text-dark">1.78 Mds</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 2: Restes à Payer -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-3 pb-2 px-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Analyse des Restes à Payer</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="chart2Type" id="c2_pie" value="pie"
+                                autocomplete="off" [(ngModel)]="statChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c2_pie"
+                                title="Pie/Doughnut"><i class="fas fa-chart-pie fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart2Type" id="c2_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="statChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c2_bar" title="Barre"><i
+                                    class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart2Type" id="c2_line" value="line"
+                                autocomplete="off" [(ngModel)]="statChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c2_line"
+                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 2px; padding-bottom: 2px;">
+                                <i class="fas fa-download fs-9"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center">
+
+                    @if (statChart2Type === 'pie') {
+                    <!-- Pie Chart Mockup -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 160px; height: 160px;">
+                        <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100">
+                            <path class="circle-bg" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3" />
+                            <path class="circle" stroke-dasharray="70, 100" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--warning)" stroke-width="3"
+                                stroke-linecap="round" />
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center mt-1">
+                            <h3 class="fw-bold text-dark mb-0">12.4%</h3>
+                            <span class="fs-9 text-secondary text-uppercase tracking-wider">Restes à Payer</span>
+                        </div>
+                    </div>
+                    }
+
+                    @if (statChart2Type === 'bar') {
+                    <!-- Bar Chart Mockup -->
+                    <div class="d-flex align-items-end justify-content-center gap-3 mb-4 mt-2 h-100 w-100 animate__animated animate__fadeIn"
+                        style="min-height: 160px;">
+                        <div class="bg-success rounded-top" style="height: 87.6%; width: 40px;" title="Payé: 87.6%">
+                        </div>
+                        <div class="bg-warning rounded-top" style="height: 12.4%; width: 40px;" title="Restes à Payer: 12.4%"></div>
+                    </div>
+                    }
+
+                    @if (statChart2Type === 'line') {
+                    <!-- Line Chart Mockup -->
+                    <div class="w-100 mb-4 mt-2 position-relative animate__animated animate__fadeIn"
+                        style="height: 160px;">
+                        <svg class="w-100 h-100" viewBox="0 0 200 100" preserveAspectRatio="none">
+                            <path d="M 0,20 L 50,25 L 100,35 L 150,40 L 200,45" fill="none" stroke="var(--warning)"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <circle cx="200" cy="45" r="4" fill="var(--surface)" stroke="var(--warning)"
+                                stroke-width="2" />
+                        </svg>
+                    </div>
+                    }
+
+                    <div class="w-100 px-2 mt-auto">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fs-8 text-secondary"><i
+                                    class="fas fa-circle text-success fs-9 me-2"></i>Payé</span>
+                            <span class="fs-8 fw-bold text-dark">7.65 Mds</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fs-8 text-secondary"><i
+                                    class="fas fa-circle text-warning fs-9 me-2"></i>Restes à Payer</span>
+                            <span class="fs-8 fw-bold text-dark">1.09 Mds</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row g-3 mb-3">
+
+        <!-- Chart 3: Intégration Régionale -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-3 pb-2 px-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Intégration Régionale (UEMOA/CEDEAO)</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="chart3Type" id="c3_line" value="line"
+                                autocomplete="off" [(ngModel)]="statChart3Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c3_line"
+                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart3Type" id="c3_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="statChart3Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c3_bar" title="Barre"><i
+                                    class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart3Type" id="c3_pie" value="pie"
+                                autocomplete="off" [(ngModel)]="statChart3Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c3_pie"
+                                title="Pie/Doughnut"><i class="fas fa-chart-pie fs-9"></i></label>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 2px; padding-bottom: 2px;">
+                                <i class="fas fa-download fs-9"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center">
+
+                    @if (statChart3Type === 'line') {
+                    <!-- Stacked Area Chart Mockup -->
+                    <div class="w-100 mb-4 mt-2 position-relative animate__animated animate__fadeIn"
+                        style="height: 160px;">
+                        <svg class="w-100 h-100" viewBox="0 0 200 100" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:var(--primary);stop-opacity:0.3" />
+                                    <stop offset="100%" style="stop-color:var(--primary);stop-opacity:0" />
+                                </linearGradient>
+                                <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:var(--success);stop-opacity:0.3" />
+                                    <stop offset="100%" style="stop-color:var(--success);stop-opacity:0" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 0,60 L 50,50 L 100,45 L 150,40 L 200,35" fill="url(#grad1)" stroke="var(--primary)"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M 0,80 L 50,70 L 100,65 L 150,60 L 200,55" fill="url(#grad2)" stroke="var(--success)"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </div>
+                    }
+
+                    @if (statChart3Type === 'bar') {
+                    <!-- Bar Chart Comparison -->
+                    <div class="d-flex align-items-end justify-content-around gap-2 mb-4 mt-2 h-100 w-100 animate__animated animate__fadeIn"
+                        style="min-height: 160px; padding: 0 20px;">
+                        <div class="d-flex flex-column gap-2">
+                            <div class="bg-primary" style="height: 80px; width: 30px;"></div>
+                            <small class="text-secondary">UEMOA</small>
+                        </div>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="bg-success" style="height: 95px; width: 30px;"></div>
+                            <small class="text-secondary">CEDEAO</small>
+                        </div>
+                    </div>
+                    }
+
+                    @if (statChart3Type === 'pie') {
+                    <!-- Pie Chart -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 160px; height: 160px;">
+                        <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100">
+                            <path class="circle-bg" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3" />
+                            <path stroke="var(--primary)" stroke-dasharray="24.3, 100" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3" stroke-linecap="round" />
+                            <path stroke="var(--success)" stroke-dasharray="75.7, 100" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3" stroke-linecap="round"
+                                stroke-dashoffset="-24.3" />
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center mt-1">
+                            <h5 class="fw-bold text-dark mb-0">Répartition</h5>
+                            <span class="fs-9 text-secondary">Régionale</span>
+                        </div>
+                    </div>
+                    }
+
+                    <div class="w-100 px-2 mt-auto">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fs-8 text-secondary"><i
+                                    class="fas fa-circle text-primary fs-9 me-2"></i>UEMOA</span>
+                            <span class="fs-8 fw-bold text-dark">24.3%</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fs-8 text-secondary"><i
+                                    class="fas fa-circle text-success fs-9 me-2"></i>CEDEAO</span>
+                            <span class="fs-8 fw-bold text-dark">75.7%</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 4: Dépenses Prioritaires -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-3 pb-2 px-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Dépenses Prioritaires</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="chart4Type" id="c4_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="statChart4Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c4_bar" title="Barre"><i
+                                    class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart4Type" id="c4_line" value="line"
+                                autocomplete="off" [(ngModel)]="statChart4Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c4_line"
+                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart4Type" id="c4_pie" value="pie"
+                                autocomplete="off" [(ngModel)]="statChart4Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c4_pie"
+                                title="Pie/Doughnut"><i class="fas fa-chart-pie fs-9"></i></label>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 2px; padding-bottom: 2px;">
+                                <i class="fas fa-download fs-9"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center">
+
+                    @if (statChart4Type === 'bar') {
+                    <!-- Horizontal Bar Chart -->
+                    <div class="w-100 mb-4 mt-2 animate__animated animate__fadeIn" style="min-height: 160px;">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fs-9 text-secondary">Programmé</span>
+                                <span class="fs-9 fw-bold text-dark">100%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fs-9 text-secondary">Payé</span>
+                                <span class="fs-9 fw-bold text-success">94.2%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: 94.2%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fs-9 text-secondary">Reste</span>
+                                <span class="fs-9 fw-bold text-warning">5.8%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-warning" style="width: 5.8%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    }
+
+                    @if (statChart4Type === 'line') {
+                    <!-- Line Chart -->
+                    <div class="w-100 mb-4 mt-2 position-relative animate__animated animate__fadeIn"
+                        style="height: 160px;">
+                        <svg class="w-100 h-100" viewBox="0 0 200 100" preserveAspectRatio="none">
+                            <path d="M 0,5 L 50,8 L 100,10 L 150,5 L 200,8" fill="none" stroke="var(--success)"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <circle cx="200" cy="8" r="4" fill="var(--surface)" stroke="var(--success)"
+                                stroke-width="2" />
+                        </svg>
+                    </div>
+                    }
+
+                    @if (statChart4Type === 'pie') {
+                    <!-- Donut Chart -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 160px; height: 160px;">
+                        <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100">
+                            <path class="circle-bg" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3" />
+                            <path class="circle" stroke-dasharray="94.2, 100" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--success)" stroke-width="3"
+                                stroke-linecap="round" />
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center mt-1">
+                            <h3 class="fw-bold text-dark mb-0">94.2%</h3>
+                            <span class="fs-9 text-secondary text-uppercase tracking-wider">Payé</span>
+                        </div>
+                    </div>
+                    }
+
+                    <div class="w-100 px-2 mt-auto">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fs-8 text-secondary"><i
+                                    class="fas fa-circle text-success fs-9 me-2"></i>Payé</span>
+                            <span class="fs-8 fw-bold text-dark">15.24 Mds</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="fs-8 text-secondary"><i
+                                    class="fas fa-circle text-warning fs-9 me-2"></i>En Attente</span>
+                            <span class="fs-8 fw-bold text-dark">0.94 Mds</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sections/Livrables Table -->
+    <div class="card border-0 shadow-sm bg-white rounded-3 mb-4">
+        <div class="card-header bg-white border-bottom pt-3 pb-2 px-3">
+            <h6 class="fw-bold mb-0">Livrables Disponibles et Rapports</h6>
+            <p class="text-secondary fs-9 mb-0 mt-1">Accès aux 17 rapports et situations du service Statistiques (4 blocs organisés)</p>
+        </div>
+        <div class="card-body p-3">
+
+            <!-- BLOC 1: SUBVENTIONS & APPROVISIONNEMENTS -->
+            <div class="mb-5">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="bg-primary bg-opacity-20 rounded-circle p-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                        <span class="fw-bold text-primary">1</span>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Subventions & Approvisionnements</h6>
+                        <p class="text-secondary fs-9 mb-0">Suivi global des flux entrants</p>
+                    </div>
+                </div>
+                <div class="row g-3 ms-1">
+                    @for (section of subsections | slice:0:3; track section.titre; let i = $index) {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <a [routerLink]="getRapportRoute(i)" class="text-decoration-none">
+                            <div class="livrable-card bg-light rounded-2 p-3 h-100 cursor-pointer transition-all"
+                                style="cursor: pointer; border-left: 3px solid var(--primary);">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="bg-primary bg-opacity-10 rounded-2 p-2 flex-shrink-0">
+                                        <i [class]="section.icon + ' fs-5 text-primary'"></i>
+                                    </div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex gap-2 align-items-start justify-content-between">
+                                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">{{ section.titre }}</h6>
+                                            <i class="fas fa-arrow-right text-primary fs-9 flex-shrink-0 mt-1"></i>
+                                        </div>
+                                        <p class="text-secondary fs-9 mb-0">{{ section.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- BLOC 2: TRÉSORERIE & ENGAGEMENTS -->
+            <div class="mb-5">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="bg-success bg-opacity-20 rounded-circle p-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                        <span class="fw-bold text-success">2</span>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Trésorerie & Engagements</h6>
+                        <p class="text-secondary fs-9 mb-0">Suivi OC/LC, Restes à Payer et dépenses prioritaires</p>
+                    </div>
+                </div>
+                <div class="row g-3 ms-1">
+                    @for (section of subsections | slice:3:7; track section.titre; let i = $index) {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <a [routerLink]="getRapportRoute(i + 3)" class="text-decoration-none">
+                            <div class="livrable-card bg-light rounded-2 p-3 h-100 cursor-pointer transition-all"
+                                style="cursor: pointer; border-left: 3px solid var(--success);">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="bg-success bg-opacity-10 rounded-2 p-2 flex-shrink-0">
+                                        <i [class]="section.icon + ' fs-5 text-success'"></i>
+                                    </div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex gap-2 align-items-start justify-content-between">
+                                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">{{ section.titre }}</h6>
+                                            <i class="fas fa-arrow-right text-success fs-9 flex-shrink-0 mt-1"></i>
+                                        </div>
+                                        <p class="text-secondary fs-9 mb-0">{{ section.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- BLOC 3: COOPÉRATION RÉGIONALE & SECTEURS SPÉCIFIQUES -->
+            <div class="mb-5">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="bg-info bg-opacity-20 rounded-circle p-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                        <span class="fw-bold text-info">3</span>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Coopération Régionale & Secteurs</h6>
+                        <p class="text-secondary fs-9 mb-0">UEMOA, CEDEAO, TVA et collectes spéciales</p>
+                    </div>
+                </div>
+                <div class="row g-3 ms-1">
+                    @for (section of subsections | slice:7:11; track section.titre; let i = $index) {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <a [routerLink]="getRapportRoute(i + 7)" class="text-decoration-none">
+                            <div class="livrable-card bg-light rounded-2 p-3 h-100 cursor-pointer transition-all"
+                                style="cursor: pointer; border-left: 3px solid var(--info);">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="bg-info bg-opacity-10 rounded-2 p-2 flex-shrink-0">
+                                        <i [class]="section.icon + ' fs-5 text-info'"></i>
+                                    </div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex gap-2 align-items-start justify-content-between">
+                                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">{{ section.titre }}</h6>
+                                            <i class="fas fa-arrow-right text-info fs-9 flex-shrink-0 mt-1"></i>
+                                        </div>
+                                        <p class="text-secondary fs-9 mb-0">{{ section.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- BLOC 4: PRÉVISIONS & SOLDES -->
+            <div class="mb-0">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="bg-warning bg-opacity-20 rounded-circle p-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                        <span class="fw-bold text-warning">4</span>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Prévisions & Soldes</h6>
+                        <p class="text-secondary fs-9 mb-0">Prévisions mensuelles et soldes de comptes</p>
+                    </div>
+                </div>
+                <div class="row g-3 ms-1">
+                    @for (section of subsections | slice:11:16; track section.titre; let i = $index) {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <a [routerLink]="getRapportRoute(i + 11)" class="text-decoration-none">
+                            <div class="livrable-card bg-light rounded-2 p-3 h-100 cursor-pointer transition-all"
+                                style="cursor: pointer; border-left: 3px solid var(--warning);">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="bg-warning bg-opacity-10 rounded-2 p-2 flex-shrink-0">
+                                        <i [class]="section.icon + ' fs-5 text-warning'"></i>
+                                    </div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex gap-2 align-items-start justify-content-between">
+                                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">{{ section.titre }}</h6>
+                                            <i class="fas fa-arrow-right text-warning fs-9 flex-shrink-0 mt-1"></i>
+                                        </div>
+                                        <p class="text-secondary fs-9 mb-0">{{ section.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

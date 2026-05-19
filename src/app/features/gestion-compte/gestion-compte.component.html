@@ -1,0 +1,482 @@
+<div class="compte-gestion-container">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 gap-md-0">
+        <div>
+            <h4 class="fw-bold text-primary-900 mb-1">Compte de Gestion</h4>
+            <p class="text-secondary mb-0">SYGACUT-BI / Services / Compte de Gestion</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
+                <i class="far fa-file-excel me-2 text-success"></i> Export Excel
+            </button>
+            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
+                <i class="far fa-file-pdf me-2 text-danger"></i> Export PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Analyse Selector Area -->
+    <app-analyse-selector 
+        title="Sélecteur d'Analyse Actif"
+        [isDragDropMode]="isDragDropMode"
+        [(selectedPeriod)]="selectedPeriod"
+        [availableIndicators]="availableIndicators"
+        [selectedIndicators]="selectedIndicators"
+        [availableAxes]="availableAxes"
+        [selectedAxes]="selectedAxes"
+        (modeChanged)="isDragDropMode = $event === 'dragdrop'">
+    </app-analyse-selector>
+
+    <!-- Contextual KPIs based on filters -->
+    <div class="row g-4 mb-4">
+        @for (kpi of kpis; track kpi.titre) {
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 bg-white rounded-3 kpi-card">
+                <div class="card-body p-4">
+                    <h6 class="text-secondary fw-semibold mb-3">{{ kpi.titre }}</h6>
+                    <h3 class="fw-bold text-dark mb-1">{{ kpi.valeur }}</h3>
+                    <span class="fs-8 fw-medium" [class.text-success]="kpi.type === 'success'"
+                        [class.text-warning]="kpi.type === 'warning'" [class.text-secondary]="kpi.type === 'primary'">
+                        {{ kpi.info }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Main Analysis Content -->
+
+    <!-- Charts Row 1 -->
+    <div class="row g-4 mb-4">
+
+        <!-- Chart 1: Exécution Budgétaire -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Exécution Budgétaire</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="chart1Type" id="cg1_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="cgChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg1_bar"
+                                title="Barre"><i class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart1Type" id="cg1_line" value="line"
+                                autocomplete="off" [(ngModel)]="cgChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg1_line"
+                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart1Type" id="cg1_area" value="area"
+                                autocomplete="off" [(ngModel)]="cgChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg1_area"
+                                title="Zone"><i class="fas fa-chart-area fs-9"></i></label>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 2px; padding-bottom: 2px;">
+                                <i class="fas fa-download fs-9"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+
+                    @if (cgChart1Type === 'bar') {
+                    <!-- CSS Mockup for Bar Chart -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 100%; height: 250px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px;">
+                        <div style="width: 12%; height: 65%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 12%; height: 78%; background: linear-gradient(to top, #00cc66, #009d4a); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 12%; height: 52%; background: linear-gradient(to top, #ff9900, #cc7a00); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 12%; height: 71%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 12%; height: 84%; background: linear-gradient(to top, #00cc66, #009d4a); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 12%; height: 62%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
+                    </div>
+                    }
+                    @else if (cgChart1Type === 'line') {
+                    <!-- CSS Mockup for Line Chart -->
+                    <svg class="animate__animated animate__fadeIn" viewBox="0 0 400 250" style="width: 100%; height: 250px; margin: 12px 0;">
+                        <polyline points="20,180 70,140 120,165 170,120 220,90 270,110 320,70 370,95" style="fill:none;stroke:#0066cc;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;" />
+                        <polyline points="20,180 70,140 120,165 170,120 220,90 270,110 320,70 370,95" style="fill:none;stroke:#00cc66;stroke-width:2;stroke-dasharray:5,5;stroke-linecap:round;" />
+                    </svg>
+                    }
+                    @else {
+                    <!-- CSS Mockup for Area Chart -->
+                    <svg class="animate__animated animate__fadeIn" viewBox="0 0 400 250" style="width: 100%; height: 250px; margin: 12px 0;">
+                        <defs>
+                            <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#0066cc;stop-opacity:0.3" />
+                                <stop offset="100%" style="stop-color:#0066cc;stop-opacity:0" />
+                            </linearGradient>
+                        </defs>
+                        <polygon points="20,180 70,140 120,165 170,120 220,90 270,110 320,70 370,95 370,250 20,250" style="fill:url(#grad1)" />
+                        <polyline points="20,180 70,140 120,165 170,120 220,90 270,110 320,70 370,95" style="fill:none;stroke:#0066cc;stroke-width:3;" />
+                    </svg>
+                    }
+
+                    <div class="text-center mt-3">
+                        <p class="text-secondary mb-1 fs-8">LFI vs LFR vs Réalisé</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 2: Mandats et Imputations -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Mandats et Imputations</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="chart2Type" id="cg2_pie" value="pie"
+                                autocomplete="off" [(ngModel)]="cgChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg2_pie"
+                                title="Pie/Doughnut"><i class="fas fa-chart-pie fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart2Type" id="cg2_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="cgChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg2_bar" title="Barre"><i
+                                    class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart2Type" id="cg2_donut" value="donut"
+                                autocomplete="off" [(ngModel)]="cgChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg2_donut"
+                                title="Donut"><i class="fas fa-ring fs-9"></i></label>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 2px; padding-bottom: 2px;">
+                                <i class="fas fa-download fs-9"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+
+                    @if (cgChart2Type === 'pie') {
+                    <!-- CSS Mockup for Pie Chart -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 160px; height: 160px;">
+                        <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#0066cc" stroke-width="20" stroke-dasharray="62.8 314" />
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#00cc66" stroke-width="20" stroke-dasharray="50.24 314" style="transform: rotate(-71deg); transform-origin: 50% 50%;" />
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#ff9900" stroke-width="20" stroke-dasharray="62.8 314" style="transform: rotate(-165deg); transform-origin: 50% 50%;" />
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#cc00cc" stroke-width="20" stroke-dasharray="50.24 314" style="transform: rotate(274deg); transform-origin: 50% 50%;" />
+                        </svg>
+                    </div>
+                    }
+                    @else if (cgChart2Type === 'bar') {
+                    <!-- CSS Mockup for Bar Chart -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 100%; height: 200px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px;">
+                        <div style="width: 18%; height: 75%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 18%; height: 60%; background: linear-gradient(to top, #00cc66, #009d4a); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 18%; height: 45%; background: linear-gradient(to top, #ff9900, #cc7a00); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 18%; height: 85%; background: linear-gradient(to top, #cc00cc, #990099); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 18%; height: 55%; background: linear-gradient(to top, #00cccc, #009999); border-radius: 6px 6px 0 0;"></div>
+                    </div>
+                    }
+                    @else {
+                    <!-- CSS Mockup for Donut Chart -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 160px; height: 160px;">
+                        <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#0066cc" stroke-width="15" stroke-dasharray="62.8 314" />
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#00cc66" stroke-width="15" stroke-dasharray="50.24 314" style="transform: rotate(-71deg); transform-origin: 50% 50%;" />
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#ff9900" stroke-width="15" stroke-dasharray="62.8 314" style="transform: rotate(-165deg); transform-origin: 50% 50%;" />
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#cc00cc" stroke-width="15" stroke-dasharray="50.24 314" style="transform: rotate(274deg); transform-origin: 50% 50%;" />
+                            <circle cx="50" cy="50" r="25" fill="white" />
+                        </svg>
+                    </div>
+                    }
+
+                    <div class="text-center mt-3">
+                        <p class="text-secondary mb-1 fs-8">Ventilation par Nature</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row g-4 mb-4">
+
+        <!-- Chart 3: Disponibilités -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Disponibilités</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="chart3Type" id="cg3_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="cgChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg3_bar"
+                                title="Barre Empilée"><i class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart3Type" id="cg3_line" value="line"
+                                autocomplete="off" [(ngModel)]="cgChart1Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg3_line"
+                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 2px; padding-bottom: 2px;">
+                                <i class="fas fa-download fs-9"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+
+                    <!-- CSS Mockup for Stacked Bar Chart -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 100%; height: 250px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px;">
+                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
+                            <div style="width: 100%; height: 60%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
+                            <div style="width: 100%; height: 25%; background: #0066cc;"></div>
+                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
+                        </div>
+                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
+                            <div style="width: 100%; height: 55%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
+                            <div style="width: 100%; height: 30%; background: #0066cc;"></div>
+                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
+                        </div>
+                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
+                            <div style="width: 100%; height: 65%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
+                            <div style="width: 100%; height: 20%; background: #0066cc;"></div>
+                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
+                        </div>
+                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
+                            <div style="width: 100%; height: 50%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
+                            <div style="width: 100%; height: 35%; background: #0066cc;"></div>
+                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
+                        </div>
+                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
+                            <div style="width: 100%; height: 70%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
+                            <div style="width: 100%; height: 15%; background: #0066cc;"></div>
+                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
+                        </div>
+                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
+                            <div style="width: 100%; height: 58%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
+                            <div style="width: 100%; height: 27%; background: #0066cc;"></div>
+                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <p class="text-secondary mb-1 fs-8">Disponible / Engagé / Bloqué</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 4: Balance Comptable -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div
+                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Balance Comptable</h6>
+                    <div class="d-flex gap-2">
+                        <!-- Chart Type Toggle -->
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="chart4Type" id="cg4_bar" value="bar"
+                                autocomplete="off" [(ngModel)]="cgChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg4_bar"
+                                title="Barre"><i class="fas fa-chart-bar fs-9"></i></label>
+
+                            <input type="radio" class="btn-check" name="chart4Type" id="cg4_table" value="table"
+                                autocomplete="off" [(ngModel)]="cgChart2Type">
+                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg4_table"
+                                title="Tableau"><i class="fas fa-table fs-9"></i></label>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false"
+                                style="padding-top: 2px; padding-bottom: 2px;">
+                                <i class="fas fa-download fs-9"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
+                                <li><a class="dropdown-item py-2" href="#"><i
+                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+
+                    @if (cgChart2Type === 'bar') {
+                    <!-- CSS Mockup for Comparison Chart -->
+                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
+                        style="width: 100%; height: 250px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px;">
+                        <div style="width: 15%; height: 80%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 15%; height: 78%; background: linear-gradient(to top, #00cc66, #009d4a); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 15%; height: 2%; background: linear-gradient(to top, #ff9900, #cc7a00); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 15%; height: 75%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
+                        <div style="width: 15%; height: 73%; background: linear-gradient(to top, #00cc66, #009d4a); border-radius: 6px 6px 0 0;"></div>
+                    </div>
+                    }
+                    @else {
+                    <!-- CSS Mockup for Table -->
+                    <table class="table table-sm table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Compte</th>
+                                <th class="text-end">Débit</th>
+                                <th class="text-end">Crédit</th>
+                                <th class="text-end">Solde</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>6011 - Fournitures</td>
+                                <td class="text-end">250,000</td>
+                                <td class="text-end">0</td>
+                                <td class="text-end fw-bold text-success">250,000</td>
+                            </tr>
+                            <tr>
+                                <td>7011 - Revenus Divers</td>
+                                <td class="text-end">0</td>
+                                <td class="text-end">180,500</td>
+                                <td class="text-end fw-bold text-danger">-180,500</td>
+                            </tr>
+                            <tr>
+                                <td>4011 - Clients</td>
+                                <td class="text-end">420,000</td>
+                                <td class="text-end">150,000</td>
+                                <td class="text-end fw-bold">270,000</td>
+                            </tr>
+                            <tr class="table-active fw-bold">
+                                <td>Total</td>
+                                <td class="text-end">670,000</td>
+                                <td class="text-end">330,500</td>
+                                <td class="text-end">339,500</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+
+                    <div class="text-center mt-3">
+                        <p class="text-secondary mb-0 fs-8">Taux de lignes lettrées: 95.2%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Data Table -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-white rounded-3">
+                <div
+                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Situation Détaillée - Compte de Gestion</h6>
+                    <button class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-filter me-2"></i> Filtres
+                    </button>
+                </div>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Bailleur</th>
+                                    <th class="text-end">LFI</th>
+                                    <th class="text-end">LFR</th>
+                                    <th class="text-end">Engagé</th>
+                                    <th class="text-end">Mandaté</th>
+                                    <th class="text-end">Payé</th>
+                                    <th class="text-end">% Exécution</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>SODE</strong></td>
+                                    <td class="text-end">2,500,000</td>
+                                    <td class="text-end">2,750,000</td>
+                                    <td class="text-end">2,400,000</td>
+                                    <td class="text-end">2,350,000</td>
+                                    <td class="text-end">2,280,000</td>
+                                    <td class="text-end fw-bold text-success">96%</td>
+                                    <td><span class="badge bg-success-light text-success">Bon</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>EPN</strong></td>
+                                    <td class="text-end">1,800,000</td>
+                                    <td class="text-end">1,950,000</td>
+                                    <td class="text-end">1,620,000</td>
+                                    <td class="text-end">1,580,000</td>
+                                    <td class="text-end">1,520,000</td>
+                                    <td class="text-end fw-bold text-warning">82%</td>
+                                    <td><span class="badge bg-warning-light text-warning">Alerte</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>COLLECTIVIT2</strong></td>
+                                    <td class="text-end">950,000</td>
+                                    <td class="text-end">1,050,000</td>
+                                    <td class="text-end">920,000</td>
+                                    <td class="text-end">880,000</td>
+                                    <td class="text-end">850,000</td>
+                                    <td class="text-end fw-bold text-success">88%</td>
+                                    <td><span class="badge bg-success-light text-success">Bon</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>AUTRES</strong></td>
+                                    <td class="text-end">750,000</td>
+                                    <td class="text-end">820,000</td>
+                                    <td class="text-end">680,000</td>
+                                    <td class="text-end">650,000</td>
+                                    <td class="text-end">600,000</td>
+                                    <td class="text-end fw-bold text-info">85%</td>
+                                    <td><span class="badge bg-info-light text-info">Suivi</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

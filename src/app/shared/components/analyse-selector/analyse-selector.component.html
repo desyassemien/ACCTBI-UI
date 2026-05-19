@@ -1,0 +1,265 @@
+<div [class]="(showIndicators || showAxes) ? 'card border-0 shadow-sm bg-white rounded-3 mb-4' : 'bg-transparent border-0 shadow-none mb-0 w-100 p-0'">
+    <div [class]="(showIndicators || showAxes) ? 'card-body p-4' : 'p-0 w-100'">
+        @if (showIndicators || showAxes) {
+        <div class="d-flex justify-content-between align-items-center border-bottom mb-4 pb-3">
+            <h6 class="fw-bold mb-0 text-dark">
+                <i class="fas fa-filter text-primary-500 me-2"></i> {{ title }}
+            </h6>
+
+            <!-- Toggle Mode -->
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off"
+                    [checked]="!isDragDropMode" (change)="toggleMode('classic')">
+                <label class="btn btn-outline-primary btn-sm px-3" for="btnradio1">
+                    <i class="fas fa-list-ul me-1"></i> Classique
+                </label>
+
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
+                    [checked]="isDragDropMode" (change)="toggleMode('dragdrop')">
+                <label class="btn btn-outline-primary btn-sm px-3" for="btnradio2">
+                    <i class="fas fa-arrows-alt me-1"></i> Drag & Drop
+                </label>
+            </div>
+        </div>
+        }
+
+        @if (!isDragDropMode) {
+        <!-- Classic Mode Form -->
+        <div class="row align-items-end" [class.g-4]="showIndicators || showAxes" [class.g-2]="!showIndicators && !showAxes">
+            <div [class]="(!showIndicators && !showAxes) ? 'col-10' : 'col-md-3'">
+                @if (showIndicators || showAxes) {
+                    <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Période</label>
+                }
+                <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium mb-1" [class.premium-select-input]="!showIndicators && !showAxes"
+                    style="height: 38px;" [ngModel]="selectedPeriod" (ngModelChange)="selectedPeriodChange.emit($event)">
+                    <option value="JOUR">Aujourd'hui</option>
+                    <option value="Cette semaine">Cette semaine</option>
+                    <option value="MOIS">Ce mois-ci</option>
+                    <option value="Ce trimestre">Ce trimestre</option>
+                    <option value="ANNEE">Cette année</option>
+                    <option value="Personnalisé...">Personnalisé...</option>
+                </select>
+            </div>
+
+            @if (showIndicators) {
+            <div class="col-md-4">
+                <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Indicateurs (Max
+                    6)</label>
+                <div class="dropdown">
+                    <button
+                        class="btn btn-outline-secondary btn-sm w-100 text-start d-flex justify-content-between align-items-center text-dark"
+                        style="height: 38px;" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                        <span class="text-truncate me-2">{{ selectedIndicators.join(', ') || 'Sélectionner...' }}</span>
+                        <i class="fas fa-chevron-down fs-8"></i>
+                    </button>
+                    <ul class="dropdown-menu w-100 shadow-sm border-0 p-2" style="max-height: 300px; overflow-y: auto;">
+                        @for (ind of selectedIndicators; track ind) {
+                        <li>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" checked [id]="'ind_sel_' + $index" (change)="toggleIndicator(ind, true)">
+                                <label class="form-check-label" [for]="'ind_sel_' + $index">{{ind}}</label>
+                            </div>
+                        </li>
+                        }
+                        @for (ind of availableIndicators; track ind) {
+                        <li>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" [id]="'ind_avail_' + $index" (change)="toggleIndicator(ind, false)">
+                                <label class="form-check-label" [for]="'ind_avail_' + $index">{{ind}}</label>
+                            </div>
+                        </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            }
+
+            @if (showAxes) {
+            <div class="col-md-3">
+                <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Axes (Max 3)</label>
+                <div class="dropdown">
+                    <button
+                        class="btn btn-outline-secondary btn-sm w-100 text-start d-flex justify-content-between align-items-center text-dark"
+                        style="height: 38px;" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                        <span class="text-truncate me-2">{{ selectedAxes.join(', ') || 'Sélectionner...' }}</span>
+                        <i class="fas fa-chevron-down fs-8"></i>
+                    </button>
+                    <ul class="dropdown-menu w-100 shadow-sm border-0 p-2" style="max-height: 300px; overflow-y: auto;">
+                        @for (axe of selectedAxes; track axe) {
+                        <li>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" checked [id]="'axe_sel_' + $index" (change)="toggleAxe(axe, true)">
+                                <label class="form-check-label" [for]="'axe_sel_' + $index">{{axe}}</label>
+                            </div>
+                        </li>
+                        }
+                        @for (axe of availableAxes; track axe) {
+                        <li>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" [id]="'axe_avail_' + $index" (change)="toggleAxe(axe, false)">
+                                <label class="form-check-label" [for]="'axe_avail_' + $index">{{axe}}</label>
+                            </div>
+                        </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            }
+
+            <div [class]="(!showIndicators && !showAxes) ? 'col-2' : 'col-md-2 text-end'">
+                <button class="btn btn-primary btn-sm w-100 fw-medium shadow-sm mb-1" [class.premium-btn-refresh]="!showIndicators && !showAxes" style="height: 38px;" (click)="onRefresh()">
+                    <i class="fas fa-sync-alt" [class.me-2]="showIndicators || showAxes"></i>
+                    @if (showIndicators || showAxes) {
+                        Actualiser
+                    }
+                </button>
+            </div>
+        </div>
+
+        <div class="row mt-2 animate__animated animate__fadeIn" [class.d-none]="selectedPeriod !== 'Personnalisé...'">
+            <div class="col-12">
+                <div class="d-flex gap-2 align-items-center bg-white px-3 py-2 rounded-3 border border-secondary border-opacity-25" style="max-width: 420px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                    <i class="far fa-calendar-alt text-primary ms-1"></i>
+                    <span class="small fw-semibold text-secondary text-nowrap me-2">Date personnalisée :</span>
+                    <input type="text"
+                        class="form-control form-control-sm text-dark fw-semibold fs-7 border-0 p-0 shadow-none bg-transparent flatpickr-range-input"
+                        placeholder="Choisir une plage de dates..." 
+                        style="height: 24px; cursor: pointer;">
+                </div>
+            </div>
+        </div>
+        } @else {
+        <!-- Drag and Drop Form -->
+        <div class="drag-drop-container pt-2">
+
+            <!-- Top section: Period & Refresh block -->
+            <div
+                class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 bg-light rounded-3 p-3 border">
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <label
+                        class="form-label mb-0 text-secondary fs-8 fw-medium text-uppercase tracking-wider flex-shrink-0">Période:</label>
+                    <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium"
+                        style="width: 200px;" [ngModel]="selectedPeriod" (ngModelChange)="selectedPeriodChange.emit($event)">
+                        <option value="Aujourd'hui">Aujourd'hui</option>
+                        <option value="Cette semaine">Cette semaine</option>
+                        <option value="Ce mois-ci">Ce mois-ci</option>
+                        <option value="Ce trimestre">Ce trimestre</option>
+                        <option value="Cette année">Cette année</option>
+                        <option value="Personnalisé...">Personnalisé...</option>
+                    </select>
+
+                    <div class="d-flex gap-2 align-items-center animate__animated animate__fadeIn" [class.d-none]="selectedPeriod !== 'Personnalisé...'">
+                        <div class="d-flex gap-2 align-items-center bg-white px-3 py-1 rounded-3 border border-secondary border-opacity-25" style="width: 320px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                            <i class="far fa-calendar-alt text-primary"></i>
+                            <input type="text"
+                                class="form-control form-control-sm text-dark fw-semibold fs-7 border-0 p-0 shadow-none bg-transparent flatpickr-range-input"
+                                placeholder="Choisir une plage..." 
+                                style="height: 24px; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-sm fw-medium shadow-sm" (click)="onRefresh()">
+                    <i class="fas fa-sync-alt me-2"></i> Générer l'Analyse
+                </button>
+            </div>
+
+            <div class="row g-4">
+                <!-- Column 1: Available Elements -->
+                <div class="col-12 col-md-4">
+                    <div class="bg-light rounded-3 p-3 h-100 border border-secondary border-opacity-10 shadow-sm">
+                        <h6 class="fs-8 fw-bold text-secondary text-uppercase tracking-wider mb-3">Éléments Disponibles</h6>
+
+                        <div class="mb-4">
+                            <div class="fs-9 text-secondary mb-2 fw-medium">
+                                <i class="fas fa-chart-line me-1"></i> Indicateurs
+                            </div>
+                            <div cdkDropList id="availableIndicatorsList" [cdkDropListData]="availableIndicators"
+                                [cdkDropListConnectedTo]="['selectedIndicatorsList']" class="drag-list"
+                                (cdkDropListDropped)="drop($event)">
+                                @for (item of availableIndicators; track item) {
+                                <div class="drag-item bg-white border shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab"
+                                    cdkDrag>
+                                    <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
+                                </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="fs-9 text-secondary mb-2 fw-medium">
+                                <i class="fas fa-layer-group me-1"></i> Axes d'Analyse
+                            </div>
+                            <div cdkDropList id="availableAxesList" [cdkDropListData]="availableAxes"
+                                [cdkDropListConnectedTo]="['selectedAxesList']" class="drag-list"
+                                (cdkDropListDropped)="drop($event)">
+                                @for (item of availableAxes; track item) {
+                                <div class="drag-item bg-white border border-primary-100 shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-medium text-dark cursor-grab"
+                                    cdkDrag>
+                                    <i class="fas fa-grip-vertical text-secondary opacity-50 me-2"></i> {{ item }}
+                                </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Selected Zone -->
+                <div class="col-12 col-md-8">
+                    <div class="border border-2 border-dashed border-primary-200 rounded-3 p-4 h-100 d-flex flex-column bg-primary-50">
+
+                        <div class="mb-4 flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fs-8 fw-bold text-primary-900 text-uppercase tracking-wider mb-0">
+                                    Indicateurs Actifs (Max 6)
+                                </h6>
+                            </div>
+                            <div class="rounded-3 p-3 drag-drop-zone bg-white border" cdkDropList
+                                id="selectedIndicatorsList" [cdkDropListData]="selectedIndicators"
+                                [cdkDropListConnectedTo]="['availableIndicatorsList']"
+                                (cdkDropListDropped)="drop($event)">
+                                @for (item of selectedIndicators; track item) {
+                                <div class="drag-item bg-primary-100 border border-primary shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-bold text-primary-900 cursor-grab"
+                                    cdkDrag>
+                                    <i class="fas fa-grip-vertical text-primary opacity-50 me-2"></i> {{ item }}
+                                </div>
+                                }
+                                @if (selectedIndicators.length === 0) {
+                                <div class="text-secondary text-center fs-8 py-3 opacity-50">
+                                    <i class="fas fa-download mb-2 d-block fs-6"></i> Glissez des indicateurs ici
+                                </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fs-8 fw-bold text-primary-900 text-uppercase tracking-wider mb-0">
+                                    Axes Principaux (Max 3)
+                                </h6>
+                            </div>
+                            <div class="rounded-3 p-3 drag-drop-zone bg-white border" cdkDropList
+                                id="selectedAxesList" [cdkDropListData]="selectedAxes"
+                                [cdkDropListConnectedTo]="['availableAxesList']"
+                                (cdkDropListDropped)="drop($event)">
+                                @for (item of selectedAxes; track item) {
+                                <div class="drag-item bg-accent-100 border border-accent shadow-sm rounded-2 p-2 mb-2 d-flex align-items-center fs-8 fw-bold text-accent-900 cursor-grab"
+                                    cdkDrag>
+                                    <i class="fas fa-grip-vertical text-accent opacity-50 me-2"></i> {{ item }}
+                                </div>
+                                }
+                                @if (selectedAxes.length === 0) {
+                                <div class="text-secondary text-center fs-8 py-3 opacity-50">
+                                    <i class="fas fa-download mb-2 d-block fs-6"></i> Glissez des axes ici
+                                </div>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,182 @@
+<div class="comptabilite-container"> <!-- Using container for consistent spacing -->
+
+    <!-- Page Header & Sub-Navigation -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h4 class="fw-bold text-primary-900 mb-1">Service Trésorerie</h4>
+            <p class="text-secondary mb-0">SYGACUT-BI / Services / Trésorerie</p>
+        </div>
+
+        <!-- Stylish Sub-Navigation -->
+        <div class="sub-nav-wrapper p-1 bg-white shadow-sm rounded-pill d-inline-flex border">
+            <button class="btn rounded-pill px-4 btn-sm fw-medium transition-all"
+                [class.btn-primary]="activeSubDomain === 'la'"
+                [class.btn-light]="activeSubDomain !== 'la'"
+                (click)="switchSubDomain('la')">
+                <i class="fas fa-file-invoice me-2"></i> Lettres d'Avance
+            </button>
+            <button class="btn rounded-pill px-4 btn-sm fw-medium transition-all"
+                [class.btn-primary]="activeSubDomain === 'bc'"
+                [class.btn-light]="activeSubDomain !== 'bc'"
+                (click)="switchSubDomain('bc')">
+                <i class="fas fa-money-check-alt me-2"></i> Bons de Caisse
+            </button>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm bg-white shadow-sm rounded-3">
+                <i class="fas fa-download me-2"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Analyse Selector Area -->
+    <app-analyse-selector 
+        [title]="'Analyse: ' + (activeSubDomain === 'la' ? 'Lettres d\'Avance' : 'Bons de Caisse')"
+        [isDragDropMode]="isDragDropMode"
+        [(selectedPeriod)]="selectedPeriod"
+        [availableIndicators]="activeSubDomain === 'la' ? availableIndicatorsLA : availableIndicatorsBC"
+        (availableIndicatorsChange)="updateAvailableIndicators($event)"
+        [selectedIndicators]="activeSubDomain === 'la' ? selectedIndicatorsLA : selectedIndicatorsBC"
+        (selectedIndicatorsChange)="updateIndicators($event)"
+        [availableAxes]="activeSubDomain === 'la' ? availableAxesLA : availableAxesBC"
+        (availableAxesChange)="updateAvailableAxes($event)"
+        [selectedAxes]="activeSubDomain === 'la' ? selectedAxesLA : selectedAxesBC"
+        (selectedAxesChange)="updateAxes($event)"
+        (modeChanged)="isDragDropMode = $event === 'dragdrop'">
+    </app-analyse-selector>
+
+    <!-- KPIs Row -->
+    <div class="row g-4 mb-4">
+        @for (kpi of (activeSubDomain === 'la' ? kpisLA : kpisBC); track kpi.titre) {
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card border-0 shadow-sm kpi-card h-100">
+                    <div class="card-body p-4">
+                        <h6 class="text-secondary fw-semibold mb-3">{{ kpi.titre }}</h6>
+                        <h3 class="fw-bold text-dark mb-1">{{ kpi.valeur }}</h3>
+                        <span class="fs-8 fw-medium" [class.text-success]="kpi.type === 'success'" [class.text-warning]="kpi.type === 'warning'" [class.text-primary]="kpi.type === 'primary'">
+                            {{ kpi.info }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-xl-8">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Analyse {{ activeSubDomain === 'la' ? 'des Flux LA (Sankey)' : 'de la Fréquentation BC' }}</h6>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Placeholder for advanced chart -->
+                    <div class="chart-mockup d-flex align-items-center justify-content-center bg-light rounded-3" style="height: 300px;">
+                        <div class="text-center">
+                            <i class="fas fa-chart-network fs-1 text-primary-200 mb-3 d-block"></i>
+                            <span class="text-secondary fs-8 fw-medium italic">Visualisation DWH avancée en attente de données</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Répartition par {{ activeSubDomain === 'la' ? 'Statut Regul' : 'Poste Comptable' }}</h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column gap-3">
+                        @if (activeSubDomain === 'la') {
+                            <div class="stat-item">
+                                <div class="d-flex justify-content-between fs-8 mb-1"><span class="fw-bold">Régularisés</span><span>65%</span></div>
+                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-success" style="width: 65%"></div></div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="d-flex justify-content-between fs-8 mb-1"><span class="fw-bold">En retard</span><span>15%</span></div>
+                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-danger" style="width: 15%"></div></div>
+                            </div>
+                        } @else {
+                            <div class="stat-item">
+                                <div class="d-flex justify-content-between fs-8 mb-1"><span class="fw-bold">Abidjan Nord</span><span>40%</span></div>
+                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-primary" style="width: 40%"></div></div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="d-flex justify-content-between fs-8 mb-1"><span class="fw-bold">Yamoussoukro</span><span>25%</span></div>
+                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-info" style="width: 25%"></div></div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deliverables Table -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-white rounded-3">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">{{ activeSubDomain === 'la' ? 'Situation de développement des LA' : 'Suivi des BC et des Caisses' }}</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            @if (activeSubDomain === 'la') {
+                                <thead class="table-light fs-9 text-uppercase tracking-wider">
+                                    <tr>
+                                        <th class="ps-4 py-3">Réf LA</th>
+                                        <th class="py-3">Bénéficiaire / Ministère</th>
+                                        <th class="py-3">Montant</th>
+                                        <th class="py-3 text-end pe-4">Régul.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (item of deliverablesLA; track item.ref) {
+                                        <tr>
+                                            <td class="ps-4 fw-bold">{{ item.ref }}</td>
+                                            <td>
+                                                <div class="text-dark fw-medium">{{ item.bene }}</div>
+                                                <div class="text-secondary fs-9">{{ item.ministere }}</div>
+                                            </td>
+                                            <td class="fw-bold">{{ item.montant }}</td>
+                                            <td class="text-end pe-4">
+                                                <span class="badge" [class.bg-success-subtle]="item.regul === '60%'" [class.bg-warning-subtle]="item.regul === 'En attente'" [class.bg-danger-subtle]="item.regul.includes('Relancé')">
+                                                    {{ item.regul }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            } @else {
+                                <thead class="table-light fs-9 text-uppercase tracking-wider">
+                                    <tr>
+                                        <th class="ps-4 py-3">Réf BC</th>
+                                        <th class="py-3">Poste Comptable</th>
+                                        <th class="py-3">Montant</th>
+                                        <th class="py-3 text-end pe-4">Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (item of deliverablesBC; track item.ref) {
+                                        <tr>
+                                            <td class="ps-4 fw-bold">{{ item.ref }}</td>
+                                            <td>{{ item.poste }}</td>
+                                            <td class="fw-bold">{{ item.montant }}</td>
+                                            <td class="text-end pe-4">
+                                                <span class="badge rounded-pill" [class.bg-primary]="item.statut === 'En circulation'" [class.bg-info]="item.statut === 'Pris en charge'" [class.bg-success]="item.statut === 'Régularisé'" [class.bg-danger]="item.statut === 'En retard'">
+                                                    {{ item.statut }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
