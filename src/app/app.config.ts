@@ -11,15 +11,16 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { provideServiceWorker } from '@angular/service-worker';
 
 import { routes } from './app.routes';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     // 1. Initialisation de Keycloak (Priorité sécurité)
     provideKeycloak({
       config: {
-        url: 'http://localhost:8080',
-        realm: 'projetBi',
-        clientId: 'acctBI-front'
+        url: environment.keycloak.url,
+        realm: environment.keycloak.realm,
+        clientId: environment.keycloak.clientId
       },
       initOptions: {
         onLoad: 'check-sso',
