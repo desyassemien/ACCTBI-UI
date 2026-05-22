@@ -185,7 +185,7 @@
             transition: all 0.15s ease;
 
             &:hover {
-                background-color: var(--bg-body, #f8f9fa);
+                background-color: var(--bg-body, #c4c6c9);
                 color: var(--primary-700) !important;
 
                 i {
@@ -194,7 +194,7 @@
             }
 
             &.text-danger:hover {
-                background-color: #FEF2F2;
+                background-color: #585454;
                 color: var(--danger, #dc3545) !important;
             }
         }

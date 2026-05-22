@@ -52,13 +52,11 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/regies/regies.component').then(m => m.RegiesComponent),
                 data: { roles: ['ADMIN', 'CHEF_REGIE'] }
             },
-            {
-                path: 'gestion-compte',
-                loadComponent: () => import('./features/gestion-compte/gestion-compte.component').then(m => m.GestionCompteComponent)
-            },
-            {
-                path: 'statistiques',
-                loadComponent: () => import('./features/statistiques/statistiques.component').then(m => m.StatistiquesComponent)
+            // Other dashboard features
+            { 
+                path: 'statistiques', 
+                loadComponent: () => import('./features/statistiques/statistiques.component').then(m => m.StatistiquesComponent),
+                data: { roles: ['ADMIN'] }
             },
             {
                 path: 'statistiques/rapport/:id',
@@ -66,7 +64,8 @@ export const routes: Routes = [
             },
             { 
                 path: 'compte-gestion', 
-                loadComponent: () => import('./features/gestion-compte/gestion-compte.component').then(m => m.GestionCompteComponent) 
+                loadComponent: () => import('./features/gestion-compte/gestion-compte.component').then(m => m.GestionCompteComponent),
+                data: { roles: ['ADMIN'] }
             },
             { 
                 path: 'reglement', 

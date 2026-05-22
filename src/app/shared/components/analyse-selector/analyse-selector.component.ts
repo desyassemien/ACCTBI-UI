@@ -1,7 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+
+declare var flatpickr: any;
 
 @Component({
   selector: 'app-analyse-selector',
@@ -10,8 +12,10 @@ import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDrag, CdkDropList }
   templateUrl: './analyse-selector.component.html',
   styleUrl: './analyse-selector.component.scss'
 })
-export class AnalyseSelectorComponent {
+export class AnalyseSelectorComponent implements AfterViewInit {
   @Input() title: string = "Sélecteur d'Analyse";
+  @Input() showIndicators: boolean = true;
+  @Input() showAxes: boolean = true;
   
   // State for the selector
   @Input() isDragDropMode: boolean = false;
@@ -94,6 +98,45 @@ export class AnalyseSelectorComponent {
     this.availableIndicatorsChange.emit([...this.availableIndicators]);
     this.selectedAxesChange.emit([...this.selectedAxes]);
     this.availableAxesChange.emit([...this.availableAxes]);
+  }
+
+  ngAfterViewInit() {
+    this.initFlatpickr();
+  }
+
+  initFlatpickr() {
+    setTimeout(() => {
+      if (typeof flatpickr !== 'undefined') {
+        flatpickr('.flatpickr-range-input', {
+          mode: 'range',
+          dateFormat: 'd/m/Y',
+          locale: 'fr',
+          allowInput: true,
+          onClose: (selectedDates: any[], dateStr: string, instance: any) => {
+            if (selectedDates.length === 1) {
+              const singleDate = instance.formatDate(selectedDates[0], 'd/m/Y');
+              this.selectedPeriod = singleDate;
+              this.selectedPeriodChange.emit(singleDate);
+            } else if (selectedDates.length === 2) {
+              const start = instance.formatDate(selectedDates[0], 'd/m/Y');
+              const end = instance.formatDate(selectedDates[1], 'd/m/Y');
+              const finalVal = start === end ? start : `${start} au ${end}`;
+              this.selectedPeriod = finalVal;
+              this.selectedPeriodChange.emit(finalVal);
+            }
+          },
+          onChange: (selectedDates: any[], dateStr: string, instance: any) => {
+            if (selectedDates.length === 2) {
+              const start = instance.formatDate(selectedDates[0], 'd/m/Y');
+              const end = instance.formatDate(selectedDates[1], 'd/m/Y');
+              const finalVal = start === end ? start : `${start} au ${end}`;
+              this.selectedPeriod = finalVal;
+              this.selectedPeriodChange.emit(finalVal);
+            }
+          }
+        });
+      }
+    }, 150);
   }
 
   onRefresh() {

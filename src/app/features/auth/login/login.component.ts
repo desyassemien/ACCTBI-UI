@@ -35,9 +35,9 @@ export class LoginComponent {
             this.isLoading.set(false);
 
             if (success) {
-                this.router.navigate(['/dashboard']);
+                this.router.navigate(['/']);
             } else {
-                this.errorMessage.set('Identifiants incorrects. Utilisez admin/admin pour tester.');
+                this.errorMessage.set('Identifiants incorrects. Utilisez admin/admin, compta/compta, tresor/tresor ou regie/regie pour tester.');
             }
         } else {
             this.loginForm.markAllAsTouched();

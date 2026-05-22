@@ -40,10 +40,6 @@ export class HeaderComponent implements OnInit {
         return this.serviceItems.some(item => url.startsWith(item.path));
     }
 
-    /** Helper to get service clean name without slash */
-    getServiceName(path: string): string {
-        return path?.replace('/', '') || '';
-    }
 
     // Navigation items
     readonly serviceItems = [
@@ -55,6 +51,11 @@ export class HeaderComponent implements OnInit {
         { path: '/statistiques', icon: 'fas fa-chart-bar', label: 'Statistiques' },
         { path: '/compte-gestion', icon: 'fas fa-clipboard-list', label: 'Compte de Gestion' }
     ];
+
+    /** Helper to get service clean name without slash */
+    getServiceName(path: string): string {
+        return path?.replace('/', '') || '';
+    }
 
     constructor() {
         const savedTheme = localStorage.getItem('theme');

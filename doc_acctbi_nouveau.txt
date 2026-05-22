@@ -1,0 +1,55 @@
+Implémentation de la solution fonctionnelle 
+ 
+La solution que nous proposerons assurera la possibilité au client de produire de façon automatique les restitutions analytiques, les analyses prédictives afin d’anticiper sur les décisions à prendre. Pour y parvenir nous avons identifié un certain nombre d’indicateur qui seront utiliser pour mettre en place des tableaux de bord des activités relatives au recettes et dépenses de l’état.  
+Nous avons pour le moment et selon le désir du client identifier plusieurs tableaux de bord tels que : 
+▪	Tableau de bord pour le suivi des soldes de compensation 
+▪	Tableau de bord pour le suivi des dépenses de l’état 
+▪	Tableau de bord pour le suivi de la gestion des comptes bancaires publics 
+▪	Tableau de bord pour le suivi de la dette 
+▪	Tableau de bord pour le suivi des fonds des bailleurs 
+▪	Tableau de bord pour le suivi de la liquidité 
+▪	Tableau de bord pour le suivi des recettes  
+▪	Tableau de bord pour le suivi des effets impayés 
+▪	Tableau de bord pour le suivi des traitements des virements rejetés 
+▪	Tableau de bord pour le suivi des virements de fond sur des comptes bancaires hors du système CUT 
+▪	Tableau de bord pour le suivi des rapprochements des écritures 
+▪	Tableau de bord pour le suivi des soldes de compte 
+▪	Tableau de bord pour le suivi des opérations de la trésorerie 
+De façon plus détaillé les tableaux de bord contiendront les indicateurs suivants : 
+Suivi des soldes de compensation o Volume mensuel des soldes de compensation o Nombre de solde de compensation 
+o	Taux de solde de compensation 
+ 
+Suivi des dépenses de l’état o Suivi mensuel du taux d’avancement des dépenses de l’État (réalisé/cible) o Suivi mensuel du montant des dépenses par poste de dépenses o Top 10 postes de dépenses de l’État 
+ 
+Suivi de la gestion des comptes bancaires publics 
+ 
+Suivi de la dette  o Volume de la dette de l’État o Taux d’avancement du remboursement de la dette o Évolution du ratio de la dette par rapport au PIB du pays 
+o	Évolution du taux de couverture de la dette (Recette/capital +intérêt sur la dette) 
+ 
+Suivi des fonds des bailleurs o Volume des fonds des bailleurs  
+o	Taux de consommation des fonds de bailleurs 
+ 
+Suivi de la liquidité o Évolution mensuelle de la liquidité  o Taux d’avancement de la liquidité 
+o	Évolution mensuelle du Ratio de liquidité 
+ 
+Suivi des recettes o Volume des recettes 100% État o Volume des recettes à partager entre État et collectivités locales o Volume des recettes à affecter o Volume des recettes obtenues par TVA o Volume des recettes du FER o Contribution de la part de chaque recette à la recette globale de l’État o Évolution mensuelle du ratio de solvabilité 
+o	Évolution mensuelle du ratio d’indépendance financière 
+ 
+Suivi des effets impayés o Volume des impayés o Délai moyen de recouvrement des impayés o Délai moyen des impayés 
+o	Proportion des impayés sur les recettes 
+ 
+Suivi des traitements virements rejetés o Montant des traitements rejetés o Délai moyen du traitement des virements rejetés o Proportion des traitements rejetés par catégorie 
+ 
+Suivi des virements de fond sur des comptes bancaires hors du système CUT 
+ 
+Suivi du rapprochement des écritures  o Montant des écarts 
+o	Nombre des comptes non balancés 
+o	Ratio des comptes non balancés par rapport à la cible 
+ 
+Suivi des soldes de compte o Nombre de comptes ouverts à la BNI sur lesquels passent les recettes et dépenses de l’État 
+o	Volume des comptes 
+o	Évolution mensuelle du solde des comptes Suivi des opérations de la trésorerie : 
+o	Virement de compte à compte o Virement sur les comptes de dépôt et autre o Volume des opérations des placements o Virement sur le compte de CUT à la banque centrale o Solde de trésorerie 
+ 
+Optimisation de la trésorerie par modélisation des flux financiers. 
+

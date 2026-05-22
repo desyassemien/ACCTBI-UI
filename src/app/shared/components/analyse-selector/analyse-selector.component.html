@@ -1,6 +1,7 @@
-<div class="card border-0 shadow-sm mb-4 bg-white rounded-3">
-    <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+<div [class]="(showIndicators || showAxes) ? 'card border-0 shadow-sm bg-white rounded-3 mb-4' : 'bg-transparent border-0 shadow-none mb-0 w-100 p-0'">
+    <div [class]="(showIndicators || showAxes) ? 'card-body p-4' : 'p-0 w-100'">
+        @if (showIndicators || showAxes) {
+        <div class="d-flex justify-content-between align-items-center border-bottom mb-4 pb-3">
             <h6 class="fw-bold mb-0 text-dark">
                 <i class="fas fa-filter text-primary-500 me-2"></i> {{ title }}
             </h6>
@@ -20,23 +21,27 @@
                 </label>
             </div>
         </div>
+        }
 
         @if (!isDragDropMode) {
         <!-- Classic Mode Form -->
-        <div class="row g-4 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Période</label>
-                <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium mb-1"
+        <div class="row align-items-end" [class.g-4]="showIndicators || showAxes" [class.g-2]="!showIndicators && !showAxes">
+            <div [class]="(!showIndicators && !showAxes) ? 'col-10' : 'col-md-3'">
+                @if (showIndicators || showAxes) {
+                    <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Période</label>
+                }
+                <select class="form-select form-select-sm shadow-none border-secondary text-dark fw-medium mb-1" [class.premium-select-input]="!showIndicators && !showAxes"
                     style="height: 38px;" [ngModel]="selectedPeriod" (ngModelChange)="selectedPeriodChange.emit($event)">
-                    <option value="Aujourd'hui">Aujourd'hui</option>
+                    <option value="JOUR">Aujourd'hui</option>
                     <option value="Cette semaine">Cette semaine</option>
-                    <option value="Ce mois-ci">Ce mois-ci</option>
+                    <option value="MOIS">Ce mois-ci</option>
                     <option value="Ce trimestre">Ce trimestre</option>
-                    <option value="Cette année">Cette année</option>
+                    <option value="ANNEE">Cette année</option>
                     <option value="Personnalisé...">Personnalisé...</option>
                 </select>
             </div>
 
+            @if (showIndicators) {
             <div class="col-md-4">
                 <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Indicateurs (Max
                     6)</label>
@@ -67,7 +72,9 @@
                     </ul>
                 </div>
             </div>
+            }
 
+            @if (showAxes) {
             <div class="col-md-3">
                 <label class="form-label text-secondary fs-8 fw-medium text-uppercase tracking-wider">Axes (Max 3)</label>
                 <div class="dropdown">
@@ -97,31 +104,30 @@
                     </ul>
                 </div>
             </div>
+            }
 
-            <div class="col-md-2 text-end">
-                <button class="btn btn-primary btn-sm w-100 fw-medium shadow-sm" style="height: 38px;" (click)="onRefresh()">
-                    <i class="fas fa-sync-alt me-2"></i> Actualiser
+            <div [class]="(!showIndicators && !showAxes) ? 'col-2' : 'col-md-2 text-end'">
+                <button class="btn btn-primary btn-sm w-100 fw-medium shadow-sm mb-1" [class.premium-btn-refresh]="!showIndicators && !showAxes" style="height: 38px;" (click)="onRefresh()">
+                    <i class="fas fa-sync-alt" [class.me-2]="showIndicators || showAxes"></i>
+                    @if (showIndicators || showAxes) {
+                        Actualiser
+                    }
                 </button>
             </div>
         </div>
 
-        @if (selectedPeriod === 'Personnalisé...') {
-        <!-- Custom Date Range Row -->
-        <div class="row g-4 mt-1 animate__animated animate__fadeIn">
-            <div class="col-12 col-md-5 d-flex gap-2 align-items-center bg-light p-2 rounded-3 border">
-                <i class="far fa-calendar-alt text-secondary ms-2"></i>
-                <span class="fs-8 fw-medium text-secondary text-nowrap">Du :</span>
-                <input type="date"
-                    class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white"
-                    title="Date de début">
-
-                <span class="fs-8 fw-medium text-secondary text-nowrap ms-2">Au :</span>
-                <input type="date"
-                    class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none bg-white"
-                    title="Date de fin">
+        <div class="row mt-2 animate__animated animate__fadeIn" [class.d-none]="selectedPeriod !== 'Personnalisé...'">
+            <div class="col-12">
+                <div class="d-flex gap-2 align-items-center bg-white px-3 py-2 rounded-3 border border-secondary border-opacity-25" style="max-width: 420px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                    <i class="far fa-calendar-alt text-primary ms-1"></i>
+                    <span class="small fw-semibold text-secondary text-nowrap me-2">Date personnalisée :</span>
+                    <input type="text"
+                        class="form-control form-control-sm text-dark fw-semibold fs-7 border-0 p-0 shadow-none bg-transparent flatpickr-range-input"
+                        placeholder="Choisir une plage de dates..." 
+                        style="height: 24px; cursor: pointer;">
+                </div>
             </div>
         </div>
-        }
         } @else {
         <!-- Drag and Drop Form -->
         <div class="drag-drop-container pt-2">
@@ -142,17 +148,15 @@
                         <option value="Personnalisé...">Personnalisé...</option>
                     </select>
 
-                    @if (selectedPeriod === 'Personnalisé...') {
-                    <div class="d-flex gap-2 align-items-center animate__animated animate__fadeIn">
-                        <input type="date"
-                            class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none"
-                            placeholder="Du" title="Date de début">
-                        <i class="fas fa-arrow-right text-secondary fs-9"></i>
-                        <input type="date"
-                            class="form-control form-control-sm text-dark fs-8 border-secondary shadow-none"
-                            placeholder="Au" title="Date de fin">
+                    <div class="d-flex gap-2 align-items-center animate__animated animate__fadeIn" [class.d-none]="selectedPeriod !== 'Personnalisé...'">
+                        <div class="d-flex gap-2 align-items-center bg-white px-3 py-1 rounded-3 border border-secondary border-opacity-25" style="width: 320px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                            <i class="far fa-calendar-alt text-primary"></i>
+                            <input type="text"
+                                class="form-control form-control-sm text-dark fw-semibold fs-7 border-0 p-0 shadow-none bg-transparent flatpickr-range-input"
+                                placeholder="Choisir une plage..." 
+                                style="height: 24px; cursor: pointer;">
+                        </div>
                     </div>
-                    }
                 </div>
                 <button class="btn btn-primary btn-sm fw-medium shadow-sm" (click)="onRefresh()">
                     <i class="fas fa-sync-alt me-2"></i> Générer l'Analyse

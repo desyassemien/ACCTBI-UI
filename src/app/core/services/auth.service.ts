@@ -26,17 +26,47 @@ export class AuthService {
         return new Promise((resolve) => {
             // Simulate API call delay
             setTimeout(() => {
-                // Mock validation
+                let user: User | null = null;
+
                 if (matricule === 'admin' && password === 'admin') {
-                    const user: User = {
+                    user = {
                         id: '1',
                         nom: 'Admin',
                         prenom: 'System',
                         matricule: 'admin',
-                        role: 'DIRECTEUR',
+                        role: 'ADMIN',
                         service: 'Direction Générale'
                     };
+                } else if (matricule === 'compta' && password === 'compta') {
+                    user = {
+                        id: '2',
+                        nom: 'Comptable',
+                        prenom: 'Chef',
+                        matricule: 'compta',
+                        role: 'CHEF_COMPTA',
+                        service: 'Comptabilité'
+                    };
+                } else if (matricule === 'tresor' && password === 'tresor') {
+                    user = {
+                        id: '3',
+                        nom: 'Trésorier',
+                        prenom: 'Chef',
+                        matricule: 'tresor',
+                        role: 'CHEF_TRESORERIE',
+                        service: 'Trésorerie'
+                    };
+                } else if (matricule === 'regie' && password === 'regie') {
+                    user = {
+                        id: '4',
+                        nom: 'Régisseur',
+                        prenom: 'Chef',
+                        matricule: 'regie',
+                        role: 'CHEF_REGIE',
+                        service: 'Régies'
+                    };
+                }
 
+                if (user) {
                     this.currentUserSignal.set(user);
                     localStorage.setItem('sygacutUser', JSON.stringify(user));
                     resolve(true);
