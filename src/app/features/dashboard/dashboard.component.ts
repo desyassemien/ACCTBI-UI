@@ -1,28 +1,23 @@
-import { Component, inject, OnInit, ChangeDetectorRef, effect } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card.component';
-import { KpiCard } from '../../core/models/kpi-card.model';
-import { Alerte } from '../../core/models/alerte.model';
-import { VoiceService } from '../../core/services/voice.service';
 import { AnalyseSelectorComponent } from '../../shared/components/analyse-selector/analyse-selector.component';
+import { Alerte } from '../../core/models/alerte.model';
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, FormsModule, KpiCardComponent, AnalyseSelectorComponent],
+    imports: [CommonModule, FormsModule, AnalyseSelectorComponent],
     templateUrl: './dashboard.component.html',
     styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
     private router = inject(Router);
     private cdr = inject(ChangeDetectorRef);
-    public voiceService = inject(VoiceService);
 
     isLoading: boolean = true;
     selectedPeriod: string = 'MOIS';
-    dashChartType: string = 'bar';
     chartTypes: { [key: string]: string } = {
         tresLiquidite: 'line',
         comptaSolde: 'bar',
@@ -33,33 +28,20 @@ export class DashboardComponent implements OnInit {
         cautionStatuts: 'donut'
     };
 
-    // Mock KPIs from HEAD
-    kpis: KpiCard[] = [];
-
-    // Mock Daily Activities from HEAD
-    activiteJour: any[] = [];
-
-    // Mock Alerts
     alertes: Alerte[] = [
-        { id: 'a1', type: 'DANGER', service: 'Statistiques', titre: 'RAP > 90 jours', description: 'Ancienneté moyenne des Restes à Payer dépassée.', routeAction: '/statistiques', lue: false, dateCreation: new Date() },
-        { id: 'a2', type: 'DANGER', service: 'Trésorerie', titre: 'LA > 60 jours', description: 'Lettres d\'Avance non régularisées après délai.', routeAction: '/tresorerie', lue: false, dateCreation: new Date() },
-        { id: 'a3', type: 'DANGER', service: 'Comptabilité', titre: 'Écart concordance > 0.1%', description: 'Écart critique détecté entre BCEAO et ACCT.', routeAction: '/comptabilite', lue: false, dateCreation: new Date() },
-        { id: 'a4', type: 'WARNING', service: 'Cautionnement', titre: 'Cautionnement échu', description: 'Cautionnement non régularisé (Date fin + 30j).', routeAction: '/cautionnement', lue: true, dateCreation: new Date() }
+        { id: 'a1', type: 'DANGER', service: 'Trésorerie', titre: 'Total liquidité : 12.45 Mds | LA non régularisé : 45.8 Mds', description: 'Position de liquidité nette globale et Lettres d\'Avance non régularisées.', routeAction: '/tresorerie', lue: false, dateCreation: new Date() },
+        { id: 'a2', type: 'DANGER', service: 'Règlement', titre: 'Total réglé : 456.2 Mds', description: 'Volume global de règlements et paiements finalisés.', routeAction: '/reglement', lue: false, dateCreation: new Date() },
+        { id: 'a3', type: 'DANGER', service: 'Statistiques', titre: 'Montant RAP : 124.5 Mds', description: 'Encours total des Restes à Payer (RAP) de plus de 90 jours.', routeAction: '/statistiques', lue: false, dateCreation: new Date() },
+        { id: 'a4', type: 'WARNING', service: 'Comptabilité', titre: 'Écart de concordance : 1.2 Mds', description: 'Divergence critique constatée lors du rapprochement BCEAO.', routeAction: '/comptabilite', lue: false, dateCreation: new Date() },
+        { id: 'a5', type: 'WARNING', service: 'Cautionnement', titre: 'Cautionnement échu : 320.5 Mds', description: 'Cautionnements n\'ayant pas fait l\'objet de mainlevée ou régularisation.', routeAction: '/cautionnement', lue: false, dateCreation: new Date() },
+        { id: 'a6', type: 'INFO', service: 'Régies', titre: 'Total recettes collectées : 1 254 Mds', description: 'Total des recettes fiscales et non-fiscales constatées par les Régies.', routeAction: '/regies', lue: false, dateCreation: new Date() },
+        { id: 'a7', type: 'INFO', service: 'Statistiques', titre: 'Service de la dette : 75.4 Mds', description: 'Total des remboursements du service de la dette sur la période.', routeAction: '/statistiques', lue: false, dateCreation: new Date() }
     ];
 
-    // Mock Top Posts from HEAD
-    topPostes = [
-        { poste: 'Trésorerie Paierie Générale', montant: 450000000, evolution: '+5%' },
-        { poste: 'Recette Générale des Finances', montant: 320000000, evolution: '+2%' },
-        { poste: 'Trésorerie Principale Cocody', montant: 150000000, evolution: '-1%' },
-        { poste: 'Trésorerie Principale Yopougon', montant: 95000000, evolution: '+8%' },
-        { poste: 'Trésorerie Régionale Bouaké', montant: 78000000, evolution: '+4%' }
-    ];
-
-    // Detailed SVG Variables
     soldeBancaireTotal = 15423; // Mds
     laEnCoursTotal = 45.8; // Mds
     
+    // Arrays for data
     tresorerieDetails: any[] = [];
     soldeBancaireEvolution: any[] = [];
     comptaSoldesCompte: any[] = [];
@@ -77,16 +59,7 @@ export class DashboardComponent implements OnInit {
     cautionnementVolumes: any[] = [];
 
     constructor() {
-        // Initialize dynamic seed data
         this.generateData();
-
-        // Observer voice transcript to trigger commands
-        effect(() => {
-            const text = this.voiceService.transcript().toLowerCase();
-            if (text) {
-                this.handleVoiceCommand(text);
-            }
-        });
     }
 
     ngOnInit() {
@@ -95,15 +68,6 @@ export class DashboardComponent implements OnInit {
             this.isLoading = false;
             this.cdr.detectChanges();
         }, 40);
-    }
-
-    private handleVoiceCommand(text: string) {
-        console.log('🎙️ Traitement commande vocale:', text);
-        if (text.includes('barre') || text.includes('histogramme')) {
-            this.dashChartType = 'bar';
-        } else if (text.includes('ligne') || text.includes('courbe')) {
-            this.dashChartType = 'line';
-        }
     }
 
     setChartType(key: string, type: string, event: Event) {
@@ -118,26 +82,6 @@ export class DashboardComponent implements OnInit {
             case 'INFO': return 'fas fa-info-circle text-info';
             default: return 'fas fa-bell text-secondary';
         }
-    }
-
-    // Navigation logic from HEAD (Aicha)
-    goToDetail(kpiId: string) {
-        this.router.navigate(['/kpi-detail', kpiId]);
-    }
-
-    goToActiviteDetail(label: string) {
-        const idMap: { [key: string]: string } = {
-            'Règlements effectués': 'activite-reglements',
-            'Mandats émis': 'activite-mandats',
-            'Nouveaux cautionnements': 'activite-cautionnements',
-            'Recettes perçues (Régies)': 'activite-recettes'
-        };
-        const id = idMap[label];
-        if (id) this.router.navigate(['/kpi-detail', id]);
-    }
-
-    goToChartDetail(chartId: string) {
-        this.router.navigate(['/kpi-detail', chartId]);
     }
 
     goToService(route: string) {
@@ -163,37 +107,9 @@ export class DashboardComponent implements OnInit {
     // Deterministic random generator based on selected period
     generateData() {
         let seed = 1;
-        if(this.selectedPeriod === 'JOUR') seed = 0.03; // Scale appropriately for daily
+        if(this.selectedPeriod === 'JOUR') seed = 0.5;
         if(this.selectedPeriod === 'MOIS') seed = 1;
         if(this.selectedPeriod === 'ANNEE') seed = 12;
-
-        // Scale high-level KPIs
-        this.kpis = [
-            { id: '1', titre: 'Position Trésorerie Nette', valeur: 12450000000 * seed, unite: 'FCFA', couleur: '#1B3A6B', icone: 'fas fa-money-bill-wave', tendance: 'up', variation: 5.2 },
-            { id: '2', titre: 'Total Restes à Payer', valeur: 320000000 * seed, unite: 'FCFA', couleur: '#B71C1C', icone: 'fas fa-exclamation-triangle', tendance: 'up', variation: 4.8 },
-            { id: '3', titre: 'Taux Exécution Budgétaire', valeur: 85.8, unite: 'PERCENT', couleur: '#2E7D32', icone: 'fas fa-chart-line', tendance: 'up', variation: 2.1 },
-            { id: '4', titre: 'Solde Bancaire Consolidé', valeur: 15423000000 * seed, unite: 'FCFA', couleur: '#D4A017', icone: 'fas fa-university', tendance: 'neutral', variation: 0 },
-            { id: '5', titre: 'Opérations en Attente', valeur: Math.round(12 * seed), unite: 'NOMBRE', couleur: '#E65100', icone: 'fas fa-clock', tendance: 'up', variation: 1.5 }
-        ];
-
-        // Scale daily activities
-        const reglemVal = Math.round(45 * seed);
-        const mandatsVal = Math.round(128 * seed);
-        const cautionVal = Math.round(8 * seed);
-        
-        let recettesFormatted = '2.4B';
-        if (this.selectedPeriod === 'JOUR') {
-            recettesFormatted = '80M';
-        } else if (this.selectedPeriod === 'ANNEE') {
-            recettesFormatted = '28.8B';
-        }
-
-        this.activiteJour = [
-            { label: 'Règlements effectués', valeur: String(reglemVal), tendance: '+3', icone: 'fas fa-check-circle', couleur: 'text-success', montant: `${(1.2 * seed).toFixed(1)}B FCFA` },
-            { label: 'Mandats émis', valeur: String(mandatsVal), tendance: '+12', icone: 'fas fa-file-invoice-dollar', couleur: 'text-primary', montant: `${(3.5 * seed).toFixed(1)}B FCFA` },
-            { label: 'Nouveaux cautionnements', valeur: String(cautionVal), tendance: '0', icone: 'fas fa-shield-alt', couleur: 'text-warning', montant: `${Math.round(850 * seed)}M FCFA` },
-            { label: 'Recettes perçues (Régies)', valeur: recettesFormatted, tendance: '+15%', icone: 'fas fa-arrow-down', couleur: 'text-info', montant: undefined }
-        ];
 
         this.soldeBancaireTotal = 15423 * seed;
         this.laEnCoursTotal = 45.8 * seed;
@@ -276,7 +192,7 @@ export class DashboardComponent implements OnInit {
             { bailleur: 'Union Européenne', consomme: 90 }
         ];
 
-        this.reglementQualiteGlobal = Math.min(100, Math.max(0, Math.round(92 + (seed * 0.5))));
+        this.reglementQualiteGlobal = Math.round(92 + (seed * 2));
         this.reglementRejetsCauses = [
             { cause: 'Fonds Insuffisants', count: Math.round(12 * seed), color: '#B71C1C' },
             { cause: 'Erreur RIB', count: Math.round(8 * seed), color: '#D4A017' },

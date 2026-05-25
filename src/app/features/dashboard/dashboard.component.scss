@@ -62,43 +62,7 @@
             background-color: var(--primary-500) !important;
             transform: scaleY(1.05);
             transform-origin: bottom;
-            opacity: 1 !important;
         }
-    }
-}
-
-.card-hover {
-    transition: all 0.3s ease;
-    &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
-    }
-}
-
-// ── Hover-dim effect ────────────────────────────────────────────
-// Tous les 9 cadres service dans un seul groupe.
-// Survoler l'un grise les 8 autres.
-
-.cards-group {
-
-    // Quand un cadre est survolé, tous les .service-card-col sont grisés…
-    &:has(.service-card-col:hover) {
-        .service-card-col {
-            opacity: 0.35;
-            filter: grayscale(30%);
-            transition: opacity 0.25s ease, filter 0.25s ease;
-        }
-    }
-
-    // …sauf celui qui est survolé
-    &:has(.service-card-col:hover) .service-card-col:hover {
-        opacity: 1 !important;
-        filter: none !important;
-    }
-
-    // Transition douce au retrait du survol
-    .service-card-col {
-        transition: opacity 0.3s ease, filter 0.3s ease;
     }
 }
 

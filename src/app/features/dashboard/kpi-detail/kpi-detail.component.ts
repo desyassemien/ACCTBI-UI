@@ -1,14 +1,8 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { KpiDetailService } from '../services/kpi-detail.service';
-import { PeriodService } from '../../../core/services/period.service';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import * as XLSX from 'xlsx';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
 
 interface ChartData {
     labels: string[];
@@ -27,12 +21,10 @@ interface TableRow {
     templateUrl: './kpi-detail.component.html',
     styleUrl: './kpi-detail.component.scss'
 })
-export class KpiDetailComponent implements OnInit, OnDestroy {
+export class KpiDetailComponent implements OnInit {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private kpiDetailService = inject(KpiDetailService);
-    private periodService = inject(PeriodService);
-    private destroy$ = new Subject<void>();
 
     kpiId: string = '';
     kpiTitle: string = '';
@@ -49,8 +41,8 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
         { id: 'donut', icon: 'fas fa-chart-pie', title: 'Donut' }
     ];
 
-    periodes = ['Aujourd\'hui', 'Cette semaine', 'Ce mois-ci', 'Ce trimestre', 'Cette année', 'Personnalisé...'];
-    selectedPeriod = 'Ce mois-ci';
+    periodes: string[] = ['Année', 'Trimestre', 'Mois', 'Semaine'];
+    selectedPeriod: string = 'Mois';
 
     // Couleurs professionnelles pour les différents types de graphiques
     chartColors = {
@@ -88,41 +80,11 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
     selectedRow: TableRow | null = null;
     detailModalOpen: boolean = false;
 
-    // Nouvelles palettes modernes
-    readonly modernPalettes = [
-        { name: 'Indigo', color: '#6366f1' },
-        { name: 'Emeraude', color: '#10b981' },
-        { name: 'Ambre', color: '#f59e0b' },
-        { name: 'Rose', color: '#ec4899' },
-        { name: 'Ciel', color: '#0ea5e9' },
-        { name: 'Violet', color: '#8b5cf6' },
-        { name: 'Ardoise', color: '#475569' },
-        { name: 'Rouge', color: '#ef4444' }
-    ];
-    customChartColor: string | null = null;
-
-    // Gestion de la confirmation d'export
-    showExportConfirm: boolean = false;
-    pendingExportType: 'excel' | 'pdf' | null = null;
-
     ngOnInit() {
-        // Souscrire aux changements de période depuis le service
-        this.periodService.selectedPeriod$
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(period => {
-                this.selectedPeriod = period;
-                console.log('Période synchronisée:', period);
-            });
-
         this.route.params.subscribe(params => {
             this.kpiId = params['id'];
             this.loadKpiDetails();
         });
-    }
-
-    ngOnDestroy() {
-        this.destroy$.next();
-        this.destroy$.complete();
     }
 
     loadKpiDetails() {
@@ -134,7 +96,7 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
             this.chartData = details.chartData;
             this.tableHeaders = details.tableHeaders;
             this.tableData = details.tableData;
-            this.chartType = details.chartType;
+            this.chartType = details.chartType === 'bar' ? 'line' : details.chartType;
         }
     }
 
@@ -148,81 +110,9 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
 
     onPeriodChange(event: Event) {
         const select = event.target as HTMLSelectElement;
-        const newPeriod = select.value;
-        this.periodService.setSelectedPeriod(newPeriod);
-        // Le selectedPeriod sera mis à jour automatiquement via la souscription
-    }
-
-    prepareExport(type: 'excel' | 'pdf') {
-        this.pendingExportType = type;
-        this.showExportConfirm = true;
-    }
-
-    confirmExport() {
-        if (this.pendingExportType === 'excel') {
-            this.exportToExcel();
-        } else if (this.pendingExportType === 'pdf') {
-            this.exportToPDF();
-        }
-        this.cancelExport();
-    }
-
-    cancelExport() {
-        this.showExportConfirm = false;
-        this.pendingExportType = null;
-    }
-
-    exportToExcel() {
-        // Préparation des données (on retire la colonne 'details' interne)
-        const exportData = this.tableData.map(row => {
-            const cleanRow: any = {};
-            this.tableHeaders.forEach(header => {
-                cleanRow[header] = row[header];
-            });
-            return cleanRow;
-        });
-
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Détails');
-
-        // Génération du nom du fichier
-        const fileName = `${this.kpiTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
-        XLSX.writeFile(workbook, fileName);
-    }
-
-    exportToPDF() {
-        const doc = new jsPDF();
-        
-        // Titre et métadonnées
-        doc.setFontSize(18);
-        doc.text(this.kpiTitle, 14, 22);
-        
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Valeur actuelle: ${this.kpiValue} ${this.kpiUnit}`, 14, 30);
-        doc.text(`Date export: ${new Date().toLocaleDateString('fr-FR')}`, 14, 35);
-
-        // Données du tableau
-        const body = this.tableData.map(row => 
-            this.tableHeaders.map(header => String(row[header] || ''))
-        );
-
-        autoTable(doc, {
-            head: [this.tableHeaders],
-            body: body,
-            startY: 45,
-            theme: 'striped',
-            headStyles: { fillColor: [27, 58, 107] }, // #1B3A6B (Bleu Projet)
-            styles: { fontSize: 9 }
-        });
-
-        const fileName = `${this.kpiTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
-        doc.save(fileName);
-    }
-
-    changeChartColor(color: string) {
-        this.customChartColor = color;
+        this.selectedPeriod = select.value;
+        // TODO: rafraîchir / filtrer chartData sur la période sélectionnée
+        console.log('Période sélectionnée :', this.selectedPeriod);
     }
 
     getMaxValue(): number {
@@ -232,17 +122,17 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
 
     getLinePath(): string {
         if (!this.chartData) return '';
-        const points: Array<{ x: number, y: number }> = [];
+        const points: Array<{x:number,y:number}> = [];
         const count = this.chartData.data.length;
         const max = this.getMaxValue() || 1;
 
         for (let i = 0; i < count; i++) {
             const x = (i / (count - 1 || 1)) * 1200;
             const y = 350 - ((this.chartData.data[i] / max) * 330);
-            points.push({ x, y });
+            points.push({x,y});
         }
 
-        return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x},${p.y}`).join(' ');
+        return points.map((p, i) => `${i===0?'M':'L'} ${p.x},${p.y}`).join(' ');
     }
 
     getAreaPath(): string {
@@ -255,28 +145,7 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
         return `${line} L ${xEnd},350 L 0,350 Z`;
     }
 
-    /** Chemin SVG mis à l'échelle pour le repère axes (x: 60-880, y: 270-10) */
-    getScaledLinePath(): string {
-        if (!this.chartData) return '';
-        const count = this.chartData.data.length;
-        const max = this.getMaxValue() || 1;
-        const xStart = 60, xEnd = 880, yTop = 10, yBottom = 270;
-        return this.chartData.data.map((val, i) => {
-            const x = xStart + (i / ((count - 1) || 1)) * (xEnd - xStart);
-            const y = yBottom - (val / max) * (yBottom - yTop);
-            return `${i === 0 ? 'M' : 'L'} ${x},${y}`;
-        }).join(' ');
-    }
-
-    getScaledAreaPath(): string {
-        const line = this.getScaledLinePath();
-        if (!line || !this.chartData) return '';
-        const count = this.chartData.data.length;
-        const xEnd = 60 + ((count - 1) / ((count - 1) || 1)) * 820;
-        return `${line} L ${xEnd},270 L 60,270 Z`;
-    }
-
-    getPieSegments(): Array<{ d: string; fill: string; inner: string; label: string; value: number; percentage: number; labelX: number; labelY: number; gradientId: string }> {
+    getPieSegments(): Array<{d:string; fill:string; inner:string; label:string; value:number; percentage:number; labelX:number; labelY:number; gradientId:string}> {
         if (!this.chartData) return [];
         const chartData = this.chartData;
         const total = chartData.data.reduce((sum, v) => sum + v, 0) || 1;
@@ -309,11 +178,11 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
         });
     }
 
-    getDonutInner(): { cx: number; cy: number; r: number; } {
-        return { cx: 170, cy: 170, r: 80 };
+    getDonutInner(): {cx:number; cy:number; r:number;} {
+        return {cx:170, cy:170, r:80};
     }
 
-    getPieLegend(): Array<{ label: string; value: number; percentage: number; color: string }> {
+    getPieLegend(): Array<{label:string; value:number; percentage:number; color:string}> {
         const segments = this.getPieSegments();
         return segments.map(s => ({
             label: s.label,
@@ -330,16 +199,19 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
     getBarGradient(index: number): string {
         const colors = this.chartColors.bar;
         const baseColor = colors[index % colors.length];
+        // Create a gradient from the base color to a lighter version
         return `linear-gradient(135deg, ${baseColor}, ${this.lightenColor(baseColor, 30)})`;
     }
 
     getPieGradient(index: number): string {
         const colors = this.chartColors.pie;
         const baseColor = colors[index % colors.length];
+        // Create a radial gradient for 3D effect
         return `radial-gradient(circle at 30% 30%, ${this.lightenColor(baseColor, 40)}, ${baseColor})`;
     }
 
     private lightenColor(color: string, percent: number): string {
+        // Simple color lightening function
         const num = parseInt(color.replace("#", ""), 16);
         const amt = Math.round(2.55 * percent);
         const R = (num >> 16) + amt;
@@ -359,42 +231,21 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
         }, 200);
     }
 
-    onCircleHover(event: MouseEvent, isHover: boolean, index: number) {
+    onCircleHover(event: MouseEvent, isHover: boolean) {
         const circle = event.target as SVGElement;
         if (isHover) {
             circle.setAttribute('r', '7');
-            if (this.chartData) {
-                this.tooltipData = {
-                    show: true,
-                    x: event.clientX,
-                    y: event.clientY - 40,
-                    label: this.chartData.labels[index],
-                    value: this.chartData.data[index].toLocaleString(),
-                    color: this.getLineColor()
-                };
-            }
         } else {
             circle.setAttribute('r', '5');
-            this.tooltipData.show = false;
         }
     }
 
-    onPieHover(event: MouseEvent, isHover: boolean, segment: any) {
+    onPieHover(event: MouseEvent, isHover: boolean) {
         const path = event.target as SVGElement;
         if (isHover) {
             path.style.transform = 'scale(1.05)';
-            this.tooltipData = {
-                show: true,
-                x: event.clientX,
-                y: event.clientY - 40,
-                label: segment.label,
-                value: segment.value.toLocaleString(),
-                percentage: segment.percentage + '%',
-                color: segment.fill
-            };
         } else {
             path.style.transform = 'scale(1)';
-            this.tooltipData.show = false;
         }
     }
 
@@ -416,7 +267,6 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
     }
 
     getLineColor(): string {
-        if (this.customChartColor) return this.customChartColor;
         if (this.chartData?.color) {
             return this.chartData.color;
         }
@@ -424,7 +274,6 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
     }
 
     getAreaColor(): string {
-        if (this.customChartColor) return this.customChartColor;
         if (this.chartData?.color) {
             return this.chartData.color;
         }
@@ -449,69 +298,42 @@ export class KpiDetailComponent implements OnInit, OnDestroy {
         return this.chartData?.labels || [];
     }
 
-    getColumnValue(row: TableRow, header: string): string | number {
-        const value = row[header];
-        if (value === null || value === undefined) {
-            return '';
-        }
-        if (typeof value === 'number') {
-            return value.toLocaleString('fr-FR');
-        }
-        return value.toString();
+    showTooltip(event: MouseEvent, label: string, value: number, percentage?: number, color?: string) {
+        const rect = (event.target as HTMLElement).getBoundingClientRect();
+        this.tooltipData = {
+            show: true,
+            x: rect.left + rect.width / 2,
+            y: rect.top - 10,
+            label: label,
+            value: value.toLocaleString('fr-FR') + ' FCFA',
+            percentage: percentage ? `${percentage.toFixed(1)}%` : undefined,
+            color: color
+        };
     }
 
-    isTrendColumn(header: string): boolean {
-        return header.toLowerCase() === 'tendance';
+    hideTooltip() {
+        this.tooltipData.show = false;
     }
 
-    getTrendClass(value: any): string {
-        const val = String(value);
-        if (val === '-') return 'text-secondary';
-
-        // Logique Inversée : Pour certains KPIs, une hausse (↑) est une mauvaise nouvelle
-        const reverseLogicIds = ['2', '5', 'alertes']; // Restes à Payer, En Attente, Alertes
-        const isReverse = reverseLogicIds.includes(this.kpiId);
-
-        if (val === '↑') {
-            return isReverse ? 'text-danger' : 'text-success';
-        } else if (val === '↓') {
-            return isReverse ? 'text-success' : 'text-danger';
+    getColumnValue(row: TableRow, column: string): string | number {
+        const value = row[column];
+        if (value === undefined || value === null) {
+            return '-';
         }
-        
-        return 'text-dark';
+        if (Array.isArray(value)) {
+            return value.length;
+        }
+        return value;
     }
 
-    isStatusColumn(header: string): boolean {
-        const h = header.toLowerCase();
-        return h === 'statut' || h === 'état' || h === 'etat';
-    }
-
-    getStatusClass(value: any): string {
-        const val = String(value).toLowerCase();
-        if (val.includes('normal') || val.includes('valid') || val.includes('approuv')) {
-            return 'bg-success-subtle text-success border-success';
-        }
-        if (val.includes('critique') || val.includes('danger') || val.includes('rejet')) {
-            return 'bg-danger-subtle text-danger border-danger';
-        }
-        if (val.includes('alert') || val.includes('attent') || val.includes('cours') || val.includes('révision')) {
-            return 'bg-warning-subtle text-warning border-warning';
-        }
-        return 'bg-light text-dark border-secondary';
-    }
-
-    isArray(value: any): boolean {
+    isArray(value: any): value is any[] {
         return Array.isArray(value);
     }
 
-    getDetailsArray(): any[] {
-        if (this.selectedRow && Array.isArray(this.selectedRow['details'])) {
-            return this.selectedRow['details'] as any[];
+    getDetails(row: TableRow | null): TableRow[] | null {
+        if (row && Array.isArray(row['details'])) {
+            return row['details'] as TableRow[];
         }
-        return [];
-    }
-
-    rowHasDetails(row: TableRow): boolean {
-        return !!(row['details'] && Array.isArray(row['details']) && (row['details'] as any[]).length > 0);
+        return null;
     }
 }
