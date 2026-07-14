@@ -1,7 +1,8 @@
 export const environment = {
   production: true,
+  useKeycloak: true,
   keycloak: {
-    url: 'http://162.215.172.50:8080',
+    url: 'https://162.215.172.50:8081',
     realm: 'projetBi',
     clientId: 'acctBI-front'
   }

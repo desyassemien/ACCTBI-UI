@@ -2,6 +2,7 @@ import { createAuthGuard } from 'keycloak-angular';
 import { inject } from '@angular/core';
 import { type ActivatedRouteSnapshot, type RouterStateSnapshot, Router, UrlTree } from '@angular/router';
 import { AlertService } from '../services/alert.service';
+import { environment } from '../../../environments/environment';
 
 export const authKeycloakGuard = createAuthGuard(
     async (
@@ -9,6 +10,10 @@ export const authKeycloakGuard = createAuthGuard(
         state: RouterStateSnapshot,
         { keycloak, authenticated }
     ): Promise<boolean | UrlTree> => {
+        if (!environment.useKeycloak) {
+            return true;
+        }
+
         const alertService = inject(AlertService);
 
         // Si l'utilisateur n'est pas authentifié, on force le login Keycloak

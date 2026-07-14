@@ -25,7 +25,8 @@ export class DashboardComponent implements OnInit {
         recettesComposition: 'donut',
         recettesDetail: 'bar',
         gestionBailleurs: 'radial',
-        cautionStatuts: 'donut'
+        cautionStatuts: 'donut',
+        reglementVolumes: 'bar'
     };
 
     alertes: Alerte[] = [
@@ -53,10 +54,23 @@ export class DashboardComponent implements OnInit {
     recettesDetails: any[] = [];
     top10Depenses: any[] = [];
     gestionFondsBailleursRadar: any[] = [];
-    reglementQualiteGlobal = 92;
-    reglementRejetsCauses: any[] = [];
+    reglementVolumesPostes: any[] = [];
+    reglementFluxTransactions: any[] = [];
     cautionnementStatuts: any[] = [];
     cautionnementVolumes: any[] = [];
+
+    get reglementTotalRegle(): number {
+        return this.reglementVolumesPostes.reduce((sum, d) => sum + d.regle, 0);
+    }
+    get reglementTotalRap(): number {
+        return this.reglementVolumesPostes.reduce((sum, d) => sum + d.rap, 0);
+    }
+    get cautionTotalCount(): number {
+        return this.cautionnementStatuts.reduce((sum, s) => sum + s.count, 0);
+    }
+    get cautionTotalVolume(): number {
+        return this.cautionnementVolumes.reduce((sum, v) => sum + v.montant, 0);
+    }
 
     constructor() {
         this.generateData();
@@ -192,17 +206,29 @@ export class DashboardComponent implements OnInit {
             { bailleur: 'Union Européenne', consomme: 90 }
         ];
 
-        this.reglementQualiteGlobal = Math.round(92 + (seed * 2));
-        this.reglementRejetsCauses = [
-            { cause: 'Fonds Insuffisants', count: Math.round(12 * seed), color: '#B71C1C' },
-            { cause: 'Erreur RIB', count: Math.round(8 * seed), color: '#D4A017' },
-            { cause: 'Défaut de Pièces', count: Math.round(3 * seed), color: '#1B3A6B' }
+        this.reglementVolumesPostes = [
+            { poste: 'Dépenses de Personnel', regle: 3200 * seed, rap: 300 * seed },
+            { poste: 'Service de la Dette', regle: 2400 * seed, rap: 100 * seed },
+            { poste: 'Investissements Publics', regle: 1600 * seed, rap: 400 * seed },
+            { poste: 'Subventions & Transferts', regle: 980 * seed, rap: 220 * seed },
+            { poste: 'Fonctionnement', regle: 750 * seed, rap: 180 * seed },
+            { poste: 'Dépenses Exceptionnelles', regle: 320 * seed, rap: 130 * seed }
+        ];
+
+        this.reglementFluxTransactions = [
+            { ref: 'REG-2024-0891', libelle: 'Salaires – Éducation Nationale', montant: 485.2 * seed, statut: 'REGLE', date: '12/06/2025' },
+            { ref: 'REG-2024-0892', libelle: 'Remboursement Eurobond', montant: 320.0 * seed, statut: 'REGLE', date: '11/06/2025' },
+            { ref: 'REG-2024-0893', libelle: 'Travaux Autoroute Nord', montant: 215.5 * seed, statut: 'RAP', date: '10/06/2025' },
+            { ref: 'REG-2024-0894', libelle: 'Subvention – Santé Publique', montant: 180.3 * seed, statut: 'REGLE', date: '09/06/2025' },
+            { ref: 'REG-2024-0895', libelle: 'Équipement Universitaire', montant: 145.8 * seed, statut: 'RAP', date: '08/06/2025' },
+            { ref: 'REG-2024-0896', libelle: 'Fonctionnement MF', montant: 98.4 * seed, statut: 'REGLE', date: '07/06/2025' },
+            { ref: 'REG-2024-0897', libelle: 'Indemnités Fonctionnaires', montant: 76.1 * seed, statut: 'RAP', date: '06/06/2025' }
         ];
 
         this.cautionnementStatuts = [
-            { statut: 'Actifs', count: Math.round(1450 * seed), color: '#2E7D32' },
-            { statut: 'Échus non levés', count: Math.round(320 * seed), color: '#D4A017' },
-            { statut: 'Contentieux', count: Math.round(45 * seed), color: '#B71C1C' }
+            { statut: 'Actifs', count: Math.round(1450 * seed), color: '#2E7D32', montant: 12.2 * seed },
+            { statut: 'Échus non levés', count: Math.round(320 * seed), color: '#D4A017', montant: 2.3 * seed },
+            { statut: 'Contentieux', count: Math.round(45 * seed), color: '#B71C1C', montant: 0.5 * seed }
         ];
 
         this.cautionnementVolumes = [
