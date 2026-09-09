@@ -1,0 +1,27 @@
+[root@svr-osisbusiness acctbi]# docker cp /opt/acctbi/projetBi-realm.json keycloak_acctbi:/tmp/projetBi-realm.json
+Successfully copied 90.1kB to keycloak_acctbi:/tmp/projetBi-realm.json
+You have mail in /var/spool/mail/root
+[root@svr-osisbusiness acctbi]# docker exec -it keycloak_acctbi /opt/keycloak/bin/kc.sh import --file /tmp/projetBi-realm.json
+Updating the configuration and installing your custom providers, if any. Please wait.
+2026-05-21 16:45:35,030 INFO  [io.qua.dep.QuarkusAugmentor] (main) Quarkus augmentation completed in 35656ms
+Server configuration updated and persisted. Run the following command to review the configuration:
+
+        kc.sh show-config
+
+2026-05-21 16:45:58,129 INFO  [org.keycloak.quarkus.runtime.storage.infinispan.CacheManagerFactory] (main) Starting Infinispan embedded cache manager
+2026-05-21 16:45:59,942 INFO  [org.keycloak.quarkus.runtime.storage.infinispan.CacheManagerFactory] (main) Persistent user sessions enabled and no memory limit found in configuration. Setting max entries for sessions to 10000 entries.
+2026-05-21 16:45:59,943 INFO  [org.keycloak.quarkus.runtime.storage.infinispan.CacheManagerFactory] (main) Persistent user sessions enabled and no memory limit found in configuration. Setting max entries for clientSessions to 10000 entries.
+2026-05-21 16:45:59,944 INFO  [org.keycloak.quarkus.runtime.storage.infinispan.CacheManagerFactory] (main) Persistent user sessions enabled and no memory limit found in configuration. Setting max entries for offlineSessions to 10000 entries.
+2026-05-21 16:45:59,944 INFO  [org.keycloak.quarkus.runtime.storage.infinispan.CacheManagerFactory] (main) Persistent user sessions enabled and no memory limit found in configuration. Setting max entries for offlineClientSessions to 10000 entries.
+2026-05-21 16:46:02,104 INFO  [org.infinispan.CONTAINER] (ForkJoinPool.commonPool-worker-1) ISPN000556: Starting user marshaller 'org.infinispan.commons.marshall.ImmutableProtoStreamMarshaller'
+2026-05-21 16:46:05,730 INFO  [org.keycloak.connections.infinispan.DefaultInfinispanConnectionProviderFactory] (main) Node name: node_487387, Site name: null
+2026-05-21 16:46:08,788 INFO  [org.keycloak.broker.provider.AbstractIdentityProviderMapper] (main) Registering class org.keycloak.broker.provider.mappersync.ConfigSyncEventListener
+2026-05-21 16:46:12,819 INFO  [org.keycloak.exportimport.singlefile.SingleFileImportProvider] (main) Full importing from file /tmp/projetBi-realm.json
+2026-05-21 16:46:13,936 WARN  [io.agroal.pool] (main) Datasource '<default>': JDBC resources leaked: 3 ResultSet(s) and 0 Statement(s)
+2026-05-21 16:46:13,991 INFO  [com.arjuna.ats.jbossatx] (main) ARJUNA032014: Stopping transaction recovery manager
+2026-05-21 16:46:14,335 ERROR [org.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler] (main) ERROR: Failed to start server in (nonserver) mode
+2026-05-21 16:46:14,336 ERROR [org.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler] (main) ERROR: Failed to run import
+2026-05-21 16:46:14,337 ERROR [org.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler] (main) ERROR: Unrecognized field "verifiableCredentialsEnabled" (class org.keycloak.representations.idm.RealmRepresentation), not marked as ignorable (144 known properties: "userFederationMappers", "rememberMe", "duplicateEmailsAllowed", "adminEventsDetailsEnabled", "users", "clientOfflineSessionMaxLifespan", "webAuthnPolicyRequireResidentKey", "webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister", "components", "otpPolicyType", "accessCodeLifespanUserAction", "id", "webAuthnPolicyAttestationConveyancePreference", "enabledEventTypes", "applications", "webAuthnPolicyPasswordlessSignatureAlgorithms", "eventsListeners", "ssoSessionMaxLifespanRememberMe", "defaultDefaultClientScopes", "webAuthnPolicyPasswordlessCreateTimeout", "clientOfflineSessionIdleTimeout", "notBefore", "publicKey", "smtpServer", "clientPolicies", "resetPasswordAllowed", "webAuthnPolicyAvoidSameAuthenticatorRegister", "accessTokenLifespanForImplicitFlow", "webAuthnPolicyPasswordlessUserVerificationRequirement", "clientScopes", "internationalizationEnabled", "defaultRole", "accessTokenLifespan", "passwordCredentialGrantAllowed", "federatedUsers", "applicationScopeMappings" [truncated]])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 2845, column: 40] (through reference chain: org.keycloak.representations.idm.RealmRepresentation["verifiableCredentialsEnabled"])
+2026-05-21 16:46:14,337 ERROR [org.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler] (main) For more details run the same command passing the '--verbose' option. Also you can use '--help' to see the details about the usage of the particular command.
+You have mail in /var/spool/mail/root

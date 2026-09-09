@@ -16,940 +16,1431 @@
         </div>
     </div>
 
-    <!-- Alertes compactes -->
-    <div class="card border-0 shadow-sm mb-4">
+    <!-- Alertes Critiques (Cards Verticales / Portrait en quinconce) -->
+    <div class="card border-0 shadow-sm mb-4 alert-container-card">
         <div class="card-body p-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="fw-bold mb-0 text-danger"><i class="fas fa-bell me-2"></i>Alertes Critiques</h6>
-                <span class="badge bg-danger rounded-pill">{{ alertes.length }}</span>
-            </div>
-            <div class="d-flex gap-2 flex-wrap">
-                @for (alerte of alertes; track alerte.id) {
-                <div class="alert-chip d-flex align-items-center gap-2 px-3 py-2 rounded-pill shadow-sm"
-                    [class.alert-chip-danger]="alerte.type==='DANGER'"
-                    [class.alert-chip-warning]="alerte.type==='WARNING'"
-                    (click)="goToService(alerte.routeAction)" style="cursor:pointer;">
-                    <i [class]="getAlertIcon(alerte.type)" style="font-size:0.75rem"></i>
-                    <span class="small fw-bold">{{ alerte.service }} :</span>
-                    <span class="small">{{ alerte.titre }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="alert-header-badge d-flex align-items-center justify-content-center">
+                        <i class="fas fa-bell"></i>
+                    </span>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-danger">Alertes Critiques</h6>
+                    </div>
                 </div>
-                }
+                <span class="badge bg-danger rounded-pill px-2.5 py-1">{{ alertes.length }} active{{ alertes.length > 1 ? 's' : '' }}</span>
+            </div>
+
+            <div class="alert-cards-scroll-container">
+                <div class="alert-cards-staggered-grid">
+                    @for (alerte of alertes; track alerte.id; let i = $index) {
+                    <div class="alert-portrait-card-wrapper"
+                        [class.is-odd]="(i + 1) % 2 !== 0"
+                        [class.is-even]="(i + 1) % 2 === 0">
+                        <div class="alert-portrait-card rounded-3 d-flex flex-column justify-content-between position-relative"
+                            [class.alert-card-danger]="alerte.type === 'DANGER'"
+                            [class.alert-card-warning]="alerte.type === 'WARNING'"
+                            [class.alert-card-info]="alerte.type === 'INFO'"
+                            (click)="goToService(alerte.routeAction)"
+                            role="button"
+                            tabindex="0">
+                            
+                            <!-- Icône transparente en arrière-plan (Watermark) -->
+                            <div class="alert-watermark-icon" aria-hidden="true">
+                                <i [class]="getServiceIcon(alerte.service)"></i>
+                            </div>
+
+                            <!-- En-tête de la Card -->
+                            <div class="alert-card-top position-relative z-1">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="alert-type-badge d-inline-flex align-items-center justify-content-center rounded-2">
+                                        <i [class]="getAlertIcon(alerte.type)"></i>
+                                    </span>
+                                    <span class="alert-type-pill fw-bold">{{ alerte.type }}</span>
+                                </div>
+                                <h6 class="alert-service-title fw-bold mb-0">{{ alerte.service }}</h6>
+                            </div>
+
+                            <!-- Corps / Métrique -->
+                            <div class="alert-card-body position-relative z-1 my-2">
+                                <p class="alert-card-text mb-0">{{ alerte.titre }}</p>
+                            </div>
+
+                            <!-- Bas de carte / Action -->
+                            <div class="alert-card-footer position-relative z-1 pt-2 border-top border-light-subtle d-flex align-items-center justify-content-between">
+                                <span class="alert-action-label">Détails</span>
+                                <span class="alert-action-arrow">
+                                    <i class="fas fa-chevron-right"></i>
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- SECTION TRÉSORERIE -->
-    <div class="d-flex align-items-center mb-3 mt-4 border-bottom pb-2">
-        <h5 class="fw-bold text-primary mb-0"><i class="fas fa-university me-2"></i>Trésorerie</h5>
+    <!-- ========================================== -->
+    <!-- 1. SECTION TRÉSORERIE (Ligne à 3 colonnes) -->
+    <!-- ========================================== -->
+    <div class="d-flex align-items-center mb-2.5 mt-3 border-bottom pb-1.5">
+        <h6 class="fw-bold text-primary mb-0"><i class="fas fa-university me-2"></i>Trésorerie &amp; Disponibilités</h6>
     </div>
-    <div class="row g-4 mb-4">
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-1" (click)="goToService('/comptabilite')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <div>
-                                <h6 class="fw-bold mb-0 text-primary">Solde Bancaire Consolidé</h6>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <span class="small text-secondary">Vue par institution</span>
-                                    <div class="btn-group shadow-none" style="height:20px;">
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-primary]="chartTypes['comptaSolde']==='bar'" [class.text-muted]="chartTypes['comptaSolde']!=='bar'" (click)="setChartType('comptaSolde','bar',$event)"><i class="fas fa-chart-bar"></i></button>
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-primary]="chartTypes['comptaSolde']==='line'" [class.text-muted]="chartTypes['comptaSolde']!=='line'" (click)="setChartType('comptaSolde','line',$event)"><i class="fas fa-chart-line"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-end">
-                                <span class="fs-4 fw-bold" style="color:#1B3A6B;">{{ soldeBancaireTotal | number:'1.0-0' }} Mds</span>
-                            </div>
-                        </div>
-                    }
+    <div class="row g-3 mb-3">
+        <!-- Col 1 : Solde Bancaire Consolidé -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-1" (click)="goToService('/tresorerie')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-primary" style="font-size:0.86rem;">Solde Consolidé</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Vue par institution</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="fw-bold text-primary" style="font-size:0.95rem;">{{ soldeBancaireTotal | number:'1.0-0' }} Mds</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('tres_solde', 'Trésorerie', 'fas fa-university', 'Solde Consolidé', 'Vue détaillée par institution et historique', soldeBancaireTotal + ' Mds', 'text-primary', '/tresorerie', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="card-body p-3">
-                    @if (isLoading) {
-                        <div class="shimmer-block w-100" style="height: 190px;"></div>
-                    } @else {
-                        @if (chartTypes['comptaSolde']==='bar') {
-                            <svg viewBox="0 0 500 200" class="w-100" style="height:190px;">
-                                <!-- Grid lines -->
-                                <line x1="50" y1="40" x2="480" y2="40" stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="50" y1="90" x2="480" y2="90" stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="50" y1="140" x2="480" y2="140" stroke="#f1f5f9" stroke-width="1"/>
-                                
-                                @for (d of soldeBancaireEvolution; track d.mois; let i = $index) {
-                                    <rect [attr.x]="80 + i * 65" [attr.y]="170 - (d.transit / 100)" width="32" [attr.height]="d.transit / 100" fill="#E9ECEF"></rect>
-                                    <rect [attr.x]="80 + i * 65" [attr.y]="170 - (d.transit + d.depots) / 100" width="32" [attr.height]="d.depots / 100" fill="#6C757D"></rect>
-                                    <rect [attr.x]="80 + i * 65" [attr.y]="170 - (d.transit + d.depots + d.bni) / 100" width="32" [attr.height]="d.bni / 100" fill="#FF8200"></rect>
-                                    <rect [attr.x]="80 + i * 65" [attr.y]="170 - (d.transit + d.depots + d.bni + d.bceao) / 100" width="32" [attr.height]="d.bceao / 100" fill="#009E60" rx="2"></rect>
-                                    <text [attr.x]="80 + i * 65 + 16" y="190" text-anchor="middle" font-size="9" fill="#94a3b8" font-weight="500">{{ d.mois }}</text>
-                                }
-                                
-                                <!-- Axes -->
-                                <line x1="50" y1="20" x2="50" y2="170" stroke="#94a3b8" stroke-width="1"/>
-                                <line x1="50" y1="170" x2="480" y2="170" stroke="#94a3b8" stroke-width="1"/>
-                                
-                                <!-- Y labels -->
-                                <text x="45" y="170" text-anchor="end" font-size="9" fill="#94a3b8">0</text>
-                                <text x="45" y="95" text-anchor="end" font-size="9" fill="#94a3b8">8K</text>
-                                <text x="45" y="25" text-anchor="end" font-size="9" fill="#94a3b8">15K</text>
-                            </svg>
-                        } @else {
-                            <svg viewBox="0 0 500 200" class="w-100" style="height:190px;">
-                                <!-- Grid lines -->
-                                <line x1="50" y1="40" x2="480" y2="40" stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="50" y1="90" x2="480" y2="90" stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="50" y1="140" x2="480" y2="140" stroke="#f1f5f9" stroke-width="1"/>
-
-                                <line x1="50" y1="170" x2="480" y2="170" stroke="#94a3b8" stroke-width="1"/>
-                                @for (d of soldeBancaireEvolution; track d.mois; let i = $index) {
-                                    <circle [attr.cx]="96 + i * 65" [attr.cy]="170 - (d.transit + d.depots + d.bni + d.bceao) / 100" r="4" fill="#009E60"></circle>
-                                    @if (i < soldeBancaireEvolution.length - 1) {
-                                        <line 
-                                            [attr.x1]="96 + i * 65" 
-                                            [attr.y1]="170 - (d.transit + d.depots + d.bni + d.bceao) / 100"
-                                            [attr.x2]="96 + (i + 1) * 65"
-                                            [attr.y2]="170 - (soldeBancaireEvolution[i+1].transit + soldeBancaireEvolution[i+1].depots + soldeBancaireEvolution[i+1].bni + soldeBancaireEvolution[i+1].bceao) / 100"
-                                            stroke="#009E60" 
-                                            stroke-width="3" 
-                                            stroke-linecap="round">
-                                        </line>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 300 115" class="w-100">
+                                    <line x1="15" y1="15" x2="285" y2="15" stroke="#f1f5f9" stroke-width="1"/>
+                                    <line x1="15" y1="50" x2="285" y2="50" stroke="#f1f5f9" stroke-width="1"/>
+                                    <line x1="15" y1="85" x2="285" y2="85" stroke="#94a3b8" stroke-width="1"/>
+                                    @for (d of soldeBancaireEvolution; track d.mois; let i = $index) {
+                                        <rect [attr.x]="25 + i * 38" [attr.y]="85 - (d.transit / 125)" width="18" [attr.height]="d.transit / 125" fill="#E9ECEF"></rect>
+                                        <rect [attr.x]="25 + i * 38" [attr.y]="85 - (d.transit + d.depots) / 125" width="18" [attr.height]="d.depots / 125" fill="#6C757D"></rect>
+                                        <rect [attr.x]="25 + i * 38" [attr.y]="85 - (d.transit + d.depots + d.bni) / 125" width="18" [attr.height]="d.bni / 125" fill="#FF8200"></rect>
+                                        <rect [attr.x]="25 + i * 38" [attr.y]="85 - (d.transit + d.depots + d.bni + d.bceao) / 125" width="18" [attr.height]="d.bceao / 125" fill="#009E60" rx="2"></rect>
+                                        <text [attr.x]="25 + i * 38 + 9" y="100" text-anchor="middle" font-size="8.5" fill="#94a3b8">{{ d.mois }}</text>
                                     }
-                                    <text [attr.x]="96 + i * 65" y="190" text-anchor="middle" font-size="9" fill="#94a3b8" font-weight="500">{{ d.mois }}</text>
-                                }
-                            </svg>
-                        }
-                        <div class="d-flex gap-3 justify-content-center mt-1 flex-wrap">
-                            <span class="small text-secondary"><span class="legend-dot" style="background:#009E60;"></span>BCEAO</span>
-                            <span class="small text-secondary"><span class="legend-dot" style="background:#FF8200;"></span>BNI</span>
-                            <span class="small text-secondary"><span class="legend-dot" style="background:#6C757D;"></span>Dépôts</span>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-2" (click)="goToService('/comptabilite')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <h6 class="fw-bold mb-0 text-primary">Situation par Compte</h6>
-                        <span class="small text-secondary">Détails des soldes actifs</span>
-                    }
-                </div>
-                <div class="card-body p-0">
-                    @if (isLoading) {
-                        <div class="p-4 d-flex flex-column gap-3">
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                        </div>
-                    } @else {
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-4 small text-uppercase text-secondary fw-semibold border-0">Banque / Compte</th>
-                                    <th class="small text-uppercase text-secondary fw-semibold border-0 text-end">Solde (Mds)</th>
-                                    <th class="pe-4 small text-uppercase text-secondary fw-semibold border-0 text-end">Écart</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (c of comptaSoldesCompte; track c.banque) {
-                                <tr>
-                                    <td class="ps-4">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="legend-dot" [style.background]="c.banque.includes('BCEAO') ? '#009E60' : c.banque.includes('BNI') ? '#FF8200' : '#94a3b8'"></span>
-                                            <span class="small fw-medium text-dark">{{ c.banque }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="text-end fw-bold small">{{ c.solde | number:'1.0-0' }}</td>
-                                    <td class="pe-4 text-end small text-muted">{{ c.tendance }}</td>
-                                </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                </div>
-            </div>
-        </div>
-       <!-- SECTION RÈGLEMENT -->
-    <div class="d-flex align-items-center mb-3 mt-5 border-bottom pb-2">
-        <h5 class="fw-bold text-danger mb-0"><i class="fas fa-money-check-alt me-2"></i>Règlement</h5>
-    </div>
-    <div class="row g-4 mb-4">
-        <!-- Carte 1 : Volumes engagés par postes (graphe barres groupées) -->
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-3" (click)="goToService('/reglement')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <div>
-                                <h6 class="fw-bold mb-0 text-danger">Volumes Engagés par Postes</h6>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <span class="small text-secondary">Réglé vs Reste à Payer (Mds)</span>
-                                    <div class="btn-group shadow-none" style="height:20px;">
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-danger]="chartTypes['reglementVolumes']==='bar'" [class.text-muted]="chartTypes['reglementVolumes']!=='bar'" (click)="setChartType('reglementVolumes','bar',$event)"><i class="fas fa-chart-bar"></i></button>
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-danger]="chartTypes['reglementVolumes']==='line'" [class.text-muted]="chartTypes['reglementVolumes']!=='line'" (click)="setChartType('reglementVolumes','line',$event)"><i class="fas fa-chart-line"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-end">
-                                <div class="d-flex flex-column align-items-end">
-                                    <span class="small fw-bold" style="color:#009E60;">Réglé : {{ reglementTotalRegle | number:'1.0-0' }} Mds</span>
-                                    <span class="small fw-bold" style="color:#B71C1C;">RAP : {{ reglementTotalRap | number:'1.0-0' }} Mds</span>
+                                </svg>
+                                <div class="d-flex gap-1 justify-content-center mt-0.5 flex-wrap" style="font-size:0.64rem;">
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#009E60;"></span>BCEAO</span>
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#FF8200;"></span>BNI</span>
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#6C757D;"></span>Dépôts</span>
                                 </div>
                             </div>
                         </div>
-                    }
-                </div>
-                <div class="card-body p-3">
-                    @if (isLoading) {
-                        <div class="shimmer-block w-100" style="height: 200px;"></div>
-                    } @else {
-                        @if (chartTypes['reglementVolumes']==='bar') {
-                            <!-- Bar chart : Y-axis at x=38, 6 groups of 77px each, bars 26px wide -->
-                            <svg viewBox="0 0 520 220" class="w-100" style="height:210px;">
-                                <!-- Grid lines -->
-                                <line x1="38" y1="25"  x2="512" y2="25"  stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="38" y1="70"  x2="512" y2="70"  stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="38" y1="115" x2="512" y2="115" stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="38" y1="160" x2="512" y2="160" stroke="#94a3b8" stroke-width="1"/>
-                                <!-- Axe Y -->
-                                <line x1="38" y1="15" x2="38" y2="160" stroke="#94a3b8" stroke-width="1"/>
-
-                                <!-- Y labels -->
-                                <text x="34" y="160" text-anchor="end" font-size="9" fill="#94a3b8">0</text>
-                                <text x="34" y="115" text-anchor="end" font-size="9" fill="#94a3b8">1K</text>
-                                <text x="34" y="70"  text-anchor="end" font-size="9" fill="#94a3b8">2K</text>
-                                <text x="34" y="25"  text-anchor="end" font-size="9" fill="#94a3b8">3K</text>
-
-                                @for (d of reglementVolumesPostes; track d.poste; let i = $index) {
-                                    <rect
-                                        [attr.x]="51 + i * 77"
-                                        [attr.y]="160 - (d.regle / 21)"
-                                        width="26"
-                                        [attr.height]="d.regle / 21"
-                                        fill="#009E60"
-                                        rx="3">
-                                    </rect>
-                                    <rect
-                                        [attr.x]="79 + i * 77"
-                                        [attr.y]="160 - (d.rap / 21)"
-                                        width="26"
-                                        [attr.height]="d.rap / 21"
-                                        fill="#B71C1C"
-                                        rx="3">
-                                    </rect>
-                                    <text
-                                        [attr.x]="64 + i * 77"
-                                        [attr.y]="160 - (d.regle / 21) - 4"
-                                        text-anchor="middle"
-                                        font-size="8.5"
-                                        fill="#007a4a"
-                                        font-weight="700">{{ d.regle | number:'1.0-0' }}</text>
-                                    <text
-                                        [attr.x]="92 + i * 77"
-                                        [attr.y]="160 - (d.rap / 21) - 4"
-                                        text-anchor="middle"
-                                        font-size="8.5"
-                                        fill="#b71c1c"
-                                        font-weight="700">{{ d.rap | number:'1.0-0' }}</text>
-                                    <text
-                                        [attr.x]="83 + i * 77"
-                                        y="176"
-                                        text-anchor="middle"
-                                        font-size="8"
-                                        fill="#64748b"
-                                        font-weight="600">{{ d.poste | slice:0:10 }}</text>
-                                    <text
-                                        [attr.x]="83 + i * 77"
-                                        y="187"
-                                        text-anchor="middle"
-                                        font-size="7.5"
-                                        fill="#94a3b8">{{ d.poste.length > 10 ? (d.poste | slice:10:20) : '' }}</text>
-                                }
-                            </svg>
-                        } @else {
-                            <svg viewBox="0 0 520 220" class="w-100" style="height:210px;">
-                                <line x1="38" y1="25"  x2="512" y2="25"  stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="38" y1="70"  x2="512" y2="70"  stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="38" y1="115" x2="512" y2="115" stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="38" y1="160" x2="512" y2="160" stroke="#94a3b8" stroke-width="1"/>
-                                <line x1="38" y1="15"  x2="38"  y2="160" stroke="#94a3b8" stroke-width="1"/>
-
-                                <text x="34" y="160" text-anchor="end" font-size="9" fill="#94a3b8">0</text>
-                                <text x="34" y="115" text-anchor="end" font-size="9" fill="#94a3b8">1K</text>
-                                <text x="34" y="70"  text-anchor="end" font-size="9" fill="#94a3b8">2K</text>
-                                <text x="34" y="25"  text-anchor="end" font-size="9" fill="#94a3b8">3K</text>
-
-                                @for (d of reglementVolumesPostes; track d.poste; let i = $index) {
-                                    <circle [attr.cx]="83 + i * 77" [attr.cy]="160 - (d.regle / 21)" r="5" fill="#009E60"/>
-                                    @if (i < reglementVolumesPostes.length - 1) {
-                                        <line
-                                            [attr.x1]="83 + i * 77"
-                                            [attr.y1]="160 - (d.regle / 21)"
-                                            [attr.x2]="83 + (i+1) * 77"
-                                            [attr.y2]="160 - (reglementVolumesPostes[i+1].regle / 21)"
-                                            stroke="#009E60" stroke-width="2.5" stroke-linecap="round"/>
-                                    }
-                                }
-                                @for (d of reglementVolumesPostes; track d.poste; let i = $index) {
-                                    <circle [attr.cx]="83 + i * 77" [attr.cy]="160 - (d.rap / 21)" r="5" fill="#B71C1C"/>
-                                    @if (i < reglementVolumesPostes.length - 1) {
-                                        <line
-                                            [attr.x1]="83 + i * 77"
-                                            [attr.y1]="160 - (d.rap / 21)"
-                                            [attr.x2]="83 + (i+1) * 77"
-                                            [attr.y2]="160 - (reglementVolumesPostes[i+1].rap / 21)"
-                                            stroke="#B71C1C" stroke-width="2.5" stroke-linecap="round"/>
-                                    }
-                                    <text [attr.x]="83 + i * 77" y="176" text-anchor="middle" font-size="8" fill="#64748b" font-weight="600">{{ d.poste | slice:0:10 }}</text>
-                                }
-                            </svg>
-                        }
-                        <!-- Légende -->
-                        <div class="d-flex gap-3 justify-content-center mt-1">
-                            <span class="small text-secondary"><span class="legend-dot" style="background:#009E60;"></span>Réglé (Mds)</span>
-                            <span class="small text-secondary"><span class="legend-dot" style="background:#B71C1C;"></span>Reste à Payer</span>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Compte</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Solde</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Évol.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (c of comptaSoldesCompte; track c.banque) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="c.banque">{{ c.banque }}</td>
+                                            <td class="text-end fw-bold">{{ c.solde | number:'1.0-0' }}M</td>
+                                            <td class="pe-1 text-end text-success fw-medium">{{ c.tendance }}</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    }
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Carte 2 : Flux de transactions -->
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-4" (click)="goToService('/reglement')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <div>
-                                <h6 class="fw-bold mb-0 text-danger">Flux de Transactions</h6>
-                                <span class="small text-secondary">Règlements effectués &amp; Restes à Payer récents</span>
-                            </div>
-                            <div class="text-end d-flex flex-column">
-                                <span class="small fw-bold" style="color:#009E60;">✓ Réglé</span>
-                                <span class="small fw-bold" style="color:#B71C1C;">⏳ RAP</span>
-                            </div>
-                        </div>
-                    }
+        <!-- Col 2 : Lettres d'Avance (LA) -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-2" (click)="goToService('/tresorerie')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-primary" style="font-size:0.86rem;">Lettres d'Avance (LA)</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Régularisations vs En cours</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-warning-subtle text-warning-emphasis fw-bold" style="font-size:0.72rem;">{{ laEnCoursTotal | number:'1.1-1' }} Mds</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('tres_la', 'Trésorerie', 'fas fa-university', 'Lettres d\'Avance (LA)', 'Suivi du portefeuille et apurement des avances', 'En cours: ' + laEnCoursTotal + ' Mds', 'text-warning', '/tresorerie', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="card-body p-0">
-                    @if (isLoading) {
-                        <div class="p-4 d-flex flex-column gap-3">
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                        </div>
-                    } @else {
-                        <div style="max-height: 260px; overflow-y: auto;">
-                            <table class="table table-hover mb-0">
-                                <thead class="bg-light" style="position: sticky; top: 0; z-index: 1;">
-                                    <tr>
-                                        <th class="ps-4 small text-uppercase text-secondary fw-semibold border-0">Réf. / Libellé</th>
-                                        <th class="small text-uppercase text-secondary fw-semibold border-0 text-end">Montant (Mds)</th>
-                                        <th class="pe-4 small text-uppercase text-secondary fw-semibold border-0 text-center">Statut</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @for (tx of reglementFluxTransactions; track tx.ref) {
-                                    <tr [style.border-left]="tx.statut === 'REGLE' ? '3px solid #009E60' : '3px solid #B71C1C'">
-                                        <td class="ps-4">
-                                            <div class="d-flex flex-column">
-                                                <span class="small fw-bold text-secondary" style="font-size:0.7rem;">{{ tx.ref }}</span>
-                                                <span class="small fw-medium text-dark">{{ tx.libelle }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="text-end fw-bold small" [style.color]="tx.statut === 'REGLE' ? '#009E60' : '#B71C1C'">{{ tx.montant | number:'1.1-1' }}</td>
-                                        <td class="pe-4 text-center">
-                                            <span class="badge rounded-pill" [style.background]="tx.statut === 'REGLE' ? '#E8F5E9' : '#FFEBEE'" [style.color]="tx.statut === 'REGLE' ? '#2E7D32' : '#B71C1C'" style="font-size:0.7rem; font-weight:700;">
-                                                {{ tx.statut === 'REGLE' ? '✓ Réglé' : '⏳ RAP' }}
-                                            </span>
-                                        </td>
-                                    </tr>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 300 115" class="w-100">
+                                    <line x1="15" y1="15" x2="285" y2="15" stroke="#f1f5f9" stroke-width="1"/>
+                                    <line x1="15" y1="50" x2="285" y2="50" stroke="#f1f5f9" stroke-width="1"/>
+                                    <line x1="15" y1="85" x2="285" y2="85" stroke="#94a3b8" stroke-width="1"/>
+                                    @for (la of laEvolution; track la.mois; let i = $index) {
+                                        <rect [attr.x]="25 + i * 38" [attr.y]="85 - (la.regul / 1.5)" width="10" [attr.height]="la.regul / 1.5" fill="#009E60" rx="1.5"></rect>
+                                        <rect [attr.x]="37 + i * 38" [attr.y]="85 - (la.encours / 1.5)" width="10" [attr.height]="la.encours / 1.5" fill="#D4A017" rx="1.5"></rect>
+                                        <text [attr.x]="25 + i * 38 + 10" y="100" text-anchor="middle" font-size="8.5" fill="#94a3b8">{{ la.mois }}</text>
                                     }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SECTION CAUTIONNEMENT -->
-    <div class="d-flex align-items-center mb-3 mt-5 border-bottom pb-2">
-        <h5 class="fw-bold mb-0" style="color: #6C3483;"><i class="fas fa-file-contract me-2"></i>Cautionnement</h5>
-    </div>
-    <div class="row g-4 mb-4">
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-1" (click)="goToService('/cautionnement')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <div>
-                                <h6 class="fw-bold mb-0" style="color:#6C3483;">États des Cautionnements</h6>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <div class="btn-group shadow-none" style="height:20px;">
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-primary]="chartTypes['cautionStatuts']==='donut'" [class.text-muted]="chartTypes['cautionStatuts']!=='donut'" (click)="setChartType('cautionStatuts','donut',$event)"><i class="fas fa-chart-pie"></i></button>
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-primary]="chartTypes['cautionStatuts']==='bar'" [class.text-muted]="chartTypes['cautionStatuts']!=='bar'" (click)="setChartType('cautionStatuts','bar',$event)"><i class="fas fa-chart-bar"></i></button>
-                                    </div>
+                                </svg>
+                                <div class="d-flex gap-2 justify-content-center mt-0.5 flex-wrap" style="font-size:0.64rem;">
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#009E60;"></span>Régul.</span>
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#D4A017;"></span>En cours</span>
                                 </div>
                             </div>
-                            <div class="text-end">
-                                <span class="badge" style="background:#EAE2F3; color:#6C3483; font-weight:700; font-size:0.85rem; padding: 6px 12px;">{{ cautionTotalCount | number:'1.0-0' }} Dossiers</span>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Ministère</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-center text-secondary fw-semibold border-0">Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (item of laDetailsList; track item.ref) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="item.ministere">{{ item.ministere }}</td>
+                                            <td class="text-end fw-bold">{{ item.montant | number:'1.1-1' }}M</td>
+                                            <td class="pe-1 text-center">
+                                                <span class="badge" [style.background]="item.statut==='REGULARISE' ? '#E8F5E9' : '#FFF3E0'" [style.color]="item.statut==='REGULARISE' ? '#2E7D32' : '#E65100'" style="font-size:0.62rem;">
+                                                    {{ item.statut==='REGULARISE' ? 'Régul.' : 'En cours' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                    }
+                    </div>
                 </div>
-                <div class="card-body p-3">
-                    @if (isLoading) {
-                        <div class="shimmer-block w-100" style="height: 150px;"></div>
-                    } @else {
-                        @if (chartTypes['cautionStatuts']==='donut') {
-                            <div class="d-flex gap-4 align-items-center w-100 px-4 h-100 justify-content-center">
-                                <div class="position-relative" style="width:110px; height:110px;">
+            </div>
+        </div>
+
+        <!-- Col 3 : Position Nette & Disponibilités -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-3" (click)="goToService('/tresorerie')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-primary" style="font-size:0.86rem;">Disponibilités &amp; Liquidité</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Répartition des dépôts</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="fw-bold text-success" style="font-size:0.95rem;">{{ liquiditeNetteTotal | number:'1.0-0' }} Mds</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('tres_disp', 'Trésorerie', 'fas fa-university', 'Disponibilités & Liquidité', 'Ventilation des avoirs par institution bancaire', liquiditeNetteTotal + ' Mds', 'text-success', '/tresorerie', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <div style="width:70px; height:70px;" class="position-relative mb-1">
                                     <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform:rotate(-90deg);">
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#2E7D32" stroke-width="6" stroke-dasharray="65 100"></circle>
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#D4A017" stroke-width="6" stroke-dasharray="25 100" stroke-dashoffset="-65"></circle>
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#B71C1C" stroke-width="6" stroke-dasharray="10 100" stroke-dashoffset="-90"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#009E60" stroke-width="5" stroke-dasharray="55 100"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#FF8200" stroke-width="5" stroke-dasharray="27 100" stroke-dashoffset="-55"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#1B3A6B" stroke-width="5" stroke-dasharray="18 100" stroke-dashoffset="-82"></circle>
                                     </svg>
                                 </div>
-                                <div class="flex-grow-1">
-                                    @for (s of cautionnementStatuts; track s.statut) {
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="legend-dot" [style.background]="s.color"></span>
-                                            <span class="small fw-medium text-secondary">{{ s.statut }}</span>
-                                        </div>
-                                        <div class="text-end">
-                                            <span class="fw-bold small text-dark d-block">{{ s.montant | number:'1.1-1' }} Mds</span>
-                                            <span class="text-muted d-block" style="font-size:0.65rem;">{{ s.count }} dossiers</span>
-                                        </div>
-                                    </div>
+                                <div class="d-flex gap-1 justify-content-center flex-wrap" style="font-size:0.64rem;">
+                                    @for (disp of tresorerieDisponibilites; track disp.banque) {
+                                    <span class="text-secondary"><span class="legend-dot" [style.background]="disp.couleur"></span>{{ disp.pct }}%</span>
                                     }
                                 </div>
                             </div>
-                        } @else {
-                            <svg viewBox="0 0 500 180" class="w-100" style="height:150px;">
-                                <line x1="100" y1="20" x2="100" y2="140" stroke="#94a3b8" stroke-width="1"/>
-                                <line x1="100" y1="140" x2="480" y2="140" stroke="#94a3b8" stroke-width="1"/>
-                                @for (s of cautionnementStatuts; track s.statut; let i = $index) {
-                                    <rect x="100" [attr.y]="30 + i * 35" [attr.width]="s.montant * 25" height="22" [attr.fill]="s.color" rx="3"></rect>
-                                    <text x="92" [attr.y]="44 + i * 35" text-anchor="end" font-size="10.5" fill="#64748b" font-weight="600">{{ s.statut }}</text>
-                                    <text [attr.x]="108 + s.montant * 25" [attr.y]="44 + i * 35" font-size="10.5" fill="#1e293b" font-weight="700">{{ s.montant | number:'1.1-1' }} Mds ({{ s.count }} dos.)</text>
-                                }
-                            </svg>
-                        }
-                    }
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-2" (click)="goToService('/cautionnement')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
                         </div>
-                    } @else {
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <div>
-                                <h6 class="fw-bold mb-0" style="color:#6C3483;">Volumes Engagés</h6>
-                                <span class="small text-secondary">Montants cumulés par catégorie (Mds)</span>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge" style="background:#6C3483; color:white; font-weight:700; font-size:0.85rem; padding: 6px 12px;">Total : {{ cautionTotalVolume | number:'1.1-1' }} Mds</span>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Institution</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Part</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (disp of tresorerieDisponibilites; track disp.banque) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="disp.banque">{{ disp.banque }}</td>
+                                            <td class="text-end fw-bold">{{ disp.montant | number:'1.0-0' }}M</td>
+                                            <td class="pe-1 text-end fw-semibold text-secondary">{{ disp.pct }}%</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                    }
-                </div>
-                <div class="card-body p-3">
-                    @if (isLoading) {
-                        <div class="shimmer-block w-100" style="height: 170px;"></div>
-                    } @else {
-                        <svg viewBox="0 0 500 180" class="w-100" style="height:170px;">
-                            <line x1="110" y1="20" x2="110" y2="160" stroke="#94a3b8" stroke-width="1"/>
-                            <line x1="110" y1="160" x2="480" y2="160" stroke="#94a3b8" stroke-width="1"/>
-                            @for (v of cautionnementVolumes | slice:0:4; track v.type; let i = $index) {
-                                <rect x="110" [attr.y]="25 + i * 34" [attr.width]="v.montant * 25" height="20" [attr.fill]="i === 0 ? '#6C3483' : i === 1 ? '#884EA2' : i === 2 ? '#A569BD' : '#BB8FCE'" rx="3"></rect>
-                                <text x="102" [attr.y]="38 + i * 34" text-anchor="end" font-size="10.5" fill="#64748b" font-weight="600">{{ v.type | slice:0:16 }}</text>
-                                <text [attr.x]="118 + v.montant * 25" [attr.y]="38 + i * 34" font-size="10.5" fill="#1e293b" font-weight="700">{{ v.montant }} Mds</text>
-                            }
-                            <text x="110" y="175" text-anchor="middle" font-size="9" fill="#94a3b8">0</text>
-                            <text x="235" y="175" text-anchor="middle" font-size="9" fill="#94a3b8">5</text>
-                            <text x="360" y="175" text-anchor="middle" font-size="9" fill="#94a3b8">10</text>
-                            <text x="485" y="175" text-anchor="middle" font-size="9" fill="#94a3b8">15 Mds</text>
-                        </svg>
-                    }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SECTION COMPTABILITÉ -->
-    <div class="d-flex align-items-center mb-3 mt-5 border-bottom pb-2">
-        <h5 class="fw-bold text-success mb-0"><i class="fas fa-book me-2"></i>Comptabilité</h5>
+    <!-- ========================================== -->
+    <!-- 2. SECTION RÈGLEMENT (Ligne à 3 colonnes)  -->
+    <!-- ========================================== -->
+    <div class="d-flex align-items-center mb-2.5 mt-4 border-bottom pb-1.5">
+        <h6 class="fw-bold text-danger mb-0"><i class="fas fa-money-check-alt me-2"></i>Règlement &amp; Dépenses</h6>
     </div>
-    <div class="row g-4 mb-4">
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-3" (click)="goToService('/comptabilite')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <div>
-                                <h6 class="fw-bold mb-0 text-success">Écritures en Suspend par Ministère</h6>
-                                <span class="small text-secondary">Axe Structurel - Répartition des restes à régulariser</span>
-                            </div>
-                            <div class="text-end">
-                                <span class="fs-5 fw-bold" style="color:#2E7D32;">{{ laEnCoursTotal | number:'1.1-1' }} Mds</span>
-                            </div>
-                        </div>
-                    }
+    <div class="row g-3 mb-3">
+        <!-- Col 1 : Volumes engagés par poste -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-1" (click)="goToService('/reglement')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-danger" style="font-size:0.86rem;">Volumes par Poste</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Réglé vs Restes à Payer</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-success-subtle text-success fw-bold" style="font-size:0.72rem;">{{ reglementTotalRegle | number:'1.0-0' }} Mds</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('reg_postes', 'Règlement', 'fas fa-money-check-alt', 'Volumes par Poste Comptable', 'Répartition des dépenses réglées et restes à payer', reglementTotalRegle + ' Mds réglés', 'text-success', '/reglement', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    @if (isLoading) {
-                        <div class="d-flex flex-column gap-3 py-2">
-                            <div class="shimmer-line w-100" style="height: 25px;"></div>
-                            <div class="shimmer-line w-100" style="height: 25px;"></div>
-                            <div class="shimmer-line w-100" style="height: 25px;"></div>
-                            <div class="shimmer-line w-100" style="height: 25px;"></div>
-                        </div>
-                    } @else {
-                        <div class="d-flex flex-column gap-3">
-                            @for (item of comptaSuspendsParMinistere; track item.ministere) {
-                            <div>
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="small fw-semibold text-dark">{{ item.ministere }}</span>
-                                    <span class="small fw-bold text-success">{{ item.montant | number:'1.1-1' }} Mds ({{ item.pct }}%)</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-success rounded" role="progressbar" [style.width]="item.pct + '%'" [attr.aria-valuenow]="item.pct" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 300 115" class="w-100">
+                                    <line x1="15" y1="15" x2="285" y2="15" stroke="#f1f5f9" stroke-width="1"/>
+                                    <line x1="15" y1="50" x2="285" y2="50" stroke="#f1f5f9" stroke-width="1"/>
+                                    <line x1="15" y1="85" x2="285" y2="85" stroke="#94a3b8" stroke-width="1"/>
+                                    @for (d of reglementVolumesPostes; track d.poste; let i = $index) {
+                                        <rect [attr.x]="25 + i * 48" [attr.y]="85 - (d.regle / 45)" width="12" [attr.height]="d.regle / 45" fill="#009E60" rx="1.5"></rect>
+                                        <rect [attr.x]="39 + i * 48" [attr.y]="85 - (d.rap / 45)" width="12" [attr.height]="d.rap / 45" fill="#B71C1C" rx="1.5"></rect>
+                                        <text [attr.x]="25 + i * 48 + 12" y="100" text-anchor="middle" font-size="8" fill="#94a3b8">{{ d.poste | slice:0:6 }}</text>
+                                    }
+                                </svg>
+                                <div class="d-flex gap-2 justify-content-center mt-0.5 flex-wrap" style="font-size:0.64rem;">
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#009E60;"></span>Réglé</span>
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#B71C1C;"></span>RAP</span>
                                 </div>
                             </div>
-                            }
                         </div>
-                    }
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Poste</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Réglé</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">RAP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (p of reglementVolumesPostes; track p.poste) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="p.poste">{{ p.poste }}</td>
+                                            <td class="text-end fw-bold text-success">{{ p.regle | number:'1.0-0' }}M</td>
+                                            <td class="pe-1 text-end fw-bold text-danger">{{ p.rap | number:'1.0-0' }}M</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-4" (click)="goToService('/comptabilite')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <h6 class="fw-bold mb-0 text-success">Suspends par Âge &amp; Criticité</h6>
-                        <span class="small text-secondary">Axe Temporel - Ancienneté des suspends de compte</span>
-                    }
-                </div>
-                <div class="card-body p-0">
-                    @if (isLoading) {
-                        <div class="p-4 d-flex flex-column gap-3">
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                        </div>
-                    } @else {
-                        <div class="list-group list-group-flush">
-                            @for (c of comptaSuspendsParAnciennete; track c.tranche) {
-                            <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 bg-transparent border-0 border-bottom">
-                                <div class="d-flex align-items-center gap-3">
-                                    <i class="fas" [class]="c.icone" [style.color]="c.couleur" style="font-size: 1.25rem;"></i>
-                                    <div>
-                                        <span class="small fw-semibold text-dark d-block">{{ c.tranche }}</span>
-                                        <span class="small text-secondary">Âge des écritures non rapprochées</span>
-                                    </div>
-                                </div>
-                                <span class="fs-6 fw-bold" [style.color]="c.couleur">{{ c.montant | number:'1.1-1' }} Mds</span>
-                            </div>
-                            }
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- SECTION RÉGIES -->
-    <div class="d-flex align-items-center mb-3 mt-5 border-bottom pb-2">
-        <h5 class="fw-bold text-info mb-0"><i class="fas fa-store me-2"></i>Régies</h5>
-    </div>
-    <div class="row g-4 mb-4">
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-7" (click)="goToService('/regies')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <div>
-                                <h6 class="fw-bold mb-0 text-info">Recettes de l'État</h6>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <span class="small text-secondary">Composition des recettes</span>
-                                    <div class="btn-group shadow-none" style="height:20px;">
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-info]="chartTypes['recettesComposition']==='donut'" [class.text-muted]="chartTypes['recettesComposition']!=='donut'" (click)="setChartType('recettesComposition','donut',$event)"><i class="fas fa-chart-pie"></i></button>
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-info]="chartTypes['recettesComposition']==='bar'" [class.text-muted]="chartTypes['recettesComposition']!=='bar'" (click)="setChartType('recettesComposition','bar',$event)"><i class="fas fa-chart-bar"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-end">
-                                <span class="fs-5 fw-bold text-info">10 000 Mds</span>
-                            </div>
-                        </div>
-                    }
+        <!-- Col 2 : Typologie & Flux récents -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-2" (click)="goToService('/reglement')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-danger" style="font-size:0.86rem;">Flux de Transactions</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Dernières opérations</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-danger-subtle text-danger fw-bold" style="font-size:0.72rem;">Temps réel</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('reg_flux', 'Règlement', 'fas fa-money-check-alt', 'Flux de Transactions & Moyens de Règlement', 'Journal complet des opérations et ventilations par instrument', 'Temps réel', 'text-danger', '/reglement', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="card-body p-3">
-                    @if (isLoading) {
-                        <div class="shimmer-block w-100" style="height: 140px;"></div>
-                    } @else {
-                        @if (chartTypes['recettesComposition']==='donut') {
-                            <div class="d-flex gap-4 align-items-center h-100 justify-content-center">
-                                <div class="flex-shrink-0 position-relative" style="width:140px;height:140px;">
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <div style="width:70px; height:70px;" class="position-relative mb-1">
                                     <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform:rotate(-90deg);">
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#e9ecef" stroke-width="4"></circle>
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#1B3A6B" stroke-width="4" stroke-dasharray="42 100" stroke-linecap="round"></circle>
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#2E7D32" stroke-width="4" stroke-dasharray="21 100" stroke-dashoffset="-42" stroke-linecap="round"></circle>
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#D4A017" stroke-width="4" stroke-dasharray="18 100" stroke-dashoffset="-63" stroke-linecap="round"></circle>
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#E65100" stroke-width="4" stroke-dasharray="19 100" stroke-dashoffset="-81" stroke-linecap="round"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#009E60" stroke-width="5" stroke-dasharray="68 100"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#FF8200" stroke-width="5" stroke-dasharray="22 100" stroke-dashoffset="-68"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#1B3A6B" stroke-width="5" stroke-dasharray="10 100" stroke-dashoffset="-90"></circle>
                                     </svg>
-                                    <div class="position-absolute top-50 start-50 translate-middle text-center">
-                                        <span class="fs-6 fw-bold text-dark">100%</span>
-                                    </div>
                                 </div>
-                                <div class="flex-grow-1">
-                                    @for (r of recettesComposition | slice:0:4; track r.nature) {
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="legend-dot" [style.background]="r.couleur"></span>
-                                            <span class="small text-dark fw-medium">{{ r.nature }}</span>
-                                        </div>
-                                        <span class="small fw-bold">{{ r.pct }}%</span>
-                                    </div>
+                                <div class="d-flex gap-1 justify-content-center flex-wrap" style="font-size:0.64rem;">
+                                    @for (t of reglementTypologie; track t.type) {
+                                    <span class="text-secondary"><span class="legend-dot" [style.background]="t.couleur"></span>{{ t.pct }}%</span>
                                     }
                                 </div>
                             </div>
-                        } @else {
-                            <svg viewBox="0 0 500 180" class="w-100" style="height:180px;">
-                                <line x1="120" y1="20" x2="120" y2="160" stroke="#94a3b8" stroke-width="1"/>
-                                <line x1="120" y1="160" x2="480" y2="160" stroke="#94a3b8" stroke-width="1"/>
-                                @for (r of recettesComposition | slice:0:4; track r.nature; let i = $index) {
-                                    <rect x="120" [attr.y]="30 + i * 32" [attr.width]="r.pct * 3.4" height="18" [attr.fill]="r.couleur" rx="2"></rect>
-                                    <text x="115" [attr.y]="42 + i * 32" text-anchor="end" font-size="10" fill="#64748b" font-weight="500">{{ r.nature }}</text>
-                                    <text [attr.x]="125 + r.pct * 3.4" [attr.y]="42 + i * 32" font-size="10" fill="#1e293b" font-weight="700">{{ r.pct }}%</text>
-                                }
-                                <text x="120" y="175" text-anchor="middle" font-size="9" fill="#94a3b8">0%</text>
-                                <text x="300" y="175" text-anchor="middle" font-size="9" fill="#94a3b8">50%</text>
-                                <text x="480" y="175" text-anchor="middle" font-size="9" fill="#94a3b8">100%</text>
-                            </svg>
-                        }
-                    }
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-8" (click)="goToService('/regies')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
                         </div>
-                    } @else {
-                        <h6 class="fw-bold mb-0 text-info">Performance des Régies</h6>
-                        <span class="small text-secondary">Répartition par administration</span>
-                    }
-                </div>
-                <div class="card-body p-0">
-                    @if (isLoading) {
-                        <div class="p-4 d-flex flex-column gap-3">
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                        </div>
-                    } @else {
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-4 small text-uppercase text-secondary fw-semibold border-0">Régie</th>
-                                    <th class="small text-uppercase text-secondary fw-semibold border-0 text-end">Recettes (Mds)</th>
-                                    <th class="pe-4 small text-uppercase text-secondary fw-semibold border-0 text-end">Var.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (item of recettesDetails; track item.libelle) {
-                                <tr>
-                                    <td class="ps-4"><span class="small fw-medium text-dark">{{ item.libelle }}</span></td>
-                                    <td class="text-end fw-bold small">{{ item.montant | number:'1.0-0' }}</td>
-                                    <td class="pe-4 text-end small text-muted">{{ item.tendance }}</td>
-                                </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SECTION COMPTE DE GESTION -->
-    <div class="d-flex align-items-center mb-3 mt-5 border-bottom pb-2">
-        <h5 class="fw-bold text-success mb-0"><i class="fas fa-clipboard-list me-2"></i>Compte de Gestion</h5>
-    </div>
-    <div class="row g-4 mb-4">
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-9" (click)="goToService('/compte-gestion')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <div>
-                                <h6 class="fw-bold mb-0 text-success">Dépenses par Poste (Top 6)</h6>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <span class="small text-secondary">Vue analytique</span>
-                                    <div class="btn-group shadow-none" style="height:20px;">
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-success]="chartTypes['recettesDetail']==='bar'" [class.text-muted]="chartTypes['recettesDetail']!=='bar'" (click)="setChartType('recettesDetail','bar',$event)"><i class="fas fa-chart-bar"></i></button>
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-success]="chartTypes['recettesDetail']==='pie'" [class.text-muted]="chartTypes['recettesDetail']!=='pie'" (click)="setChartType('recettesDetail','pie',$event)"><i class="fas fa-chart-pie"></i></button>
-                                    </div>
-                                </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Libellé</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-center text-secondary fw-semibold border-0">Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (tx of reglementFluxTransactions; track tx.ref) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="tx.libelle">{{ tx.libelle }}</td>
+                                            <td class="text-end fw-bold">{{ tx.montant | number:'1.1-1' }}M</td>
+                                            <td class="pe-1 text-center">
+                                                <span class="badge" [style.background]="tx.statut==='REGLE' ? '#E8F5E9' : '#FFEBEE'" [style.color]="tx.statut==='REGLE' ? '#2E7D32' : '#B71C1C'" style="font-size:0.62rem;">
+                                                    {{ tx.statut }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                    }
+                    </div>
                 </div>
-                <div class="card-body p-3">
-                    @if (isLoading) {
-                        <div class="shimmer-block w-100" style="height: 190px;"></div>
-                    } @else {
-                        @if (chartTypes['recettesDetail']==='bar') {
-                            <svg viewBox="0 0 500 200" class="w-100" style="height:190px;">
-                                <line x1="140" y1="20" x2="140" y2="170" stroke="#94a3b8" stroke-width="1"/>
-                                <line x1="140" y1="170" x2="480" y2="170" stroke="#94a3b8" stroke-width="1"/>
-                                @for (dep of top10Depenses | slice:0:6; track dep.poste; let i = $index) {
-                                    <rect x="140" [attr.y]="30 + i * 24" [attr.width]="dep.pct * 4" height="14" [attr.fill]="'hsl(' + (140 + dep.pct * 3) + ', 55%, 42%)'" rx="2"></rect>
-                                    <text x="135" [attr.y]="40 + i * 24" text-anchor="end" font-size="9" fill="#64748b" font-weight="500">{{ dep.poste | slice:0:20 }}...</text>
-                                    <text [attr.x]="145 + dep.pct * 4" [attr.y]="40 + i * 24" font-size="9" fill="#1e293b" font-weight="700">{{ dep.montant }}M</text>
-                                }
-                            </svg>
-                        } @else {
-                            <div class="d-flex align-items-center justify-content-center h-100 py-4">
-                                <svg viewBox="0 0 36 36" style="width:140px; height:140px; transform:rotate(-90deg);">
-                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#2E7D32" stroke-width="8" stroke-dasharray="40 100"></circle>
-                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#1B3A6B" stroke-width="8" stroke-dasharray="25 100" stroke-dashoffset="-40"></circle>
-                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#D4A017" stroke-width="8" stroke-dasharray="20 100" stroke-dashoffset="-65"></circle>
+            </div>
+        </div>
+
+        <!-- Col 3 : Délais & Échéancier RAP -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-3" (click)="goToService('/reglement')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-danger" style="font-size:0.86rem;">Délais &amp; RAP</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Ancienneté des instances</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-danger text-white fw-bold" style="font-size:0.72rem;">99.9 Mds &gt; 90j</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('reg_delais', 'Règlement', 'fas fa-money-check-alt', 'Délais de Règlement & Échéancier RAP', 'Suivi des instances critiques et bénéficiaires prioritaires', '99.9 Mds critiques', 'text-danger', '/reglement', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 105" class="w-100">
+                                    @for (del of reglementDelais; track del.tranche; let i = $index) {
+                                        <rect x="70" [attr.y]="12 + i * 30" [attr.width]="del.montant / 1.6" height="15" [attr.fill]="del.couleur" rx="2"></rect>
+                                        <text x="65" [attr.y]="23 + i * 30" text-anchor="end" font-size="8" fill="#64748b" font-weight="600">{{ del.tranche }}</text>
+                                        <text [attr.x]="75 + del.montant / 1.6" [attr.y]="23 + i * 30" font-size="8" fill="#1e293b" font-weight="700">{{ del.montant | number:'1.0-0' }}M</text>
+                                    }
                                 </svg>
                             </div>
-                        }
-                    }
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-10" (click)="goToService('/compte-gestion')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
                         </div>
-                    } @else {
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <div>
-                                <h6 class="fw-bold mb-0 text-success">Consommation Fonds Bailleurs</h6>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <div class="btn-group shadow-none" style="height:20px;">
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-success]="chartTypes['gestionBailleurs']==='radial'" [class.text-muted]="chartTypes['gestionBailleurs']!=='radial'" (click)="setChartType('gestionBailleurs','radial',$event)"><i class="fas fa-dot-circle"></i></button>
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-success]="chartTypes['gestionBailleurs']==='bar'" [class.text-muted]="chartTypes['gestionBailleurs']!=='bar'" (click)="setChartType('gestionBailleurs','bar',$event)"><i class="fas fa-chart-bar"></i></button>
-                                    </div>
-                                </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Bénéficiaire</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-center text-secondary fw-semibold border-0">Âge</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (ech of reglementEcheancesDetail; track ech.beneficiaire) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="ech.beneficiaire">{{ ech.beneficiaire }}</td>
+                                            <td class="text-end fw-bold">{{ ech.montant | number:'1.1-1' }}M</td>
+                                            <td class="pe-1 text-center">
+                                                <span class="badge" [style.background]="ech.statut==='URGENT' ? '#FFEBEE' : '#FFF3E0'" [style.color]="ech.statut==='URGENT' ? '#B71C1C' : '#E65100'" style="font-size:0.62rem;">
+                                                    {{ ech.age }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                    }
-                </div>
-                <div class="card-body p-3">
-                    @if (isLoading) {
-                        <div class="shimmer-block w-100" style="height: 170px;"></div>
-                    } @else {
-                        @if (chartTypes['gestionBailleurs']==='radial') {
-                            <div class="d-flex justify-content-around flex-wrap h-100 align-items-center py-2">
-                                @for (b of gestionFondsBailleursRadar; track b.bailleur) {
-                                <div class="text-center mb-2 mx-2">
-                                    <div class="position-relative d-inline-block" style="width:65px; height:65px;">
-                                        <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform:rotate(-90deg);">
-                                            <circle cx="18" cy="18" r="14" fill="none" stroke="#e9ecef" stroke-width="4"></circle>
-                                            <circle cx="18" cy="18" r="14" fill="none" [attr.stroke]="b.consomme > 75 ? '#2E7D32' : b.consomme > 50 ? '#D4A017' : '#B71C1C'" stroke-width="4" [attr.stroke-dasharray]="b.consomme + ' 100'" stroke-linecap="round"></circle>
-                                        </svg>
-                                        <div class="position-absolute top-50 start-50 translate-middle text-center" style="font-size:0.7rem;">
-                                            <span class="fw-bold">{{ b.consomme }}%</span>
-                                        </div>
-                                    </div>
-                                    <span class="small d-block text-secondary mt-1" style="font-size:0.65rem;">{{ b.bailleur }}</span>
-                                </div>
-                                }
-                            </div>
-                        } @else {
-                            <svg viewBox="0 0 500 180" class="w-100" style="height:170px;">
-                                <line x1="100" y1="20" x2="100" y2="150" stroke="#94a3b8" stroke-width="1"/>
-                                <line x1="100" y1="150" x2="480" y2="150" stroke="#94a3b8" stroke-width="1"/>
-                                @for (b of gestionFondsBailleursRadar | slice:0:4; track b.bailleur; let i = $index) {
-                                    <rect x="100" [attr.y]="30 + i * 30" [attr.width]="b.consomme * 3.5" height="18" [attr.fill]="b.consomme > 75 ? '#2E7D32' : b.consomme > 50 ? '#D4A017' : '#B71C1C'" rx="2"></rect>
-                                    <text x="95" [attr.y]="42 + i * 30" text-anchor="end" font-size="10" fill="#64748b" font-weight="500">{{ b.bailleur }}</text>
-                                    <text [attr.x]="105 + b.consomme * 3.5" [attr.y]="42 + i * 30" font-size="10" fill="#1e293b" font-weight="700">{{ b.consomme }}%</text>
-                                }
-                                <text x="100" y="165" text-anchor="middle" font-size="9" fill="#94a3b8">0%</text>
-                                <text x="290" y="165" text-anchor="middle" font-size="9" fill="#94a3b8">50%</text>
-                                <text x="480" y="165" text-anchor="middle" font-size="9" fill="#94a3b8">100%</text>
-                            </svg>
-                        }
-                    }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SECTION STATISTIQUES -->
-    <div class="d-flex align-items-center mb-3 mt-5 border-bottom pb-2">
-        <h5 class="fw-bold text-warning mb-0"><i class="fas fa-chart-bar me-2"></i>Statistiques</h5>
+    <!-- ========================================== -->
+    <!-- 3. SECTION CAUTIONNEMENT (Ligne à 3 colonnes) -->
+    <!-- ========================================== -->
+    <div class="d-flex align-items-center mb-2.5 mt-4 border-bottom pb-1.5">
+        <h6 class="fw-bold mb-0" style="color: #6C3483;"><i class="fas fa-file-contract me-2"></i>Cautionnement &amp; Garanties</h6>
     </div>
-    <div class="row g-4 mb-4">
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-5" (click)="goToService('/statistiques')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <div>
-                                <h6 class="fw-bold mb-0 text-warning">Encours de la Dette Publique</h6>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <span class="small text-secondary">Évolution annuelle (Mds)</span>
-                                    <div class="btn-group shadow-none" style="height:20px;">
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-warning]="chartTypes['detteVolume']==='bar'" [class.text-muted]="chartTypes['detteVolume']!=='bar'" (click)="setChartType('detteVolume','bar',$event)"><i class="fas fa-chart-bar"></i></button>
-                                        <button class="btn btn-link p-0 px-1 border-0" [class.text-warning]="chartTypes['detteVolume']==='line'" [class.text-muted]="chartTypes['detteVolume']!=='line'" (click)="setChartType('detteVolume','line',$event)"><i class="fas fa-chart-line"></i></button>
-                                    </div>
+    <div class="row g-3 mb-3">
+        <!-- Col 1 : États des Cautionnements -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-1" (click)="goToService('/cautionnement')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0" style="color:#6C3483; font-size:0.86rem;">États Cautions</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Répartition par statut</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge" style="background:#EAE2F3; color:#6C3483; font-weight:700; font-size:0.72rem;">{{ cautionTotalCount }} Dos.</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('caut_statuts', 'Cautionnement', 'fas fa-file-contract', 'États des Cautionnements', 'Répartition globale par statut (Actives, Libérées, Appelées)', cautionTotalCount + ' Dossiers', 'text-purple', '/cautionnement', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <div style="width:70px; height:70px;" class="position-relative mb-1">
+                                    <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform:rotate(-90deg);">
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#2E7D32" stroke-width="5" stroke-dasharray="65 100"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#D4A017" stroke-width="5" stroke-dasharray="25 100" stroke-dashoffset="-65"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#B71C1C" stroke-width="5" stroke-dasharray="10 100" stroke-dashoffset="-90"></circle>
+                                    </svg>
+                                </div>
+                                <div class="d-flex gap-1 justify-content-center flex-wrap" style="font-size:0.64rem;">
+                                    @for (s of cautionnementStatuts; track s.statut) {
+                                    <span class="text-secondary"><span class="legend-dot" [style.background]="s.color"></span>{{ s.count }}</span>
+                                    }
                                 </div>
                             </div>
                         </div>
-                    }
-                </div>
-                <div class="card-body p-3">
-                    @if (isLoading) {
-                        <div class="shimmer-block w-100" style="height: 180px;"></div>
-                    } @else {
-                        @if (chartTypes['detteVolume']==='bar') {
-                            <svg viewBox="0 0 500 200" class="w-100" style="height:180px;">
-                                <!-- Grid lines -->
-                                <line x1="50" y1="40" x2="480" y2="40" stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="50" y1="90" x2="480" y2="90" stroke="#f1f5f9" stroke-width="1"/>
-                                <line x1="50" y1="140" x2="480" y2="140" stroke="#f1f5f9" stroke-width="1"/>
-                                @for (d of detteEvolution; track d.annee; let i = $index) {
-                                    <rect [attr.x]="80 + i * 82" [attr.y]="170 - (d.volume / 100)" width="40" [attr.height]="d.volume / 100" rx="4" fill="#1B3A6B" opacity="0.85"></rect>
-                                    <text [attr.x]="80 + i * 82 + 20" y="190" text-anchor="middle" font-size="11" fill="#64748b" font-weight="500">{{ d.annee }}</text>
-                                }
-                                <!-- Axes -->
-                                <line x1="50" y1="20" x2="50" y2="170" stroke="#94a3b8" stroke-width="1"/>
-                                <line x1="50" y1="170" x2="480" y2="170" stroke="#94a3b8" stroke-width="1"/>
-                                <!-- Y labels -->
-                                <text x="45" y="170" text-anchor="end" font-size="9" fill="#94a3b8">0</text>
-                                <text x="45" y="95" text-anchor="end" font-size="9" fill="#94a3b8">8K</text>
-                                <text x="45" y="25" text-anchor="end" font-size="9" fill="#94a3b8">15K</text>
-                            </svg>
-                        } @else {
-                            <svg viewBox="0 0 500 200" class="w-100" style="height:180px;">
-                                <line x1="50" y1="170" x2="480" y2="170" stroke="#94a3b8" stroke-width="1"/>
-                                <polyline points="80,150 160,130 240,100 320,80 400,60 480,40" fill="none" stroke="#1B3A6B" stroke-width="4" stroke-linecap="round"></polyline>
-                                @for (d of detteEvolution; track d.annee; let i = $index) {
-                                    <circle [attr.cx]="80 + i * 80" [attr.cy]="150 - (i * 20)" r="5" fill="#1B3A6B"></circle>
-                                }
-                            </svg>
-                        }
-                    }
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Statut</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Dos.</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (s of cautionnementStatuts; track s.statut) {
+                                        <tr>
+                                            <td class="ps-1">{{ s.statut }}</td>
+                                            <td class="text-end fw-bold">{{ s.count }}</td>
+                                            <td class="pe-1 text-end fw-bold" [style.color]="s.color">{{ s.montant | number:'1.1-1' }}M</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100 dash-card reveal-item reveal-delay-6" (click)="goToService('/statistiques')" style="cursor:pointer;">
-                <div class="card-header bg-white border-bottom pt-3 pb-2 px-4">
-                    @if (isLoading) {
-                        <div class="py-2">
-                            <div class="shimmer-line w-50 mb-2"></div>
-                            <div class="shimmer-line w-25"></div>
-                        </div>
-                    } @else {
-                        <h6 class="fw-bold mb-0 text-warning">Portefeuille de la Dette</h6>
-                        <span class="small text-secondary">Répartition par nature d'instrument</span>
-                    }
+
+        <!-- Col 2 : Volumes par Catégorie de Marché -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-2" (click)="goToService('/cautionnement')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0" style="color:#6C3483; font-size:0.86rem;">Volumes par Catégorie</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Marchés &amp; Douanes</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge" style="background:#6C3483; color:white; font-weight:700; font-size:0.72rem;">{{ cautionTotalVolume | number:'1.1-1' }} Mds</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('caut_volumes', 'Cautionnement', 'fas fa-file-contract', 'Volumes de Cautionnement par Catégorie', 'Structure par type de marché (BTP, Douanes, Marchés Publics)', cautionTotalVolume + ' Mds', 'text-purple', '/cautionnement', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="card-body p-0">
-                    @if (isLoading) {
-                        <div class="p-4 d-flex flex-column gap-3">
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
-                            <div class="shimmer-line w-100" style="height: 35px;"></div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 105" class="w-100">
+                                    @for (v of cautionnementVolumes; track v.type; let i = $index) {
+                                        <rect x="75" [attr.y]="10 + i * 24" [attr.width]="v.pct * 1.8" height="14" [attr.fill]="i === 0 ? '#6C3483' : i === 1 ? '#884EA2' : '#A569BD'" rx="2"></rect>
+                                        <text x="70" [attr.y]="21 + i * 24" text-anchor="end" font-size="8" fill="#64748b" font-weight="600">{{ v.type | slice:0:10 }}</text>
+                                        <text [attr.x]="80 + v.pct * 1.8" [attr.y]="21 + i * 24" font-size="8" fill="#1e293b" font-weight="700">{{ v.pct }}%</text>
+                                    }
+                                </svg>
+                            </div>
                         </div>
-                    } @else {
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-4 small text-uppercase text-secondary fw-semibold border-0">Instrument</th>
-                                    <th class="small text-uppercase text-secondary fw-semibold border-0 text-end">Encours (Mds)</th>
-                                    <th class="pe-4 small text-uppercase text-secondary fw-semibold border-0 text-end">Part</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (item of detteDetails; track item.libelle) {
-                                <tr>
-                                    <td class="ps-4"><span class="small fw-medium text-dark">{{ item.libelle }}</span></td>
-                                    <td class="text-end fw-bold small">{{ item.montant | number:'1.0-0' }}</td>
-                                    <td class="pe-4 text-end small text-muted">{{ item.tendance }}</td>
-                                </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Catégorie</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Part</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (v of cautionnementVolumes; track v.type) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="v.type">{{ v.type }}</td>
+                                            <td class="text-end fw-bold">{{ v.montant | number:'1.1-1' }}M</td>
+                                            <td class="pe-1 text-end fw-medium text-secondary">{{ v.pct }}%</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 3 : Alertes Échéances & Mainlevées -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-3" (click)="goToService('/cautionnement')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0" style="color:#6C3483; font-size:0.86rem;">Échéances Cautions</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Dossiers à risque</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-danger-subtle text-danger fw-bold" style="font-size:0.72rem;">4.8 Mds &lt; 30j</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('caut_ech', 'Cautionnement', 'fas fa-file-contract', 'Échéances & Mainlevées de Cautions', 'Dossiers sensibles arrivant à échéance sans mainlevée', '4.8 Mds sous 30 jours', 'text-danger', '/cautionnement', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 105" class="w-100">
+                                    @for (ech of cautionEcheances; track ech.tranche; let i = $index) {
+                                        <rect x="75" [attr.y]="12 + i * 28" [attr.width]="ech.count * 1.0" height="15" [attr.fill]="ech.color" rx="2"></rect>
+                                        <text x="70" [attr.y]="23 + i * 28" text-anchor="end" font-size="8" fill="#64748b" font-weight="600">{{ ech.tranche }}</text>
+                                        <text [attr.x]="80 + ech.count * 1.0" [attr.y]="23 + i * 28" font-size="8" fill="#1e293b" font-weight="700">{{ ech.count }} dos.</text>
+                                    }
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Tiers</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-center text-secondary fw-semibold border-0">Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (risk of cautionTopRisques; track risk.ref) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="risk.tiers">{{ risk.tiers }}</td>
+                                            <td class="text-end fw-bold">{{ risk.montant | number:'1.1-1' }}M</td>
+                                            <td class="pe-1 text-center">
+                                                <span class="badge" [style.background]="risk.statut==='CONTENTIEUX' ? '#FFEBEE' : '#FFF3E0'" [style.color]="risk.statut==='CONTENTIEUX' ? '#B71C1C' : '#E65100'" style="font-size:0.62rem;">
+                                                    {{ risk.echeance }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- ========================================== -->
+    <!-- 4. SECTION COMPTABILITÉ (Ligne à 3 colonnes) -->
+    <!-- ========================================== -->
+    <div class="d-flex align-items-center mb-2.5 mt-4 border-bottom pb-1.5">
+        <h6 class="fw-bold text-success mb-0"><i class="fas fa-book me-2"></i>Comptabilité &amp; Rapprochement</h6>
+    </div>
+    <div class="row g-3 mb-3">
+        <!-- Col 1 : Suspends par Ministère -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-1" (click)="goToService('/comptabilite')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-success" style="font-size:0.86rem;">Suspends Ministère</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Axe structurel</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="fw-bold text-success" style="font-size:0.95rem;">{{ laEnCoursTotal | number:'1.1-1' }} Mds</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('compta_min', 'Comptabilité', 'fas fa-book', 'Suspends par Ministère', 'Répartition structurelle des écritures en suspens', laEnCoursTotal + ' Mds', 'text-success', '/comptabilite', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 110" class="w-100">
+                                    @for (item of comptaSuspendsParMinistere | slice:0:4; track item.ministere; let i = $index) {
+                                        <rect x="75" [attr.y]="8 + i * 25" [attr.width]="item.pct * 4.5" height="14" fill="#2E7D32" rx="2"></rect>
+                                        <text x="70" [attr.y]="19 + i * 25" text-anchor="end" font-size="8" fill="#64748b" font-weight="600">{{ item.ministere | slice:0:10 }}</text>
+                                        <text [attr.x]="80 + item.pct * 4.5" [attr.y]="19 + i * 25" font-size="8" fill="#1e293b" font-weight="700">{{ item.pct }}%</text>
+                                    }
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Ministère</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Part</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (item of comptaSuspendsParMinistere; track item.ministere) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="item.ministere">{{ item.ministere }}</td>
+                                            <td class="text-end fw-bold">{{ item.montant | number:'1.1-1' }}M</td>
+                                            <td class="pe-1 text-end text-success fw-bold">{{ item.pct }}%</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 2 : Suspends par Ancienneté & Criticité -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-2" (click)="goToService('/comptabilite')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-success" style="font-size:0.86rem;">Balance Âgée</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Axe temporel</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-danger-subtle text-danger fw-bold" style="font-size:0.72rem;">9.2 Mds &gt; 90j</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('compta_age', 'Comptabilité', 'fas fa-book', 'Balance Âgée des Suspends', 'Analyse de l\'ancienneté des écritures et suivi du plan d\'apurement', '9.2 Mds > 90 jours', 'text-danger', '/comptabilite', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 105" class="w-100">
+                                    @for (c of comptaSuspendsParAnciennete; track c.tranche; let i = $index) {
+                                        <rect x="75" [attr.y]="12 + i * 30" [attr.width]="c.montant * 7" height="15" [attr.fill]="c.couleur" rx="2"></rect>
+                                        <text x="70" [attr.y]="23 + i * 30" text-anchor="end" font-size="8" fill="#64748b" font-weight="600">{{ c.tranche | slice:0:10 }}</text>
+                                        <text [attr.x]="80 + c.montant * 7" [attr.y]="23 + i * 30" font-size="8" fill="#1e293b" font-weight="700">{{ c.montant | number:'1.1-1' }}M</text>
+                                    }
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Tranche</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-center text-secondary fw-semibold border-0">Niveau</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (c of comptaSuspendsParAnciennete; track c.tranche) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;">{{ c.tranche }}</td>
+                                            <td class="text-end fw-bold" [style.color]="c.couleur">{{ c.montant | number:'1.1-1' }}M</td>
+                                            <td class="pe-1 text-center">
+                                                <i class="fas" [class]="c.icone" [style.color]="c.couleur"></i>
+                                            </td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 3 : Rapprochements & Écarts BCEAO -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-3" (click)="goToService('/comptabilite')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-success" style="font-size:0.86rem;">Rapprochement &amp; Écarts</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Écarts de concordance</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-warning text-dark fw-bold" style="font-size:0.72rem;">1.2 Mds</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('compta_rap', 'Comptabilité', 'fas fa-book', 'Rapprochement & Écarts BCEAO', 'Suivi des divergences Livre Trésor vs Relevés Bancaires', 'Écart: 1.2 Mds', 'text-warning', '/comptabilite', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 105" class="w-100">
+                                    <line x1="15" y1="80" x2="265" y2="80" stroke="#94a3b8" stroke-width="1"/>
+                                    @for (ec of comptaRapprochementEcarts; track ec.mois; let i = $index) {
+                                        <rect [attr.x]="25 + i * 40" [attr.y]="80 - (ec.ecart * 28)" width="18" [attr.height]="ec.ecart * 28" fill="#D4A017" rx="2"></rect>
+                                        <text [attr.x]="25 + i * 40 + 9" y="95" text-anchor="middle" font-size="8.5" fill="#94a3b8">{{ ec.mois }}</text>
+                                    }
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Compte</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Écart</th>
+                                            <th class="pe-1 text-center text-secondary fw-semibold border-0">Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (op of comptaOperationsRapprochement; track op.compte) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="op.compte">{{ op.compte }}</td>
+                                            <td class="text-end fw-bold" [style.color]="op.ecart > 0 ? '#D4A017' : '#2E7D32'">{{ op.ecart | number:'1.1-1' }}M</td>
+                                            <td class="pe-1 text-center">
+                                                <span class="badge" [style.background]="op.statut==='CONFORME' ? '#E8F5E9' : '#FFF8E1'" [style.color]="op.statut==='CONFORME' ? '#2E7D32' : '#F57F17'" style="font-size:0.62rem;">
+                                                    {{ op.statut }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 5. SECTION RÉGIES (Ligne à 3 colonnes)     -->
+    <!-- ========================================== -->
+    <div class="d-flex align-items-center mb-2.5 mt-4 border-bottom pb-1.5">
+        <h6 class="fw-bold text-info mb-0"><i class="fas fa-store me-2"></i>Régies d'Avances &amp; Recettes</h6>
+    </div>
+    <div class="row g-3 mb-3">
+        <!-- Col 1 : Composition des Recettes -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-1" (click)="goToService('/regies')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-info" style="font-size:0.86rem;">Recettes de l'État</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Composition globale</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="fw-bold text-info" style="font-size:0.95rem;">10 000 Mds</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('regie_recettes', 'Régies', 'fas fa-store', 'Composition des Recettes de l\'État', 'Ventilation globale des recettes fiscales et non-fiscales', '10 000 Mds', 'text-info', '/regies', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <div style="width:70px; height:70px;" class="position-relative mb-1">
+                                    <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform:rotate(-90deg);">
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#1B3A6B" stroke-width="5" stroke-dasharray="42 100"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#2E7D32" stroke-width="5" stroke-dasharray="21 100" stroke-dashoffset="-42"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#D4A017" stroke-width="5" stroke-dasharray="18 100" stroke-dashoffset="-63"></circle>
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#E65100" stroke-width="5" stroke-dasharray="19 100" stroke-dashoffset="-81"></circle>
+                                    </svg>
+                                </div>
+                                <div class="d-flex gap-1 justify-content-center flex-wrap" style="font-size:0.64rem;">
+                                    @for (r of recettesComposition; track r.nature) {
+                                    <span class="text-secondary"><span class="legend-dot" [style.background]="r.couleur"></span>{{ r.pct }}%</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Nature</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Part</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (r of recettesComposition; track r.nature) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="r.nature">{{ r.nature }}</td>
+                                            <td class="text-end fw-bold">{{ r.montant | number:'1.0-0' }}M</td>
+                                            <td class="pe-1 text-end fw-semibold text-secondary">{{ r.pct }}%</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 2 : Performance par Régie -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-2" (click)="goToService('/regies')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-info" style="font-size:0.86rem;">Performance Régies</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Recettes collectées</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-info-subtle text-info fw-bold" style="font-size:0.72rem;">Taux: 93%</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('regie_perf', 'Régies', 'fas fa-store', 'Performance & Recouvrement des Régies', 'Taux de collecte et suivi d\'activité par grande régie', 'Taux moyen: 93%', 'text-info', '/regies', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 105" class="w-100">
+                                    @for (item of recettesDetails; track item.libelle; let i = $index) {
+                                        <rect x="75" [attr.y]="8 + i * 24" [attr.width]="item.taux * 1.6" height="14" fill="#0284c7" rx="2"></rect>
+                                        <text x="70" [attr.y]="19 + i * 24" text-anchor="end" font-size="8" fill="#64748b" font-weight="600">{{ item.libelle | slice:0:10 }}</text>
+                                        <text [attr.x]="80 + item.taux * 1.6" [attr.y]="19 + i * 24" font-size="8" fill="#1e293b" font-weight="700">{{ item.taux }}%</text>
+                                    }
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Régie</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Évol.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (item of recettesDetails; track item.libelle) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="item.libelle">{{ item.libelle }}</td>
+                                            <td class="text-end fw-bold">{{ item.montant | number:'1.0-0' }}M</td>
+                                            <td class="pe-1 text-end text-success fw-bold">{{ item.tendance }}</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 3 : Objectifs Loi de Finances -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-3" (click)="goToService('/regies')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-info" style="font-size:0.86rem;">Objectifs LF</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Taux de réalisation</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-success text-white fw-bold" style="font-size:0.72rem;">{{ regiesTauxGlobal }}%</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('regie_lf', 'Régies', 'fas fa-store', 'Objectifs de la Loi de Finances vs Réalisé', 'Taux de concrétisation budgétaire par régie financière', 'Taux global: ' + regiesTauxGlobal + '%', 'text-success', '/regies', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 105" class="w-100">
+                                    @for (obj of regiesObjectifsLF; track obj.regie; let i = $index) {
+                                        <rect [attr.x]="25 + i * 80" [attr.y]="75 - (obj.prevision / 75)" width="14" [attr.height]="obj.prevision / 75" fill="#cbd5e1" rx="1.5"></rect>
+                                        <rect [attr.x]="42 + i * 80" [attr.y]="75 - (obj.realise / 75)" width="14" [attr.height]="obj.realise / 75" fill="#0284c7" rx="1.5"></rect>
+                                        <text [attr.x]="25 + i * 80 + 15" y="90" text-anchor="middle" font-size="8" fill="#94a3b8">{{ obj.regie }}</text>
+                                    }
+                                </svg>
+                                <div class="d-flex gap-2 justify-content-center mt-0.5 flex-wrap" style="font-size:0.64rem;">
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#cbd5e1;"></span>Prévu</span>
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#0284c7;"></span>Réalisé</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Régie</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Réalisé</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Taux</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (obj of regiesObjectifsLF; track obj.regie) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;">{{ obj.regie }}</td>
+                                            <td class="text-end fw-bold">{{ obj.realise | number:'1.0-0' }}M</td>
+                                            <td class="pe-1 text-end fw-bold text-success">{{ obj.taux }}%</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 6. SECTION STATISTIQUES & DETTE (3 cols)  -->
+    <!-- ========================================== -->
+    <div class="d-flex align-items-center mb-2.5 mt-4 border-bottom pb-1.5">
+        <h6 class="fw-bold text-warning mb-0"><i class="fas fa-chart-bar me-2"></i>Statistiques &amp; Dette Publique</h6>
+    </div>
+    <div class="row g-3 mb-3">
+        <!-- Col 1 : Encours de la Dette Publique -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-1" (click)="goToService('/statistiques')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-warning" style="font-size:0.86rem;">Encours Dette</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Évolution annuelle (Mds)</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="fw-bold text-dark" style="font-size:0.95rem;">12 100 Mds</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('dette_encours', 'Statistiques & Dette', 'fas fa-chart-bar', 'Évolution de l\'Encours de la Dette Publique', 'Trajectoire historique et encours consolidé (2021-2025)', '12 100 Mds', 'text-dark', '/statistiques', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 110" class="w-100">
+                                    <line x1="15" y1="15" x2="265" y2="15" stroke="#f1f5f9" stroke-width="1"/>
+                                    <line x1="15" y1="50" x2="265" y2="50" stroke="#f1f5f9" stroke-width="1"/>
+                                    <line x1="15" y1="85" x2="265" y2="85" stroke="#94a3b8" stroke-width="1"/>
+                                    @for (d of detteEvolution; track d.annee; let i = $index) {
+                                        <rect [attr.x]="25 + i * 48" [attr.y]="85 - (d.volume / 190)" width="22" [attr.height]="d.volume / 190" rx="2" fill="#1B3A6B"></rect>
+                                        <text [attr.x]="25 + i * 48 + 11" y="100" text-anchor="middle" font-size="8" fill="#94a3b8">{{ d.annee }}</text>
+                                    }
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Année</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Encours</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Évol.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (d of detteEvolution; track d.annee) {
+                                        <tr>
+                                            <td class="ps-1 fw-medium">{{ d.annee }}</td>
+                                            <td class="text-end fw-bold">{{ d.volume | number:'1.0-0' }}M</td>
+                                            <td class="pe-1 text-end text-secondary">+{{ ((d.volume - 8000) / 100) | number:'1.0-0' }}%</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 2 : Portefeuille de la Dette par Instrument -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-2" (click)="goToService('/statistiques')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-warning" style="font-size:0.86rem;">Portefeuille Dette</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Structure par catégorie</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-warning-subtle text-warning-emphasis fw-bold" style="font-size:0.72rem;">4 Types</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('dette_portefeuille', 'Statistiques & Dette', 'fas fa-chart-bar', 'Portefeuille de la Dette par Instrument', 'Ventilation de l\'encours par catégorie d\'instrument et devise', '4 Instruments majeurs', 'text-dark', '/statistiques', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 105" class="w-100">
+                                    @for (item of detteDetails; track item.libelle; let i = $index) {
+                                        <rect x="75" [attr.y]="8 + i * 24" [attr.width]="item.montant / 35" height="14" [attr.fill]="i===0 ? '#1B3A6B' : i===1 ? '#2E7D32' : i===2 ? '#D4A017' : '#0284c7'" rx="2"></rect>
+                                        <text x="70" [attr.y]="19 + i * 24" text-anchor="end" font-size="8" fill="#64748b" font-weight="600">{{ item.libelle | slice:0:10 }}</text>
+                                        <text [attr.x]="80 + item.montant / 35" [attr.y]="19 + i * 24" font-size="8" fill="#1e293b" font-weight="700">{{ item.montant }}M</text>
+                                    }
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Instrument</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Encours</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Devise</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (item of detteDetails; track item.libelle) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="item.libelle">{{ item.libelle }}</td>
+                                            <td class="text-end fw-bold">{{ item.montant | number:'1.0-0' }}M</td>
+                                            <td class="pe-1 text-end text-secondary fw-medium">{{ item.devise }}</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 3 : Service de la Dette & Échéancier -->
+        <div class="col-12 col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 dash-card-triple reveal-item reveal-delay-3" (click)="goToService('/statistiques')" style="cursor:pointer;">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-warning" style="font-size:0.86rem;">Service Dette</h6>
+                        <span class="text-secondary" style="font-size:0.7rem;">Principal vs Intérêts</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge bg-dark text-white fw-bold" style="font-size:0.72rem;">1 090 Mds</span>
+                        <button type="button" class="btn-card-expand" (click)="openCardModal('dette_service', 'Statistiques & Dette', 'fas fa-chart-bar', 'Service de la Dette & Échéancier', 'Calendrier prévisionnel des remboursements du principal et intérêts', '1 090 Mds annuel', 'text-dark', '/statistiques', $event)" title="Agrandir la carte">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-xxl-2.5">
+                    <div class="triple-card-content">
+                        <!-- Graphique (Gauche) -->
+                        <div class="chart-side">
+                            <div class="chart-container-compact">
+                                <svg viewBox="0 0 280 105" class="w-100">
+                                    <line x1="15" y1="75" x2="265" y2="75" stroke="#94a3b8" stroke-width="1"/>
+                                    @for (s of detteServiceEvolution; track s.annee; let i = $index) {
+                                        <rect [attr.x]="25 + i * 48" [attr.y]="75 - (s.principal / 20)" width="10" [attr.height]="s.principal / 20" fill="#1B3A6B" rx="1.5"></rect>
+                                        <rect [attr.x]="37 + i * 48" [attr.y]="75 - (s.interets / 20)" width="10" [attr.height]="s.interets / 20" fill="#D4A017" rx="1.5"></rect>
+                                        <text [attr.x]="25 + i * 48 + 11" y="90" text-anchor="middle" font-size="8" fill="#94a3b8">{{ s.annee }}</text>
+                                    }
+                                </svg>
+                                <div class="d-flex gap-2 justify-content-center mt-0.5 flex-wrap" style="font-size:0.64rem;">
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#1B3A6B;"></span>Princ.</span>
+                                    <span class="text-secondary"><span class="legend-dot" style="background:#D4A017;"></span>Intér.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tableau détail (Droite) -->
+                        <div class="table-side">
+                            <div class="table-container-compact">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-1 text-secondary fw-semibold border-0">Échéance</th>
+                                            <th class="text-end text-secondary fw-semibold border-0">Montant</th>
+                                            <th class="pe-1 text-end text-secondary fw-semibold border-0">Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (ech of detteEcheancierDetail; track ech.echeance) {
+                                        <tr>
+                                            <td class="ps-1 text-truncate" style="max-width:85px;" [title]="ech.libelle">{{ ech.libelle }}</td>
+                                            <td class="text-end fw-bold">{{ ech.montant | number:'1.1-1' }}M</td>
+                                            <td class="pe-1 text-end text-secondary fw-medium">{{ ech.type }}</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- MODAL OVERLAY D'AGRANDISSEMENT DE CARTE (EXPAND)    -->
+    <!-- =================================================== -->
+    @if (activeModalCard) {
+    <div class="card-modal-backdrop" (click)="closeCardModal($event)">
+        <div class="card-modal-container" (click)="$event.stopPropagation()">
+            <!-- En-tête Modal -->
+            <div class="modal-header-custom">
+                <div class="d-flex align-items-center gap-2.5">
+                    <span class="p-2 rounded-3 bg-light text-primary fs-5 d-inline-flex align-items-center justify-content-center" style="width:40px; height:40px;">
+                        <i [class]="activeModalCard.icon"></i>
+                    </span>
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis text-uppercase" style="font-size:0.7rem;">{{ activeModalCard.domain }}</span>
+                            @if (activeModalCard.badgeText) {
+                            <span class="badge bg-light text-dark border">{{ activeModalCard.badgeText }}</span>
+                            }
+                        </div>
+                        <h5 class="fw-bold mb-0 text-dark">{{ activeModalCard.title }}</h5>
+                        <p class="text-muted small mb-0">{{ activeModalCard.subtitle }}</p>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-light rounded-circle border-0 d-flex align-items-center justify-content-center" style="width:36px; height:36px;" (click)="closeCardModal($event)" title="Fermer">
+                    <i class="fas fa-times fs-6 text-secondary"></i>
+                </button>
+            </div>
+
+            <!-- Corps du Modal : Vue HD agrandie -->
+            <div class="modal-body-custom">
+                <div class="row g-4">
+                    <!-- Vue Graphique Agrandie -->
+                    <div class="col-12 col-lg-6">
+                        <div class="p-3.5 bg-light rounded-3 border h-100 d-flex flex-column justify-content-between">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Représentation Graphique</h6>
+                                <span class="badge bg-white text-secondary border">HD Analysis</span>
+                            </div>
+                            
+                            <div class="d-flex align-items-center justify-content-center my-3" style="min-height: 220px;">
+                                <!-- Trésorerie Solde -->
+                                @if (activeModalCard.id === 'tres_solde') {
+                                    <svg viewBox="0 0 450 160" class="w-100" style="max-height:220px;">
+                                        <line x1="20" y1="20" x2="430" y2="20" stroke="#e2e8f0" stroke-width="1"/>
+                                        <line x1="20" y1="70" x2="430" y2="70" stroke="#e2e8f0" stroke-width="1"/>
+                                        <line x1="20" y1="120" x2="430" y2="120" stroke="#64748b" stroke-width="1.5"/>
+                                        @for (d of soldeBancaireEvolution; track d.mois; let i = $index) {
+                                            <rect [attr.x]="35 + i * 65" [attr.y]="120 - (d.transit / 80)" width="28" [attr.height]="d.transit / 80" fill="#E9ECEF"></rect>
+                                            <rect [attr.x]="35 + i * 65" [attr.y]="120 - (d.transit + d.depots) / 80" width="28" [attr.height]="d.depots / 80" fill="#6C757D"></rect>
+                                            <rect [attr.x]="35 + i * 65" [attr.y]="120 - (d.transit + d.depots + d.bni) / 80" width="28" [attr.height]="d.bni / 80" fill="#FF8200"></rect>
+                                            <rect [attr.x]="35 + i * 65" [attr.y]="120 - (d.transit + d.depots + d.bni + d.bceao) / 80" width="28" [attr.height]="d.bceao / 80" fill="#009E60" rx="3"></rect>
+                                            <text [attr.x]="35 + i * 65 + 14" y="142" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">{{ d.mois }}</text>
+                                        }
+                                    </svg>
+                                }
+                                <!-- Lettres d'Avance -->
+                                @else if (activeModalCard.id === 'tres_la') {
+                                    <svg viewBox="0 0 450 160" class="w-100" style="max-height:220px;">
+                                        <line x1="20" y1="20" x2="430" y2="20" stroke="#e2e8f0" stroke-width="1"/>
+                                        <line x1="20" y1="70" x2="430" y2="70" stroke="#e2e8f0" stroke-width="1"/>
+                                        <line x1="20" y1="120" x2="430" y2="120" stroke="#64748b" stroke-width="1.5"/>
+                                        @for (la of laEvolution; track la.mois; let i = $index) {
+                                            <rect [attr.x]="35 + i * 65" [attr.y]="120 - (la.regul / 0.9)" width="16" [attr.height]="la.regul / 0.9" fill="#009E60" rx="3"></rect>
+                                            <rect [attr.x]="55 + i * 65" [attr.y]="120 - (la.encours / 0.9)" width="16" [attr.height]="la.encours / 0.9" fill="#D4A017" rx="3"></rect>
+                                            <text [attr.x]="35 + i * 65 + 18" y="142" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">{{ la.mois }}</text>
+                                        }
+                                    </svg>
+                                }
+                                <!-- Donut Disponibilités -->
+                                @else if (activeModalCard.id === 'tres_disp' || activeModalCard.id === 'reg_flux' || activeModalCard.id === 'caut_statuts' || activeModalCard.id === 'regie_recettes') {
+                                    <div class="d-flex align-items-center justify-content-center gap-4">
+                                        <div style="width:130px; height:130px;" class="position-relative">
+                                            <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform:rotate(-90deg);">
+                                                <circle cx="18" cy="18" r="14" fill="none" stroke="#009E60" stroke-width="5" stroke-dasharray="55 100"></circle>
+                                                <circle cx="18" cy="18" r="14" fill="none" stroke="#FF8200" stroke-width="5" stroke-dasharray="27 100" stroke-dashoffset="-55"></circle>
+                                                <circle cx="18" cy="18" r="14" fill="none" stroke="#1B3A6B" stroke-width="5" stroke-dasharray="18 100" stroke-dashoffset="-82"></circle>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                }
+                                <!-- Autres Graphiques Barres HD -->
+                                @else {
+                                    <svg viewBox="0 0 450 160" class="w-100" style="max-height:220px;">
+                                        <line x1="20" y1="20" x2="430" y2="20" stroke="#e2e8f0" stroke-width="1"/>
+                                        <line x1="20" y1="70" x2="430" y2="70" stroke="#e2e8f0" stroke-width="1"/>
+                                        <line x1="20" y1="120" x2="430" y2="120" stroke="#64748b" stroke-width="1.5"/>
+                                        @for (d of detteEvolution; track d.annee; let i = $index) {
+                                            <rect [attr.x]="35 + i * 80" [attr.y]="120 - (d.volume / 120)" width="38" [attr.height]="d.volume / 120" rx="4" fill="#1B3A6B"></rect>
+                                            <text [attr.x]="35 + i * 80 + 19" y="142" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">{{ d.annee }}</text>
+                                        }
+                                    </svg>
+                                }
+                            </div>
+
+                            <div class="p-2.5 bg-white rounded border d-flex justify-content-around text-center mt-2">
+                                <div>
+                                    <span class="text-secondary small d-block">Période</span>
+                                    <span class="fw-bold text-dark">{{ selectedPeriod }}</span>
+                                </div>
+                                <div class="border-start ps-3">
+                                    <span class="text-secondary small d-block">Statut Flux</span>
+                                    <span class="fw-bold text-success"><i class="fas fa-check-circle me-1"></i>Synchronisé</span>
+                                </div>
+                                <div class="border-start ps-3">
+                                    <span class="text-secondary small d-block">Fiabilité Données</span>
+                                    <span class="fw-bold text-primary">100% Validé</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tableau Complet Agrandi -->
+                    <div class="col-12 col-lg-6">
+                        <div class="p-3.5 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-table me-2 text-primary"></i>Détail Exhaustif des Données</h6>
+                                    <span class="badge bg-primary-subtle text-primary fw-medium">Vue Globale</span>
+                                </div>
+                                <div class="table-responsive border rounded" style="max-height:280px; overflow-y:auto;">
+                                    <!-- Tableau Trésorerie Solde -->
+                                    @if (activeModalCard.id === 'tres_solde') {
+                                        <table class="table table-hover table-striped mb-0" style="font-size:0.85rem;">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Établissement / Compte</th>
+                                                    <th class="text-end">Solde (Mds)</th>
+                                                    <th class="text-end">Tendance</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @for (c of comptaSoldesCompte; track c.banque) {
+                                                <tr>
+                                                    <td class="fw-medium">{{ c.banque }}</td>
+                                                    <td class="text-end fw-bold">{{ c.solde | number:'1.0-0' }} Mds</td>
+                                                    <td class="text-end text-success fw-bold">{{ c.tendance }}</td>
+                                                </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                    <!-- Tableau Lettres d'Avance -->
+                                    @else if (activeModalCard.id === 'tres_la') {
+                                        <table class="table table-hover table-striped mb-0" style="font-size:0.85rem;">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Réf. / Ministère</th>
+                                                    <th class="text-end">Montant</th>
+                                                    <th class="text-center">Statut</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @for (item of laDetailsList; track item.ref) {
+                                                <tr>
+                                                    <td>
+                                                        <div class="fw-semibold">{{ item.ministere }}</div>
+                                                        <small class="text-muted">{{ item.ref }}</small>
+                                                    </td>
+                                                    <td class="text-end fw-bold">{{ item.montant | number:'1.1-1' }} Mds</td>
+                                                    <td class="text-center">
+                                                        <span class="badge" [style.background]="item.statut==='REGULARISE' ? '#E8F5E9' : '#FFF3E0'" [style.color]="item.statut==='REGULARISE' ? '#2E7D32' : '#E65100'">
+                                                            {{ item.statut==='REGULARISE' ? 'Régularisé' : 'En cours' }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                    <!-- Tableau Générique Agrandit -->
+                                    @else {
+                                        <table class="table table-hover table-striped mb-0" style="font-size:0.85rem;">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Élément / Désignation</th>
+                                                    <th class="text-end">Montant / Volume</th>
+                                                    <th class="text-end">Statut / Part</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @for (tx of reglementFluxTransactions; track tx.ref) {
+                                                <tr>
+                                                    <td class="fw-medium">{{ tx.libelle }}</td>
+                                                    <td class="text-end fw-bold">{{ tx.montant | number:'1.1-1' }} Mds</td>
+                                                    <td class="text-end">
+                                                        <span class="badge bg-success-subtle text-success">{{ tx.statut }}</span>
+                                                    </td>
+                                                </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pied de Modal -->
+            <div class="modal-footer-custom">
+                <button type="button" class="btn btn-light px-3 py-1.5 fw-medium" (click)="closeCardModal($event)">
+                    Fermer
+                </button>
+                <button type="button" class="btn btn-primary px-3 py-1.5 fw-bold" (click)="goToService(activeModalCard.routeAction); closeCardModal($event)">
+                    <i class="fas fa-external-link-alt me-1.5"></i>Ouvrir le Module Complet
+                </button>
+            </div>
+        </div>
+    </div>
+    }
