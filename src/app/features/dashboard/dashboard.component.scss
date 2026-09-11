@@ -1,5 +1,33 @@
+.dashboard-sticky-bar {
+    position: sticky;
+    top: 60px; // Placé immédiatement sous la barre topbar (60px)
+    z-index: 1020;
+    background: var(--bg-body, #E9ECEF);
+    margin-left: -3rem;
+    margin-right: -3rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+    margin-top: -1.5rem;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
+
+    @media (max-width: 767.98px) {
+        margin-left: -2rem;
+        margin-right: -2rem;
+        padding-left: 2rem;
+        padding-right: 2rem;
+        margin-top: -1rem;
+        top: 56px;
+    }
+}
+
 .dashboard-container {
-    padding-top: 1.8rem; /* Faire remonter le contenu du body */
+    padding-top: 0;
 
     // Animation pour le texte défilant
     .scrolling-text {
@@ -44,6 +72,550 @@
         transform: translateY(-5px);
         box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
     }
+}
+
+
+// =============================================
+// FLUX DE CAISSE — COMPACT WIDGET
+// =============================================
+
+// Pastille live réutilisable
+.flux-live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: -4px; left: -4px;
+        width: 16px; height: 16px;
+        border-radius: 50%;
+        background: rgba(34, 197, 94, 0.25);
+        animation: livePulse 1.8s ease-in-out infinite;
+    }
+}
+
+.flux-caisse-widget-compact {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+
+    // ---- En-tête compacte ----
+    .fcw-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: linear-gradient(110deg, #0f172a 0%, #ef8f2a 100%);
+        padding: 0.6rem 1rem;
+        flex-wrap: wrap;
+
+        .fcw-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-shrink: 0;
+
+            .fcw-title {
+                color: #fff;
+                font-size: 0.82rem;
+                font-weight: 700;
+                letter-spacing: 0.02em;
+                white-space: nowrap;
+            }
+            .fcw-subtitle {
+                color: rgba(255,255,255,0.45);
+                font-size: 0.7rem;
+                white-space: nowrap;
+            }
+        }
+
+        .fcw-soldes {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-left: auto;
+            flex-shrink: 0;
+
+            .fcw-solde {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 1px;
+
+                .fcw-solde-lbl {
+                    font-size: 0.58rem;
+                    color: rgba(255,255,255,0.45);
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    font-weight: 600;
+                    white-space: nowrap;
+                    i { font-size: 0.55rem; }
+                }
+
+                .fcw-solde-val {
+                    font-size: 0.85rem;
+                    font-weight: 800;
+                    font-variant-numeric: tabular-nums;
+                    white-space: nowrap;
+                }
+            }
+
+            .fcw-solde-sep {
+                width: 1px;
+                height: 30px;
+                background: rgba(255,255,255,0.12);
+                flex-shrink: 0;
+            }
+        }
+
+        .fcw-expand-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: rgba(255,255,255,0.85);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.3rem 0.7rem;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+
+            &:hover {
+                background: rgba(255,255,255,0.2);
+                color: #fff;
+                transform: scale(1.04);
+            }
+        }
+    }
+
+    // ---- Mini Feed — 3 lignes compactes ----
+    .fcw-mini-feed {
+        background: #ffffff;
+        position: relative;
+
+        .fcw-tx-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.42rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+
+            &:last-child { border-bottom: none; }
+
+            &.fcw-tx-entree { border-left-color: #10b981; }
+            &.fcw-tx-sortie { border-left-color: #ef4444; }
+
+            // Effet WOW sur la dernière transaction ajoutée
+            &.fcw-tx-latest {
+                position: relative;
+                z-index: 2;
+
+                &.fcw-tx-entree {
+                    border-left: 4px solid #10b981;
+                    animation: rowSlideInWow 0.5s cubic-bezier(0.16, 1, 0.3, 1), flashRowEntreeWow 2.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+                }
+
+                &.fcw-tx-sortie {
+                    border-left: 4px solid #ef4444;
+                    animation: rowSlideInWow 0.5s cubic-bezier(0.16, 1, 0.3, 1), flashRowSortieWow 2.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+                }
+
+                // Rayon laser lumineux balayant la ligne
+                &::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    bottom: 0;
+                    left: -80px;
+                    width: 80px;
+                    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.85) 50%, transparent 100%);
+                    transform: skewX(-25deg);
+                    animation: laserSweepBeam 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+                    pointer-events: none;
+                }
+
+                .fcw-tx-arrow {
+                    animation: iconPopWow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+                }
+
+                .fcw-tx-montant {
+                    animation: montantPopWow 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+                }
+
+                .fcw-tx-svc {
+                    animation: badgePopWow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+                }
+            }
+
+            &:hover { background: #f8fafc; }
+
+            .fcw-tx-arrow {
+                font-size: 0.7rem;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                transition: transform 0.2s;
+
+                .fcw-tx-entree & { color: #059669; background: #d1fae5; box-shadow: 0 0 0 1px rgba(16,185,129,0.2); }
+                .fcw-tx-sortie & { color: #dc2626; background: #fee2e2; box-shadow: 0 0 0 1px rgba(239,68,68,0.2); }
+            }
+
+            .fcw-tx-time {
+                font-size: 0.7rem;
+                font-family: 'Courier New', monospace;
+                color: #64748b;
+                font-weight: 600;
+                white-space: nowrap;
+                min-width: 62px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+
+                .fcw-row-pulse-dot {
+                    display: inline-block;
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    flex-shrink: 0;
+                    animation: livePulse 1.2s infinite ease-in-out;
+
+                    &.dot-entree { background: #10b981; box-shadow: 0 0 6px #10b981; }
+                    &.dot-sortie { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+                }
+            }
+
+            .fcw-tx-svc {
+                font-size: 0.66rem;
+                font-weight: 700;
+                padding: 0.12rem 0.45rem;
+                border-radius: 5px;
+                border: 1px solid;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .fcw-tx-desc {
+                font-size: 0.71rem;
+                color: #475569;
+                flex: 1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .fcw-tx-montant {
+                font-size: 0.82rem;
+                font-weight: 800;
+                white-space: nowrap;
+                flex-shrink: 0;
+                font-variant-numeric: tabular-nums;
+
+                &.fcw-pos { color: #059669; }
+                &.fcw-neg { color: #dc2626; }
+            }
+
+            .fcw-tx-solde {
+                font-size: 0.68rem;
+                color: #64748b;
+                font-weight: 500;
+                white-space: nowrap;
+                flex-shrink: 0;
+                font-variant-numeric: tabular-nums;
+            }
+        }
+    }
+}
+
+// =============================================
+// FLUX MODAL — Vue complète
+// =============================================
+.flux-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 20, 0.65);
+    backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: fadeInBackdrop 0.2s ease-out;
+}
+
+.flux-modal-container {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 900px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+    animation: slideUpModal 0.25s cubic-bezier(0.16,1,0.3,1);
+
+    .flux-modal-header {
+        background: linear-gradient(110deg, #0f172a 0%, #1e3a5f 100%);
+        padding: 0.75rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-shrink: 0;
+    }
+
+    .flux-modal-solde-chip {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 8px;
+        padding: 0.25rem 0.65rem;
+        font-size: 0.7rem;
+        color: rgba(255,255,255,0.7);
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .btn-flux-close {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.18);
+        color: #fff;
+        width: 30px; height: 30px;
+        border-radius: 50%;
+        font-size: 0.8rem;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s;
+        flex-shrink: 0;
+
+        &:hover { background: rgba(255,255,255,0.22); }
+    }
+
+    .flux-modal-body {
+        overflow-y: auto;
+        flex: 1;
+
+        &::-webkit-scrollbar { width: 5px; }
+        &::-webkit-scrollbar-track { background: #f1f5f9; }
+        &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    }
+}
+
+// Table partagée (compact + modal)
+.flux-table {
+    border-collapse: separate;
+    border-spacing: 0;
+
+    thead tr th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 0.67rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 2px solid #e2e8f0;
+        border-top: none;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    tbody tr {
+        transition: background 0.15s;
+        position: relative;
+
+        td {
+            padding: 0.38rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        &:hover { background: #f8fafc; }
+
+        &.flux-row-new {
+            &.flux-entree {
+                border-left: 4px solid #10b981;
+                animation: rowSlideInTable 0.5s cubic-bezier(0.16, 1, 0.3, 1), flashRowEntreeWow 2.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            }
+            &.flux-sortie {
+                border-left: 4px solid #ef4444;
+                animation: rowSlideInTable 0.5s cubic-bezier(0.16, 1, 0.3, 1), flashRowSortieWow 2.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            }
+
+            .flux-service-badge {
+                animation: badgePopWow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+        }
+
+        &.flux-entree { border-left: 3px solid #10b981; }
+        &.flux-sortie { border-left: 3px solid #ef4444; }
+    }
+}
+
+.flux-service-badge {
+    display: inline-block;
+    padding: 0.14rem 0.45rem;
+    border-radius: 5px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border: 1px solid;
+    white-space: nowrap;
+}
+
+.flux-badge-entree { background: #dcfce7; color: #166534; font-size: 0.63rem; font-weight: 700; }
+.flux-badge-sortie { background: #fee2e2; color: #991b1b; font-size: 0.63rem; font-weight: 700; }
+.fw-mono { font-family: 'Courier New', Courier, monospace; }
+
+// =============================================
+// ANIMATIONS & EFFETS WOW EN TEMPS RÉEL
+// =============================================
+@keyframes livePulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.6); opacity: 0.2; }
+    100% { transform: scale(1); opacity: 0.9; }
+}
+
+@keyframes rowSlideInWow {
+    0% {
+        opacity: 0;
+        transform: translateY(-14px) scale(0.98);
+        filter: brightness(1.2);
+    }
+    60% {
+        transform: translateY(0) scale(1.006);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: brightness(1);
+    }
+}
+
+@keyframes rowSlideInTable {
+    0% {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes flashRowEntreeWow {
+    0% {
+        background: linear-gradient(90deg, rgba(16, 185, 129, 0.32) 0%, rgba(16, 185, 129, 0.12) 40%, rgba(16, 185, 129, 0.02) 100%);
+        box-shadow: inset 0 0 16px rgba(16, 185, 129, 0.18), 0 2px 10px rgba(16, 185, 129, 0.15);
+    }
+    30% {
+        background: linear-gradient(90deg, rgba(16, 185, 129, 0.24) 0%, rgba(16, 185, 129, 0.08) 40%, transparent 100%);
+        box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.12), 0 1px 6px rgba(16, 185, 129, 0.08);
+    }
+    100% {
+        background: transparent;
+        box-shadow: none;
+    }
+}
+
+@keyframes flashRowSortieWow {
+    0% {
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.32) 0%, rgba(239, 68, 68, 0.12) 40%, rgba(239, 68, 68, 0.02) 100%);
+        box-shadow: inset 0 0 16px rgba(239, 68, 68, 0.18), 0 2px 10px rgba(239, 68, 68, 0.15);
+    }
+    30% {
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.24) 0%, rgba(239, 68, 68, 0.08) 40%, transparent 100%);
+        box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.12), 0 1px 6px rgba(239, 68, 68, 0.08);
+    }
+    100% {
+        background: transparent;
+        box-shadow: none;
+    }
+}
+
+@keyframes laserSweepBeam {
+    0% {
+        left: -100px;
+        opacity: 0.9;
+    }
+    100% {
+        left: 110%;
+        opacity: 0;
+    }
+}
+
+@keyframes iconPopWow {
+    0% {
+        transform: scale(0.2) rotate(-90deg);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.35) rotate(10deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes montantPopWow {
+    0% {
+        transform: scale(0.9);
+        filter: brightness(1.4);
+        text-shadow: 0 0 10px currentColor;
+    }
+    35% {
+        transform: scale(1.22);
+        filter: brightness(1.2);
+        text-shadow: 0 0 6px currentColor;
+    }
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+        text-shadow: none;
+    }
+}
+
+@keyframes badgePopWow {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    60% {
+        transform: scale(1.12);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInBackdrop {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUpModal {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 // Alertes Critiques - Cards Verticales / Portrait en quinconce

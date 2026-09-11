@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,7 +12,7 @@ import { Alerte } from '../../core/models/alerte.model';
     templateUrl: './dashboard.component.html',
     styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
     private router = inject(Router);
     private cdr = inject(ChangeDetectorRef);
 
@@ -54,6 +54,18 @@ export class DashboardComponent implements OnInit {
     laTotalEnCours = 45.8;
     tresorerieDisponibilites: any[] = [];
     liquiditeNetteTotal = 15423;
+
+    // Flux de Caisse en Temps Réel
+    fluxCaisseTransactions: any[] = [];
+    soldeCaisseReel = 15423000;
+    soldeCaisseVirtuel = 15423000;
+    fluxModalOpen = false;
+    private fluxInterval: any = null;
+    private readonly SERVICES_SOURCE = ['Douanes', 'DGI - Impôts', 'Trésor Public', 'SODECI', 'SIR', 'CIE', 'DMO - Dette', 'DGBudget'];
+    private readonly SERVICES_COLORS: { [k: string]: string } = {
+        'Douanes': '#1B3A6B', 'DGI - Impôts': '#FF8200', 'Trésor Public': '#009E60',
+        'SODECI': '#6C757D', 'SIR': '#B71C1C', 'CIE': '#D4A017', 'DMO - Dette': '#4A0E8F', 'DGBudget': '#0D6EFD'
+    };
 
     // 2. Règlement
     reglementVolumesPostes: any[] = [];
@@ -120,6 +132,62 @@ export class DashboardComponent implements OnInit {
             this.isLoading = false;
             this.cdr.detectChanges();
         }, 40);
+        this.initFluxCaisse();
+        this.startFluxInterval();
+    }
+
+    ngOnDestroy() {
+        if (this.fluxInterval) clearInterval(this.fluxInterval);
+    }
+
+    /** Initialize with historical transactions */
+    initFluxCaisse() {
+        const now = new Date();
+        this.fluxCaisseTransactions = [
+            { id: 'FC-001', heure: this.timeStr(now, -18), service: 'Douanes', type: 'ENTREE', montant: 3450, soldeVirtuel: 15423000, description: 'Recettes douanières Port-Bouët' },
+            { id: 'FC-002', heure: this.timeStr(now, -15), service: 'DGI - Impôts', type: 'ENTREE', montant: 1280, soldeVirtuel: 15424280, description: 'TVA entreprises - Lot B' },
+            { id: 'FC-003', heure: this.timeStr(now, -12), service: 'DMO - Dette', type: 'SORTIE', montant: 5600, soldeVirtuel: 15418680, description: 'Coupon obligation - Eurobond 2029' },
+            { id: 'FC-004', heure: this.timeStr(now, -9), service: 'DGBudget', type: 'SORTIE', montant: 2100, soldeVirtuel: 15416580, description: 'Subventions secteur éducation' },
+            { id: 'FC-005', heure: this.timeStr(now, -6), service: 'Douanes', type: 'ENTREE', montant: 2800, soldeVirtuel: 15419380, description: 'Droits d\'entrée - Aéroport HKAE' },
+            { id: 'FC-006', heure: this.timeStr(now, -3), service: 'DGI - Impôts', type: 'ENTREE', montant: 980, soldeVirtuel: 15420360, description: 'Impôts fonciers - Cycle mars' },
+            { id: 'FC-007', heure: this.timeStr(now, -1), service: 'SODECI', type: 'ENTREE', montant: 450, soldeVirtuel: 15420810, description: 'Reversement concession eau' },
+        ];
+        this.soldeCaisseVirtuel = 15420810;
+    }
+
+    private timeStr(base: Date, minutesOffset: number): string {
+        const d = new Date(base.getTime() + minutesOffset * 60000);
+        return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0') + ':' + d.getSeconds().toString().padStart(2, '0');
+    }
+
+    startFluxInterval() {
+        this.fluxInterval = setInterval(() => {
+            const services = this.SERVICES_SOURCE;
+            const svc = services[Math.floor(Math.random() * services.length)];
+            const isEntree = Math.random() > 0.35; // 65% entrées
+            const montant = Math.floor(Math.random() * 4000 + 100);
+            const now = new Date();
+            const newId = 'FC-' + Date.now().toString().slice(-5);
+
+            this.soldeCaisseVirtuel += isEntree ? montant : -montant;
+
+            const newTx = {
+                id: newId,
+                heure: this.timeStr(now, 0),
+                service: svc,
+                type: isEntree ? 'ENTREE' : 'SORTIE',
+                montant,
+                soldeVirtuel: this.soldeCaisseVirtuel,
+                description: isEntree ? `Recettes - ${svc}` : `Dépense - ${svc}`
+            };
+
+            this.fluxCaisseTransactions = [newTx, ...this.fluxCaisseTransactions].slice(0, 20);
+            this.cdr.detectChanges();
+        }, 4000);
+    }
+
+    getServiceColor(service: string): string {
+        return this.SERVICES_COLORS[service] || '#64748b';
     }
 
     openCardModal(id: string, domain: string, icon: string, title: string, subtitle: string, badgeText: string, badgeClass: string, routeAction: string, event?: Event) {

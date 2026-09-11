@@ -1,18 +1,21 @@
 <div class="dashboard-container px-4 pt-0 pb-4">
-    <div class="row align-items-center mb-2 g-3">
-        <div class="col-12 col-xl-8">
-            <h4 class="fw-bold text-primary-900 mb-1">Vue globale</h4>
-            <p class="text-secondary mb-0">Situation de l'Agence Comptable Centrale du Trésor</p>
-        </div>
-        <div class="col-12 col-xl-4 reveal-item reveal-delay-1">
-            <app-analyse-selector 
-                title="Période de Référence"
-                [showAxes]="false"
-                [showIndicators]="false"
-                [selectedPeriod]="selectedPeriod"
-                (selectedPeriodChange)="onPeriodChange($event)"
-                (analysisTriggered)="onRefresh()">
-            </app-analyse-selector>
+    <!-- Header Vue Globale + Sélecteur (Sticky on scroll) -->
+    <div class="dashboard-sticky-bar">
+        <div class="row align-items-center g-3">
+            <div class="col-12 col-md-7 col-lg-8">
+                <h4 class="fw-bold text-primary-900 mb-1">Vue globale</h4>
+                <p class="text-secondary mb-0">Situation de l'Agence Comptable Centrale du Trésor</p>
+            </div>
+            <div class="col-12 col-md-5 col-lg-4 text-md-end reveal-item reveal-delay-1">
+                <app-analyse-selector 
+                    title="Période de Référence"
+                    [showAxes]="false"
+                    [showIndicators]="false"
+                    [selectedPeriod]="selectedPeriod"
+                    (selectedPeriodChange)="onPeriodChange($event)"
+                    (analysisTriggered)="onRefresh()">
+                </app-analyse-selector>
+            </div>
         </div>
     </div>
 
@@ -285,6 +288,158 @@
             </div>
         </div>
     </div>
+
+    <!-- ======================================================================== -->
+    <!-- FLUX DE CAISSE EN TEMPS RÉEL — Widget compact pleine largeur            -->
+    <!-- ======================================================================== -->
+    <div class="row g-0 mb-4">
+        <div class="col-12">
+            <div class="flux-caisse-widget-compact">
+
+                <!-- ---- En-tête compacte (tout en une ligne) ---- -->
+                <div class="fcw-header">
+                    <!-- Gauche : titre + live dot -->
+                    <div class="fcw-header-left">
+                        <span class="flux-live-dot"></span>
+                        <span class="fcw-title"><i class="fas fa-bolt me-1"></i>Flux de Caisse</span>
+                        <span class="fcw-subtitle d-none d-md-inline">Entrées &amp; Sorties — Temps Réel</span>
+                    </div>
+
+                    <!-- Centre : 3 soldes inline -->
+                    <div class="fcw-soldes">
+                        <div class="fcw-solde fcw-solde-virt">
+                            <span class="fcw-solde-lbl"><i class="fas fa-sync-alt fa-spin"></i> Virtuel</span>
+                            <span class="fcw-solde-val text-warning">{{ soldeCaisseVirtuel | number:'1.0-0' }}&nbsp;M</span>
+                        </div>
+                        <div class="fcw-solde-sep"></div>
+                        <div class="fcw-solde fcw-solde-reel">
+                            <span class="fcw-solde-lbl"><i class="fas fa-lock"></i> Réel</span>
+                            <span class="fcw-solde-val text-success">{{ soldeCaisseReel | number:'1.0-0' }}&nbsp;M</span>
+                        </div>
+                        <div class="fcw-solde-sep"></div>
+                        <div class="fcw-solde fcw-solde-ecart">
+                            <span class="fcw-solde-lbl"><i class="fas fa-arrows-alt-h"></i> Écart</span>
+                            <span class="fcw-solde-val"
+                                [class.text-success]="(soldeCaisseVirtuel - soldeCaisseReel) >= 0"
+                                [class.text-danger]="(soldeCaisseVirtuel - soldeCaisseReel) < 0">
+                                {{ (soldeCaisseVirtuel - soldeCaisseReel) | number:'1.0-0' }}&nbsp;M
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Droite : bouton expand -->
+                    <button class="fcw-expand-btn" (click)="fluxModalOpen = true" title="Voir toutes les transactions">
+                        <i class="fas fa-expand-alt me-1"></i><span class="d-none d-md-inline">Détails</span>
+                    </button>
+                </div>
+
+                <!-- ---- 3 dernières transactions (mini-feed) ---- -->
+                <div class="fcw-mini-feed">
+                    @for (tx of fluxCaisseTransactions.slice(0,3); track tx.id; let i = $index) {
+                    <div class="fcw-tx-row" [class.fcw-tx-entree]="tx.type === 'ENTREE'" [class.fcw-tx-sortie]="tx.type === 'SORTIE'" [class.fcw-tx-latest]="i === 0">
+                        <!-- Indicateur type -->
+                        <span class="fcw-tx-arrow">
+                            @if (tx.type === 'ENTREE') {
+                                <i class="fas fa-arrow-down"></i>
+                            } @else {
+                                <i class="fas fa-arrow-up"></i>
+                            }
+                        </span>
+                        <!-- Heure -->
+                        <span class="fcw-tx-time">
+                            @if (i === 0) {
+                                <span class="fcw-row-pulse-dot" [class.dot-entree]="tx.type === 'ENTREE'" [class.dot-sortie]="tx.type === 'SORTIE'"></span>
+                            }
+                            {{ tx.heure }}
+                        </span>
+                        <!-- Service badge -->
+                        <span class="fcw-tx-svc" [style.color]="getServiceColor(tx.service)" [style.border-color]="getServiceColor(tx.service) + '44'" [style.background]="getServiceColor(tx.service) + '15'">
+                            {{ tx.service }}
+                        </span>
+                        <!-- Description -->
+                        <span class="fcw-tx-desc d-none d-lg-inline">{{ tx.description }}</span>
+                        <!-- Montant -->
+                        <span class="fcw-tx-montant" [class.fcw-pos]="tx.type === 'ENTREE'" [class.fcw-neg]="tx.type === 'SORTIE'">
+                            {{ tx.type === 'ENTREE' ? '+' : '−' }}{{ tx.montant | number:'1.0-0' }} M
+                        </span>
+                        <!-- Solde virtuel après transac -->
+                        <span class="fcw-tx-solde">→ {{ tx.soldeVirtuel | number:'1.0-0' }} M</span>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================== -->
+    <!-- MODAL FULL — Toutes les transactions en temps réel                       -->
+    <!-- ======================================================================== -->
+    @if (fluxModalOpen) {
+    <div class="flux-modal-backdrop" (click)="fluxModalOpen = false">
+        <div class="flux-modal-container" (click)="$event.stopPropagation()">
+            <!-- Header modal -->
+            <div class="flux-modal-header">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="flux-live-dot" style="width:8px;height:8px;flex-shrink:0;"></span>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-white" style="font-size:0.92rem;">Flux de Caisse — Historique Temps Réel</h6>
+                        <span class="text-white-50" style="font-size:0.7rem;">{{ fluxCaisseTransactions.length }} transactions · Mise à jour automatique toutes les 4s</span>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- 3 soldes condensés dans le modal -->
+                    <span class="flux-modal-solde-chip"><span class="opacity-50">Virtuel</span> <strong class="text-warning">{{ soldeCaisseVirtuel | number:'1.0-0' }} M</strong></span>
+                    <span class="flux-modal-solde-chip"><span class="opacity-50">Réel</span> <strong class="text-success">{{ soldeCaisseReel | number:'1.0-0' }} M</strong></span>
+                    <span class="flux-modal-solde-chip"><span class="opacity-50">Écart</span>
+                        <strong [class.text-success]="(soldeCaisseVirtuel - soldeCaisseReel) >= 0" [class.text-danger]="(soldeCaisseVirtuel - soldeCaisseReel) < 0">
+                            {{ (soldeCaisseVirtuel - soldeCaisseReel) | number:'1.0-0' }} M
+                        </strong>
+                    </span>
+                    <button class="btn-flux-close" (click)="fluxModalOpen = false" title="Fermer"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <!-- Table complète -->
+            <div class="flux-modal-body">
+                <table class="table table-sm mb-0 flux-table">
+                    <thead>
+                        <tr>
+                            <th style="width:85px;">Heure</th>
+                            <th style="width:130px;">Service</th>
+                            <th style="width:75px;" class="text-center">Type</th>
+                            <th style="width:120px;" class="text-end">Montant (M)</th>
+                            <th>Description</th>
+                            <th style="width:140px;" class="text-end">Solde Virtuel</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (tx of fluxCaisseTransactions; track tx.id; let i = $index) {
+                        <tr class="flux-row" [class.flux-row-new]="i === 0" [class.flux-entree]="tx.type === 'ENTREE'" [class.flux-sortie]="tx.type === 'SORTIE'">
+                            <td class="text-secondary fw-mono" style="font-size:0.77rem;"><i class="fas fa-clock me-1 opacity-40" style="font-size:0.6rem;"></i>{{ tx.heure }}</td>
+                            <td>
+                                <span class="flux-service-badge" [style.background]="getServiceColor(tx.service) + '20'" [style.color]="getServiceColor(tx.service)" [style.border-color]="getServiceColor(tx.service) + '50'">
+                                    {{ tx.service }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                @if (tx.type === 'ENTREE') {
+                                    <span class="badge flux-badge-entree"><i class="fas fa-arrow-down me-1" style="font-size:0.55rem;"></i>ENTRÉE</span>
+                                } @else {
+                                    <span class="badge flux-badge-sortie"><i class="fas fa-arrow-up me-1" style="font-size:0.55rem;"></i>SORTIE</span>
+                                }
+                            </td>
+                            <td class="text-end fw-bold" [class.text-success]="tx.type === 'ENTREE'" [class.text-danger]="tx.type === 'SORTIE'" style="font-size:0.83rem;">
+                                {{ tx.type === 'ENTREE' ? '+' : '−' }}{{ tx.montant | number:'1.0-0' }}
+                            </td>
+                            <td class="text-secondary" style="font-size:0.77rem;">{{ tx.description }}</td>
+                            <td class="text-end fw-semibold" style="font-size:0.79rem; color:#334155; font-variant-numeric: tabular-nums;">{{ tx.soldeVirtuel | number:'1.0-0' }} M</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    }
 
     <!-- ========================================== -->
     <!-- 2. SECTION RÈGLEMENT (Ligne à 3 colonnes)  -->

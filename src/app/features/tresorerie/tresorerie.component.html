@@ -1,182 +1,720 @@
-<div class="comptabilite-container"> <!-- Using container for consistent spacing -->
+<div class="svc-page-container">
 
-    <!-- Page Header & Sub-Navigation -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-        <div>
-            <h4 class="fw-bold text-primary-900 mb-1">Service Trésorerie</h4>
-            <p class="text-secondary mb-0">SYGACUT-BI / Services / Trésorerie</p>
+    <!-- 1. PAGE HEADER: BREADCRUMB + SUB-MODULES + ACTIONS -->
+    <section class="page-header-svc">
+        <div class="breadcrumb-area">
+            <div class="breadcrumb-trail">
+                <span>SYGACUT-BI</span>
+                <i class="fas fa-chevron-right text-muted fs-9"></i>
+                <span>SERVICES</span>
+                <i class="fas fa-chevron-right text-muted fs-9"></i>
+                <span class="active">TRÉSORERIE</span>
+            </div>
+            <div class="title-with-pill">
+                <h1 class="page-title">Service Trésorerie</h1>
+                <span class="title-badge">
+                    <i class="fas fa-shield-check"></i>
+                    Guichet Opérationnel
+                </span>
+            </div>
         </div>
 
-        <!-- Stylish Sub-Navigation -->
-        <div class="sub-nav-wrapper p-1 bg-white shadow-sm rounded-pill d-inline-flex border">
-            <button class="btn rounded-pill px-4 btn-sm fw-medium transition-all"
-                [class.btn-primary]="activeSubDomain === 'la'"
-                [class.btn-light]="activeSubDomain !== 'la'"
-                (click)="switchSubDomain('la')">
-                <i class="fas fa-file-invoice me-2"></i> Lettres d'Avance
+        <!-- Segmented Module Switcher (LA vs BC vs CS) -->
+        <div class="service-switcher-bar">
+            <button class="switcher-btn" [class.active]="activeSubDomain === 'la'" (click)="switchSubDomain('la')">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Lettres d'Avance (LA)</span>
             </button>
-            <button class="btn rounded-pill px-4 btn-sm fw-medium transition-all"
-                [class.btn-primary]="activeSubDomain === 'bc'"
-                [class.btn-light]="activeSubDomain !== 'bc'"
-                (click)="switchSubDomain('bc')">
-                <i class="fas fa-money-check-alt me-2"></i> Bons de Caisse
+            <button class="switcher-btn" [class.active]="activeSubDomain === 'bc'" (click)="switchSubDomain('bc')">
+                <i class="fas fa-money-check-dollar"></i>
+                <span>Bons de Caisse (BC)</span>
             </button>
-        </div>
-
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary btn-sm bg-white shadow-sm rounded-3">
-                <i class="fas fa-download me-2"></i> Export
+            <button class="switcher-btn" [class.active]="activeSubDomain === 'cs'" (click)="switchSubDomain('cs')">
+                <i class="fas fa-wallet"></i>
+                <span>Comptes Spéciaux (CS)</span>
             </button>
         </div>
-    </div>
 
-    <!-- Analyse Selector Area -->
-    <app-analyse-selector 
-        [title]="'Analyse: ' + (activeSubDomain === 'la' ? 'Lettres d\'Avance' : 'Bons de Caisse')"
-        [isDragDropMode]="isDragDropMode"
-        [(selectedPeriod)]="selectedPeriod"
-        [availableIndicators]="activeSubDomain === 'la' ? availableIndicatorsLA : availableIndicatorsBC"
-        (availableIndicatorsChange)="updateAvailableIndicators($event)"
-        [selectedIndicators]="activeSubDomain === 'la' ? selectedIndicatorsLA : selectedIndicatorsBC"
-        (selectedIndicatorsChange)="updateIndicators($event)"
-        [availableAxes]="activeSubDomain === 'la' ? availableAxesLA : availableAxesBC"
-        (availableAxesChange)="updateAvailableAxes($event)"
-        [selectedAxes]="activeSubDomain === 'la' ? selectedAxesLA : selectedAxesBC"
-        (selectedAxesChange)="updateAxes($event)"
-        (modeChanged)="isDragDropMode = $event === 'dragdrop'">
-    </app-analyse-selector>
+        <!-- Action Buttons -->
+        <div class="action-group-right">
+            <button class="btn-svc-secondary" (click)="exportData('PDF')">
+                <i class="fas fa-file-pdf text-danger"></i>
+                <span>Exporter</span>
+            </button>
+            <button class="btn-svc-primary" (click)="refreshData()">
+                <i class="fas fa-arrows-rotate"></i>
+                <span>Actualiser</span>
+            </button>
+        </div>
+    </section>
 
-    <!-- KPIs Row -->
-    <div class="row g-4 mb-4">
-        @for (kpi of (activeSubDomain === 'la' ? kpisLA : kpisBC); track kpi.titre) {
-            <div class="col-12 col-md-6 col-xl-3">
-                <div class="card border-0 shadow-sm kpi-card h-100">
-                    <div class="card-body p-4">
-                        <h6 class="text-secondary fw-semibold mb-3">{{ kpi.titre }}</h6>
-                        <h3 class="fw-bold text-dark mb-1">{{ kpi.valeur }}</h3>
-                        <span class="fs-8 fw-medium" [class.text-success]="kpi.type === 'success'" [class.text-warning]="kpi.type === 'warning'" [class.text-primary]="kpi.type === 'primary'">
-                            {{ kpi.info }}
-                        </span>
+    <!-- 2. REFINED FILTER & CONTROL STRIP -->
+    <section class="filter-strip">
+        <div class="filter-tags-left">
+            <div class="filter-label">
+                <i class="fas fa-sliders-h"></i>
+                <span>Filtres :</span>
+            </div>
+
+            <!-- Période Dropdown -->
+            <div class="filter-dropdown dropdown">
+                <button class="filter-select-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="far fa-calendar-days text-primary"></i>
+                    <span>Période : <strong>{{ activePeriod }}</strong></span>
+                    <i class="fas fa-chevron-down fs-9 text-muted ms-1"></i>
+                </button>
+                <ul class="dropdown-menu shadow-lg border-0 rounded-3 py-2 mt-1 fs-8">
+                    @for (p of periodsList; track p) {
+                        <li>
+                            <a class="dropdown-item py-2 px-3 d-flex align-items-center justify-content-between"
+                               [class.active]="activePeriod === p"
+                               (click)="selectPeriod(p)" style="cursor: pointer;">
+                                <span>{{ p }}</span>
+                                @if (activePeriod === p) {
+                                    <i class="fas fa-check text-primary fs-9 ms-2"></i>
+                                }
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Périmètre Dropdown -->
+            <div class="filter-dropdown dropdown">
+                <button class="filter-select-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-landmark text-primary"></i>
+                    <span>Périmètre : <strong>{{ activePerimetre }}</strong></span>
+                    <i class="fas fa-chevron-down fs-9 text-muted ms-1"></i>
+                </button>
+                <ul class="dropdown-menu shadow-lg border-0 rounded-3 py-2 mt-1 fs-8">
+                    @for (p of currentPerimetres; track p) {
+                        <li>
+                            <a class="dropdown-item py-2 px-3 d-flex align-items-center justify-content-between"
+                               [class.active]="activePerimetre === p"
+                               (click)="selectPerimetre(p)" style="cursor: pointer;">
+                                <span>{{ p }}</span>
+                                @if (activePerimetre === p) {
+                                    <i class="fas fa-check text-primary fs-9 ms-2"></i>
+                                }
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="filter-chips">
+                @for (chip of filterChips; track chip) {
+                    <div class="filter-chip">
+                        <span>{{ chip }}</span>
+                        <i class="fas fa-xmark chip-close" (click)="removeChip(chip)"></i>
                     </div>
+                }
+            </div>
+        </div>
+
+        <div class="view-toggles">
+            <button class="view-toggle-btn" [class.active]="viewMode === 'synthese'" (click)="setViewMode('synthese')">
+                <i class="fas fa-table-cells-large"></i>
+                <span>Vue Synthèse</span>
+            </button>
+            <button class="view-toggle-btn" [class.active]="viewMode === 'avancee'" (click)="setViewMode('avancee')">
+                <i class="fas fa-chart-line"></i>
+                <span>Analyses Avancées</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 2b. ADVANCED MULTIDIMENSIONAL DWH SELECTOR (WHEN IN 'AVANCEE' MODE) -->
+    @if (viewMode === 'avancee') {
+        <div class="advanced-selector-wrap animate-fadeIn">
+            <app-analyse-selector 
+                [title]="'Analyse Multidimensionnelle: ' + (activeSubDomain === 'la' ? 'Lettres d\'Avance' : (activeSubDomain === 'bc' ? 'Bons de Caisse' : 'Comptes Spéciaux'))"
+                [isDragDropMode]="isDragDropMode"
+                [(selectedPeriod)]="selectedPeriod"
+                [availableIndicators]="activeSubDomain === 'la' ? availableIndicatorsLA : availableIndicatorsBC"
+                (availableIndicatorsChange)="updateAvailableIndicators($event)"
+                [selectedIndicators]="activeSubDomain === 'la' ? selectedIndicatorsLA : selectedIndicatorsBC"
+                (selectedIndicatorsChange)="updateIndicators($event)"
+                [availableAxes]="activeSubDomain === 'la' ? availableAxesLA : availableAxesBC"
+                (availableAxesChange)="updateAvailableAxes($event)"
+                [selectedAxes]="activeSubDomain === 'la' ? selectedAxesLA : selectedAxesBC"
+                (selectedAxesChange)="updateAxes($event)"
+                (modeChanged)="isDragDropMode = $event === 'dragdrop'">
+            </app-analyse-selector>
+        </div>
+    }
+
+    <!-- 3. KPI METRICS GRID -->
+    <section class="kpi-grid">
+        @for (kpi of currentKpis; track kpi.titre) {
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-title">
+                        <i class="fas {{ kpi.icon }}"></i>
+                        {{ kpi.titre }}
+                    </span>
+                    <div class="kpi-icon-box" [class.orange]="kpi.colorTheme === 'orange'" [class.green]="kpi.colorTheme === 'green'" [class.blue]="kpi.colorTheme === 'blue'" [class.red]="kpi.colorTheme === 'red'">
+                        <i class="fas {{ kpi.icon }}"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-big-value">{{ kpi.valeur }}</span>
+                    <span class="kpi-unit">{{ kpi.unite }}</span>
+                </div>
+                <div class="mini-bar-track">
+                    <div class="mini-bar-fill fill-{{ kpi.progressColor }}" [style.width.%]="kpi.progress"></div>
+                </div>
+                <div class="kpi-footer">
+                    <span class="kpi-status-badge {{ kpi.badgeClass }}">
+                        <i class="fas {{ kpi.badgeIcon }}"></i>
+                        {{ kpi.badgeText }}
+                    </span>
+                    <span class="kpi-bench">{{ kpi.bench }}</span>
                 </div>
             </div>
         }
-    </div>
+    </section>
 
-    <!-- Charts Row -->
-    <div class="row g-4 mb-4">
-        <div class="col-12 col-xl-8">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Analyse {{ activeSubDomain === 'la' ? 'des Flux LA (Sankey)' : 'de la Fréquentation BC' }}</h6>
+    <!-- 4. MAIN ANALYTICS SECTION (2/3 FLOW CANVAS + 1/3 STATUS HEALTH) -->
+    <section class="analytics-grid">
+        <!-- LEFT: INTERACTIVE DWH FLOW / PIPELINE -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box orange">
+                        <i class="fas fa-code-fork"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">
+                            Cycle de Vie & Flux {{ activeSubDomain === 'la' ? 'des Lettres d\'Avance' : (activeSubDomain === 'bc' ? 'des Bons de Caisse' : 'des Comptes Spéciaux') }}
+                        </h2>
+                        <div class="panel-subtitle">
+                            Traçabilité DWH : De l'émission ordonnateur à l'apurement comptable
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    <!-- Placeholder for advanced chart -->
-                    <div class="chart-mockup d-flex align-items-center justify-content-center bg-light rounded-3" style="height: 300px;">
-                        <div class="text-center">
-                            <i class="fas fa-chart-network fs-1 text-primary-200 mb-3 d-block"></i>
-                            <span class="text-secondary fs-8 fw-medium italic">Visualisation DWH avancée en attente de données</span>
+                <div class="panel-tabs">
+                    <button class="panel-tab" [class.active]="chartTab === 'sankey'" (click)="setChartTab('sankey')">
+                        Flux Sankey
+                    </button>
+                    <button class="panel-tab" [class.active]="chartTab === 'ministere'" (click)="setChartTab('ministere')">
+                        Par Ministère
+                    </button>
+                    <button class="panel-tab" [class.active]="chartTab === 'age'" (click)="setChartTab('age')">
+                        Pyramide des Âges
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <!-- SVG Sankey Pipeline Representation -->
+                <div class="flow-canvas-container">
+                    <div class="flow-nodes-row">
+                        <!-- Step 1: Émission -->
+                        <div class="flow-column">
+                            <div class="flow-node-box source-node">
+                                <div class="flow-node-header">
+                                    <span>1. ÉMISSION ACCT</span>
+                                    <i class="fas fa-circle-arrow-right text-primary"></i>
+                                </div>
+                                <div class="flow-node-amount">
+                                    {{ currentFlowData.totalEmission }}
+                                </div>
+                                <div class="flow-node-pct text-muted">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>{{ currentFlowData.mandatsCount }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Connecting Stream Curves -->
+                        <div class="flow-svg-connector">
+                            <svg width="100" height="140" viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Regularises stream -->
+                                <path d="M 0 35 C 50 35, 50 20, 100 20" stroke="#10b981" stroke-width="6" stroke-opacity="0.6" fill="none"/>
+                                <!-- En cours stream -->
+                                <path d="M 0 55 C 50 55, 50 70, 100 70" stroke="#f59e0b" stroke-width="4" stroke-opacity="0.6" fill="none"/>
+                                <!-- Retard stream -->
+                                <path d="M 0 75 C 50 75, 50 120, 100 120" stroke="#ef4444" stroke-width="3" stroke-opacity="0.6" fill="none"/>
+                            </svg>
+                        </div>
+
+                        <!-- Step 2: Distribution des Statuts -->
+                        <div class="flow-column">
+                            <!-- Regularised -->
+                            <div class="flow-node-box reg-node">
+                                <div class="flow-node-header">
+                                    <span class="text-success-bold">Régularisés (65%)</span>
+                                    <span class="kpi-status-badge badge-success">Conforme</span>
+                                </div>
+                                <div class="flow-node-amount text-success-bold">
+                                    {{ currentFlowData.reguleAmount }}
+                                </div>
+                                <div class="flow-node-pct text-success">
+                                    <span>Pièces justificatives validées</span>
+                                </div>
+                            </div>
+
+                            <!-- En cours -->
+                            <div class="flow-node-box wait-node">
+                                <div class="flow-node-header">
+                                    <span class="text-warning-bold">En cours (20%)</span>
+                                    <span class="kpi-status-badge badge-warning">&lt; 30j</span>
+                                </div>
+                                <div class="flow-node-amount text-warning-bold">
+                                    {{ currentFlowData.enCoursAmount }}
+                                </div>
+                                <div class="flow-node-pct text-warning">
+                                    <span>Dossiers en instruction</span>
+                                </div>
+                            </div>
+
+                            <!-- Retard -->
+                            <div class="flow-node-box late-node">
+                                <div class="flow-node-header">
+                                    <span class="text-danger-bold">En retard (15%)</span>
+                                    <span class="kpi-status-badge badge-danger">Critique</span>
+                                </div>
+                                <div class="flow-node-amount text-danger-bold">
+                                    {{ currentFlowData.retardAmount }}
+                                </div>
+                                <div class="flow-node-pct text-danger">
+                                    <span>Échéance légale dépassée</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flow Stats Bar -->
+                    <div class="flow-footer-stats">
+                        <div class="flow-stat-item">
+                            <div class="flow-stat-label">Déblocage Moyen</div>
+                            <div class="flow-stat-val">{{ currentFlowData.deblocageMoyen }}</div>
+                        </div>
+                        <div class="flow-stat-item border-start ps-3">
+                            <div class="flow-stat-label">Taux d'Apurement Rapide</div>
+                            <div class="flow-stat-val text-success">{{ currentFlowData.apurementRapide }}</div>
+                        </div>
+                        <div class="flow-stat-item border-start ps-3">
+                            <div class="flow-stat-label">Impact Trésorerie Nette</div>
+                            <div class="flow-stat-val text-primary">{{ currentFlowData.impactNet }}</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-xl-4">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Répartition par {{ activeSubDomain === 'la' ? 'Statut Regul' : 'Poste Comptable' }}</h6>
+
+        <!-- RIGHT: STATUS HEALTH & CRITICAL REGUL ALERTS -->
+        <div class="panel-card donut-breakdown-card">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box blue">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">Santé des Régularisations</h2>
+                        <div class="panel-subtitle">Conformité aux règles ACCT</div>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    <div class="d-flex flex-column gap-3">
-                        @if (activeSubDomain === 'la') {
-                            <div class="stat-item">
-                                <div class="d-flex justify-content-between fs-8 mb-1"><span class="fw-bold">Régularisés</span><span>65%</span></div>
-                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-success" style="width: 65%"></div></div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="d-flex justify-content-between fs-8 mb-1"><span class="fw-bold">En retard</span><span>15%</span></div>
-                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-danger" style="width: 15%"></div></div>
-                            </div>
-                        } @else {
-                            <div class="stat-item">
-                                <div class="d-flex justify-content-between fs-8 mb-1"><span class="fw-bold">Abidjan Nord</span><span>40%</span></div>
-                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-primary" style="width: 40%"></div></div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="d-flex justify-content-between fs-8 mb-1"><span class="fw-bold">Yamoussoukro</span><span>25%</span></div>
-                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-info" style="width: 25%"></div></div>
-                            </div>
-                        }
+                <button class="table-action-btn" title="Détails" (click)="triggerToast('Rapport complet des statuts généré')">
+                    <i class="fas fa-up-right-and-down-left-from-center"></i>
+                </button>
+            </div>
+
+            <div class="panel-body">
+                <!-- SVG Donut Chart with Center Data -->
+                <div class="donut-hero-area">
+                    <div class="donut-chart-wrapper">
+                        <svg viewBox="0 0 36 36" class="donut-chart-svg">
+                            <!-- Background Circle -->
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3.8"/>
+                            <!-- Green Segment: 65% -->
+                            <path stroke-dasharray="65, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981" stroke-width="4.2" stroke-linecap="round"/>
+                            <!-- Amber Segment: 20% (offset 65) -->
+                            <path stroke-dasharray="20, 100" stroke-dashoffset="-65" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f59e0b" stroke-width="4.2"/>
+                            <!-- Red Segment: 15% (offset 85) -->
+                            <path stroke-dasharray="15, 100" stroke-dashoffset="-85" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ef4444" stroke-width="4.2"/>
+                        </svg>
+                        <div class="donut-center-text">
+                            <div class="donut-center-val">85%</div>
+                            <div class="donut-center-sub">Régul. global</div>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="donut-legend-col">
+                        <div class="legend-item">
+                            <span class="legend-dot bg-success"></span>
+                            <span class="fw-bold">65%</span>
+                            <span class="text-muted">Régularisés</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot bg-warning"></span>
+                            <span class="fw-bold">20%</span>
+                            <span class="text-muted">En cours</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot bg-danger"></span>
+                            <span class="fw-bold">15%</span>
+                            <span class="text-muted">En souffrance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bars Breakdown -->
+                <div class="status-bars-list">
+                    <div class="status-bar-row">
+                        <div class="bar-row-info">
+                            <span class="bar-name-with-dot">
+                                <span class="dot-indicator bg-success"></span>
+                                <span>Régularisés dans les délais</span>
+                            </span>
+                            <span class="fw-bold text-success">65% (10.0 Mds)</span>
+                        </div>
+                        <div class="track-wrapper">
+                            <div class="track-progress bg-success" style="width: 65%"></div>
+                        </div>
+                    </div>
+
+                    <div class="status-bar-row">
+                        <div class="bar-row-info">
+                            <span class="bar-name-with-dot">
+                                <span class="dot-indicator bg-warning"></span>
+                                <span>En cours (délai &lt; 60j)</span>
+                            </span>
+                            <span class="fw-bold text-warning">20% (3.1 Mds)</span>
+                        </div>
+                        <div class="track-wrapper">
+                            <div class="track-progress bg-warning" style="width: 20%"></div>
+                        </div>
+                    </div>
+
+                    <div class="status-bar-row">
+                        <div class="bar-row-info">
+                            <span class="bar-name-with-dot">
+                                <span class="dot-indicator bg-danger"></span>
+                                <span>En retard critique (&gt; 60j)</span>
+                            </span>
+                            <span class="fw-bold text-danger">15% (2.3 Mds)</span>
+                        </div>
+                        <div class="track-wrapper">
+                            <div class="track-progress bg-danger" style="width: 15%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Critical Alerts Callout -->
+                <div class="service-alert-callout">
+                    <i class="fas fa-triangle-exclamation callout-icon"></i>
+                    <div>
+                        <div class="callout-text-title">3 Dossiers en contentieux imminent</div>
+                        <div class="callout-text-desc">
+                            Ministère de la Défense (4.6 Mds) et Infrastructures (8.5 Mds) approchent du terme des 90 jours légaux sans pièces justificatives.
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
+
+    <!-- 5. REAL-TIME TELEMETRY STRIP & MODERN DATA TABLE -->
+    <section class="table-section">
+        <!-- Real-time Live Header -->
+        <div class="cashflow-live-bar">
+            <div class="live-title-box">
+                <div class="pulse-dot"></div>
+                <div>
+                    <div class="live-title-text">
+                        <i class="fas fa-bolt text-primary"></i>
+                        <span>Registre d'Émission & Justification — Temps Réel</span>
+                    </div>
+                    <div class="live-subtitle-text">
+                        Synchronisation directe avec la Banque Centrale et SIGFIP
+                    </div>
+                </div>
+            </div>
+
+            <div class="live-telemetry-metrics">
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-layer-group"></i> ENGAGÉ :</span>
+                    <span class="metric-val val-orange">{{ currentTelemetry.engage }}</span>
+                </div>
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-check-double"></i> JUSTIFIÉ :</span>
+                    <span class="metric-val val-green">{{ currentTelemetry.justifie }}</span>
+                </div>
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-clock"></i> SOLDE :</span>
+                    <span class="metric-val val-amber">{{ currentTelemetry.solde }}</span>
+                </div>
+                <button class="btn-svc-primary btn-sm-svc" (click)="triggerToast('Journal d\'audit en temps réel rafraîchi')">
+                    <i class="fas fa-rotate-right"></i>
+                    <span>Auditer</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Modern Table Container -->
+        <div class="table-container-card">
+            <!-- Toolbar -->
+            <div class="table-filter-toolbar">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-magnifying-glass search-icon"></i>
+                    <input type="text" placeholder="Rechercher par référence, entité, libellé..." [(ngModel)]="searchQuery" />
+                </div>
+
+                <div class="table-quick-filters">
+                    <span class="filter-caption">Afficher :</span>
+                    <button class="pill-filter" [class.active]="tableFilter === 'all'" (click)="setTableFilter('all')">
+                        Tous ({{ getCount('all') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'en-cours'" (click)="setTableFilter('en-cours')">
+                        En cours ({{ getCount('en-cours') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'retard'" (click)="setTableFilter('retard')">
+                        En retard ({{ getCount('retard') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'regule'" (click)="setTableFilter('regule')">
+                        Régularisés ({{ getCount('regule') }})
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Responsive -->
+            <div class="table-responsive">
+                <!-- LA Table -->
+                @if (activeSubDomain === 'la') {
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>RÉFÉRENCE LA</th>
+                                <th>BÉNÉFICIAIRE / MINISTÈRE</th>
+                                <th>DATE D'ÉMISSION</th>
+                                <th>ÉCHÉANCE LÉGALE</th>
+                                <th>MONTANT ALLOUÉ</th>
+                                <th>AVANCEMENT JUSTIF.</th>
+                                <th>STATUT RÉGUL.</th>
+                                <th class="text-end pe-4">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of filteredDeliverablesLA; track item.ref) {
+                                <tr>
+                                    <td>
+                                        <span class="ref-code-cell">{{ item.ref }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="ministry-cell">
+                                            <div class="ministry-badge-avatar {{ item.avatarClass }}">{{ item.avatarInitials }}</div>
+                                            <div>
+                                                <div class="ministry-name">{{ item.ministereFull }}</div>
+                                                <div class="ministry-subtext">{{ item.subtext }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted fs-8">{{ item.dateEmission }}</td>
+                                    <td>
+                                        <div class="fw-bold fs-8" [class.text-success]="item.echeanceStatus === 'success'" [class.text-warning]="item.echeanceStatus === 'warning'" [class.text-danger]="item.echeanceStatus === 'danger'">
+                                            {{ item.echeance }}
+                                        </div>
+                                        <div class="fs-9 text-muted">{{ item.echeanceSub }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="amount-cell">{{ item.montant }}</span>
+                                        <span class="amount-unit ms-1">{{ item.montantUnite }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress-cell-box">
+                                            <div class="progress-cell-bar">
+                                                <div class="progress-cell-fill" [style.width.%]="item.progression" [class.bg-success]="item.progression >= 90" [class.bg-warning]="item.progression >= 50 && item.progression < 90" [class.bg-danger]="item.progression < 50"></div>
+                                            </div>
+                                            <span class="progress-pct-label" [class.text-success]="item.progression >= 90" [class.text-warning]="item.progression >= 50 && item.progression < 90" [class.text-danger]="item.progression < 50">{{ item.progression }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-tag {{ item.statut }}">
+                                            <i class="fas" [class.fa-check-circle]="item.statut === 'regule'" [class.fa-clock]="item.statut === 'en-cours'" [class.fa-circle-exclamation]="item.statut === 'retard'"></i>
+                                            {{ item.statutLabel }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="table-action-btn me-1" title="Voir pièces justificatives" (click)="triggerToast('Consultation dossier ' + item.ref)">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                        <button class="table-action-btn" [class.text-danger]="item.statut === 'retard'" title="Relance ordonnateur" (click)="triggerToast('Relance transmise pour ' + item.ref)">
+                                            <i class="far fa-paper-plane"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <!-- BC Table -->
+                @if (activeSubDomain === 'bc') {
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>RÉFÉRENCE BC</th>
+                                <th>POSTE COMPTABLE</th>
+                                <th>DATE D'ÉMISSION</th>
+                                <th>ÉCHÉANCE</th>
+                                <th>MONTANT</th>
+                                <th>AVANCEMENT</th>
+                                <th>STATUT</th>
+                                <th class="text-end pe-4">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of filteredDeliverablesBC; track item.ref) {
+                                <tr>
+                                    <td>
+                                        <span class="ref-code-cell">{{ item.ref }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="ministry-cell">
+                                            <div class="ministry-badge-avatar {{ item.avatarClass }}">{{ item.avatarInitials }}</div>
+                                            <div>
+                                                <div class="ministry-name">{{ item.posteFull }}</div>
+                                                <div class="ministry-subtext">{{ item.subtext }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted fs-8">{{ item.dateEmission }}</td>
+                                    <td>
+                                        <div class="fw-bold fs-8" [class.text-success]="item.echeanceStatus === 'success'" [class.text-danger]="item.echeanceStatus === 'danger'">
+                                            {{ item.echeance }}
+                                        </div>
+                                        <div class="fs-9 text-muted">{{ item.echeanceSub }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="amount-cell">{{ item.montant }}</span>
+                                        <span class="amount-unit ms-1">{{ item.montantUnite }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress-cell-box">
+                                            <div class="progress-cell-bar">
+                                                <div class="progress-cell-fill" [style.width.%]="item.progression" [class.bg-success]="item.progression >= 90" [class.bg-warning]="item.progression >= 50 && item.progression < 90" [class.bg-danger]="item.progression < 50"></div>
+                                            </div>
+                                            <span class="progress-pct-label">{{ item.progression }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-tag {{ item.statut }}">
+                                            <i class="fas" [class.fa-check-circle]="item.statut === 'regule'" [class.fa-clock]="item.statut === 'en-cours'" [class.fa-circle-exclamation]="item.statut === 'retard'"></i>
+                                            {{ item.statutLabel }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="table-action-btn me-1" title="Voir détails" (click)="triggerToast('Consultation bon ' + item.ref)">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                        <button class="table-action-btn" title="Télécharger bordereau" (click)="triggerToast('Bordereau téléchargé')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <!-- CS Table -->
+                @if (activeSubDomain === 'cs') {
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>RÉFÉRENCE COMPTE</th>
+                                <th>INTITULÉ DU COMPTE</th>
+                                <th>DATE CRÉATION</th>
+                                <th>CONFORMITÉ</th>
+                                <th>SOLDE DISPONIBLE</th>
+                                <th>EXÉCUTION</th>
+                                <th>STATUT</th>
+                                <th class="text-end pe-4">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of filteredDeliverablesCS; track item.ref) {
+                                <tr>
+                                    <td>
+                                        <span class="ref-code-cell">{{ item.ref }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="ministry-cell">
+                                            <div class="ministry-badge-avatar {{ item.avatarClass }}">{{ item.avatarInitials }}</div>
+                                            <div>
+                                                <div class="ministry-name">{{ item.intitule }}</div>
+                                                <div class="ministry-subtext">{{ item.gestionnaire }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted fs-8">{{ item.dateEmission }}</td>
+                                    <td>
+                                        <div class="fw-bold fs-8" [class.text-success]="item.echeanceStatus === 'success'" [class.text-danger]="item.echeanceStatus === 'danger'">
+                                            {{ item.echeance }}
+                                        </div>
+                                        <div class="fs-9 text-muted">{{ item.echeanceSub }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="amount-cell">{{ item.montant }}</span>
+                                        <span class="amount-unit ms-1">{{ item.montantUnite }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress-cell-box">
+                                            <div class="progress-cell-bar">
+                                                <div class="progress-cell-fill" [style.width.%]="item.progression" [class.bg-success]="item.progression >= 90" [class.bg-warning]="item.progression >= 50 && item.progression < 90" [class.bg-danger]="item.progression < 50"></div>
+                                            </div>
+                                            <span class="progress-pct-label">{{ item.progression }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-tag {{ item.statut }}">
+                                            <i class="fas" [class.fa-check-circle]="item.statut === 'regule'" [class.fa-clock]="item.statut === 'en-cours'" [class.fa-triangle-exclamation]="item.statut === 'retard'"></i>
+                                            {{ item.statutLabel }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="table-action-btn me-1" title="Voir compte" (click)="triggerToast('Fiche compte ' + item.ref)">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                        <button class="table-action-btn" title="Relevé complet" (click)="triggerToast('Relevé généré')">
+                                            <i class="fas fa-file-lines"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <!-- Table Pagination -->
+            <div class="table-pagination">
+                <div>
+                    Affichage de <strong>1 à {{ activeSubDomain === 'la' ? filteredDeliverablesLA.length : (activeSubDomain === 'bc' ? filteredDeliverablesBC.length : filteredDeliverablesCS.length) }}</strong> sur <strong>{{ getCount('all') }} dossiers</strong>
+                </div>
+                <div class="page-numbers">
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <span class="px-1 text-muted">...</span>
+                    <button class="page-btn">12</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FLOATING AI ASSISTANT FAB -->
+    <div class="floating-fab" title="Assistant Trésorerie IA" (click)="triggerToast('Assistant Trésorerie activé. Posez votre question.')">
+        <i class="fas fa-robot fs-5"></i>
     </div>
 
-    <!-- Deliverables Table -->
-    <div class="row g-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm bg-white rounded-3">
-                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">{{ activeSubDomain === 'la' ? 'Situation de développement des LA' : 'Suivi des BC et des Caisses' }}</h6>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            @if (activeSubDomain === 'la') {
-                                <thead class="table-light fs-9 text-uppercase tracking-wider">
-                                    <tr>
-                                        <th class="ps-4 py-3">Réf LA</th>
-                                        <th class="py-3">Bénéficiaire / Ministère</th>
-                                        <th class="py-3">Montant</th>
-                                        <th class="py-3 text-end pe-4">Régul.</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @for (item of deliverablesLA; track item.ref) {
-                                        <tr>
-                                            <td class="ps-4 fw-bold">{{ item.ref }}</td>
-                                            <td>
-                                                <div class="text-dark fw-medium">{{ item.bene }}</div>
-                                                <div class="text-secondary fs-9">{{ item.ministere }}</div>
-                                            </td>
-                                            <td class="fw-bold">{{ item.montant }}</td>
-                                            <td class="text-end pe-4">
-                                                <span class="badge" [class.bg-success-subtle]="item.regul === '60%'" [class.bg-warning-subtle]="item.regul === 'En attente'" [class.bg-danger-subtle]="item.regul.includes('Relancé')">
-                                                    {{ item.regul }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            } @else {
-                                <thead class="table-light fs-9 text-uppercase tracking-wider">
-                                    <tr>
-                                        <th class="ps-4 py-3">Réf BC</th>
-                                        <th class="py-3">Poste Comptable</th>
-                                        <th class="py-3">Montant</th>
-                                        <th class="py-3 text-end pe-4">Statut</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @for (item of deliverablesBC; track item.ref) {
-                                        <tr>
-                                            <td class="ps-4 fw-bold">{{ item.ref }}</td>
-                                            <td>{{ item.poste }}</td>
-                                            <td class="fw-bold">{{ item.montant }}</td>
-                                            <td class="text-end pe-4">
-                                                <span class="badge rounded-pill" [class.bg-primary]="item.statut === 'En circulation'" [class.bg-info]="item.statut === 'Pris en charge'" [class.bg-success]="item.statut === 'Régularisé'" [class.bg-danger]="item.statut === 'En retard'">
-                                                    {{ item.statut }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            }
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- TOAST NOTIFICATION -->
+    <div class="export-toast" [class.show]="showToast">
+        <i class="fas fa-circle-check text-success fs-5"></i>
+        <span>{{ toastMessage }}</span>
     </div>
+
 </div>

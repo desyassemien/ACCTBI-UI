@@ -1,399 +1,699 @@
-<div class="comptabilite-container">
+<div class="svc-page-container">
 
-    <!-- Page Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 gap-md-0">
-        <div>
-            <h4 class="fw-bold text-primary-900 mb-1">Comptabilité</h4>
-            <p class="text-secondary mb-0">SYGACUT-BI / Services / Comptabilité</p>
+    <!-- 1. PAGE HEADER: BREADCRUMB + SUB-MODULES + ACTIONS -->
+    <section class="page-header-svc">
+        <div class="breadcrumb-area">
+            <div class="breadcrumb-trail">
+                <span>SYGACUT-BI</span>
+                <i class="fas fa-chevron-right text-muted fs-9"></i>
+                <span>SERVICES</span>
+                <i class="fas fa-chevron-right text-muted fs-9"></i>
+                <span class="active">COMPTABILITÉ</span>
+            </div>
+            <div class="title-with-pill">
+                <h1 class="page-title">Service Comptabilité</h1>
+                <span class="title-badge">
+                    <i class="fas fa-scale-balanced"></i>
+                    Grand Livre & Rapprochement
+                </span>
+            </div>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
-                <i class="far fa-file-excel me-2 text-success"></i> Export Excel
+
+        <!-- Segmented Module Switcher -->
+        <div class="service-switcher-bar">
+            <button class="switcher-btn" [class.active]="activeSubDomain === 'rapprochement'" (click)="switchSubDomain('rapprochement')">
+                <i class="fas fa-arrows-split-up-and-left"></i>
+                <span>Rapprochement Bancaire</span>
             </button>
-            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
-                <i class="far fa-file-pdf me-2 text-danger"></i> Export PDF
+            <button class="switcher-btn" [class.active]="activeSubDomain === 'journaux'" (click)="switchSubDomain('journaux')">
+                <i class="fas fa-book-bookmark"></i>
+                <span>Journaux Comptables</span>
+            </button>
+            <button class="switcher-btn" [class.active]="activeSubDomain === 'balance'" (click)="switchSubDomain('balance')">
+                <i class="fas fa-table-list"></i>
+                <span>Balance Générale</span>
             </button>
         </div>
-    </div>
 
-    <!-- Analyse Selector Area -->
-    <app-analyse-selector 
-        title="Sélecteur d'Analyse Actif"
-        [isDragDropMode]="isDragDropMode"
-        [(selectedPeriod)]="selectedPeriod"
-        [(availableIndicators)]="availableIndicators"
-        [(selectedIndicators)]="selectedIndicators"
-        [(availableAxes)]="availableAxes"
-        [(selectedAxes)]="selectedAxes"
-        (modeChanged)="isDragDropMode = $event === 'dragdrop'">
-    </app-analyse-selector>
+        <!-- Action Buttons -->
+        <div class="action-group-right">
+            <button class="btn-svc-secondary" (click)="exportData('EXCEL')">
+                <i class="far fa-file-excel text-success"></i>
+                <span>Exporter</span>
+            </button>
+            <button class="btn-svc-primary" (click)="refreshData()">
+                <i class="fas fa-arrows-rotate"></i>
+                <span>Actualiser</span>
+            </button>
+        </div>
+    </section>
 
-    <!-- Contextual KPIs based on filters -->
-    <div class="row g-4 mb-4">
-        @for (kpi of kpis; track kpi.titre) {
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100 bg-white rounded-3 kpi-card">
-                <div class="card-body p-4">
-                    <h6 class="text-secondary fw-semibold mb-3">{{ kpi.titre }}</h6>
-                    <h3 class="fw-bold text-dark mb-1">{{ kpi.valeur }}</h3>
-                    <span class="fs-8 fw-medium" [class.text-success]="kpi.type === 'success'"
-                        [class.text-warning]="kpi.type === 'warning'" [class.text-secondary]="kpi.type === 'primary'">
-                        {{ kpi.info }}
+    <!-- 2. REFINED FILTER & CONTROL STRIP -->
+    <section class="filter-strip">
+        <div class="filter-tags-left">
+            <div class="filter-label">
+                <i class="fas fa-sliders-h"></i>
+                <span>Filtres :</span>
+            </div>
+
+            <!-- Période Dropdown -->
+            <div class="filter-dropdown dropdown">
+                <button class="filter-select-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="far fa-calendar-days text-primary"></i>
+                    <span>Période : <strong>{{ activePeriod }}</strong></span>
+                    <i class="fas fa-chevron-down fs-9 text-muted ms-1"></i>
+                </button>
+                <ul class="dropdown-menu shadow-lg border-0 rounded-3 py-2 mt-1 fs-8">
+                    @for (p of periodsList; track p) {
+                        <li>
+                            <a class="dropdown-item py-2 px-3 d-flex align-items-center justify-content-between"
+                               [class.active]="activePeriod === p"
+                               (click)="selectPeriod(p)" style="cursor: pointer;">
+                                <span>{{ p }}</span>
+                                @if (activePeriod === p) {
+                                    <i class="fas fa-check text-primary fs-9 ms-2"></i>
+                                }
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Périmètre Dropdown -->
+            <div class="filter-dropdown dropdown">
+                <button class="filter-select-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-building-columns text-primary"></i>
+                    <span>Périmètre : <strong>{{ activePoste }}</strong></span>
+                    <i class="fas fa-chevron-down fs-9 text-muted ms-1"></i>
+                </button>
+                <ul class="dropdown-menu shadow-lg border-0 rounded-3 py-2 mt-1 fs-8">
+                    @for (p of postesList; track p) {
+                        <li>
+                            <a class="dropdown-item py-2 px-3 d-flex align-items-center justify-content-between"
+                               [class.active]="activePoste === p"
+                               (click)="selectPoste(p)" style="cursor: pointer;">
+                                <span>{{ p }}</span>
+                                @if (activePoste === p) {
+                                    <i class="fas fa-check text-primary fs-9 ms-2"></i>
+                                }
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="filter-chips">
+                @for (chip of filterChips; track chip) {
+                    <div class="filter-chip">
+                        <span>{{ chip }}</span>
+                        <i class="fas fa-xmark chip-close" (click)="removeChip(chip)"></i>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="view-toggles">
+            <button class="view-toggle-btn" [class.active]="viewMode === 'synthese'" (click)="setViewMode('synthese')">
+                <i class="fas fa-table-cells-large"></i>
+                <span>Vue Synthèse</span>
+            </button>
+            <button class="view-toggle-btn" [class.active]="viewMode === 'avancee'" (click)="setViewMode('avancee')">
+                <i class="fas fa-chart-line"></i>
+                <span>Analyses Avancées</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 2b. ADVANCED MULTIDIMENSIONAL DWH SELECTOR (WHEN IN 'AVANCEE' MODE) -->
+    @if (viewMode === 'avancee') {
+        <div class="advanced-selector-wrap animate-fadeIn">
+            <app-analyse-selector 
+                [title]="'Analyse Multidimensionnelle: ' + (activeSubDomain === 'rapprochement' ? 'Rapprochement Bancaire' : (activeSubDomain === 'journaux' ? 'Journaux Comptables' : 'Balance des Comptes'))"
+                [isDragDropMode]="isDragDropMode"
+                [(selectedPeriod)]="selectedPeriod"
+                [(availableIndicators)]="availableIndicators"
+                [(selectedIndicators)]="selectedIndicators"
+                [(availableAxes)]="availableAxes"
+                [(selectedAxes)]="selectedAxes"
+                (modeChanged)="isDragDropMode = $event === 'dragdrop'">
+            </app-analyse-selector>
+        </div>
+    }
+
+    <!-- 3. KPI METRICS GRID -->
+    <section class="kpi-grid">
+        @for (kpi of currentKpis; track kpi.titre) {
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-title">
+                        <i class="fas {{ kpi.icon }}"></i>
+                        {{ kpi.titre }}
                     </span>
+                    <div class="kpi-icon-box" [class.orange]="kpi.colorTheme === 'orange'" [class.green]="kpi.colorTheme === 'green'" [class.blue]="kpi.colorTheme === 'blue'" [class.red]="kpi.colorTheme === 'red'">
+                        <i class="fas {{ kpi.icon }}"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-big-value">{{ kpi.valeur }}</span>
+                    <span class="kpi-unit">{{ kpi.unite }}</span>
+                </div>
+                <div class="mini-bar-track">
+                    <div class="mini-bar-fill fill-{{ kpi.progressColor }}" [style.width.%]="kpi.progress"></div>
+                </div>
+                <div class="kpi-footer">
+                    <span class="kpi-status-badge {{ kpi.badgeClass }}">
+                        <i class="fas {{ kpi.badgeIcon }}"></i>
+                        {{ kpi.badgeText }}
+                    </span>
+                    <span class="kpi-bench">{{ kpi.bench }}</span>
                 </div>
             </div>
-        </div>
         }
-    </div>
+    </section>
 
-    <!-- Main Analysis Content -->
-
-    <!-- Charts Row -->
-    <div class="row g-4 mb-4">
-
-        <!-- Chart 1: Concordance -->
-        <div class="col-12 col-xl-4">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div
-                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Concordance Bancaire</h6>
-                    <div class="d-flex gap-2">
-                        <!-- Chart Type Toggle -->
-                        <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check" name="chart1Type" id="c1_pie" value="pie"
-                                autocomplete="off" [(ngModel)]="compChart1Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c1_pie"
-                                title="Pie/Doughnut"><i class="fas fa-chart-pie fs-9"></i></label>
-
-                            <input type="radio" class="btn-check" name="chart1Type" id="c1_bar" value="bar"
-                                autocomplete="off" [(ngModel)]="compChart1Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c1_bar" title="Barre"><i
-                                    class="fas fa-chart-bar fs-9"></i></label>
-
-                            <input type="radio" class="btn-check" name="chart1Type" id="c1_line" value="line"
-                                autocomplete="off" [(ngModel)]="compChart1Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c1_line"
-                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
-                        </div>
-
-                        <!-- Export Options -->
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false"
-                                style="padding-top: 2px; padding-bottom: 2px;">
-                                <i class="fas fa-download fs-9"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
-                            </ul>
+    <!-- 4. MAIN ANALYTICS SECTION (2/3 FLOW CONCORDANCE + 1/3 BREAKDOWN) -->
+    <section class="analytics-grid">
+        <!-- LEFT: CONCORDANCE BANCAIRE & PIPELINE D'APUREMENT -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box blue">
+                        <i class="fas fa-arrows-rotate"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">
+                            {{ activeSubDomain === 'rapprochement' ? 'Concordance Bancaire BCEAO & Postes' : (activeSubDomain === 'journaux' ? 'Flux de Validation des Journaux' : 'Équilibre des Masses de la Balance') }}
+                        </h2>
+                        <div class="panel-subtitle">
+                            Traçabilité automatique : Relevé Banque Centrale vs Écritures ACCT
                         </div>
                     </div>
                 </div>
-                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
-
-                    @if (compChart1Type === 'pie') {
-                    <!-- CSS Mockup for Doughnut Chart -->
-                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
-                        style="width: 160px; height: 160px;">
-                        <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100">
-                            <path class="circle-bg" d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3" />
-                            <path class="circle" stroke-dasharray="97.6, 100" d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--success)" stroke-width="3"
-                                stroke-linecap="round" />
-                        </svg>
-                        <div class="position-absolute top-50 start-50 translate-middle text-center mt-1">
-                            <h3 class="fw-bold text-dark mb-0">97.6%</h3>
-                            <span class="fs-9 text-secondary text-uppercase tracking-wider">Rapproché</span>
-                        </div>
-                    </div>
-                    }
-
-                    @if (compChart1Type === 'bar') {
-                    <!-- Bar Chart Mockup -->
-                    <div class="d-flex align-items-end justify-content-center gap-3 mb-4 mt-2 h-100 w-100 animate__animated animate__fadeIn"
-                        style="min-height: 160px;">
-                        <div class="bg-success rounded-top" style="height: 97%; width: 40px;" title="Rapproché: 97.6%">
-                        </div>
-                        <div class="bg-warning rounded-top" style="height: 15%; width: 40px;" title="Écart: 2.4%"></div>
-                    </div>
-                    }
-
-                    @if (compChart1Type === 'line') {
-                    <!-- Line Chart Mockup -->
-                    <div class="w-100 mb-4 mt-2 position-relative animate__animated animate__fadeIn"
-                        style="height: 160px;">
-                        <svg class="w-100 h-100" viewBox="0 0 200 100" preserveAspectRatio="none">
-                            <path d="M 0,80 L 50,20 L 100,60 L 150,10 L 200,5" fill="none" stroke="var(--success)"
-                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                            <circle cx="200" cy="5" r="4" fill="var(--surface)" stroke="var(--success)"
-                                stroke-width="2" />
-                            <path d="M 0,90 L 50,95 L 100,85 L 150,92 L 200,90" fill="none" stroke="var(--warning)"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,4">
-                            </path>
-                        </svg>
-                    </div>
-                    }
-
-                    <div class="w-100 px-2 mt-auto">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="fs-8 text-secondary"><i
-                                    class="fas fa-circle text-success fs-9 me-2"></i>Rapproché</span>
-                            <span class="fs-8 fw-bold text-dark">12.1 Mds</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="fs-8 text-secondary"><i
-                                    class="fas fa-circle text-warning fs-9 me-2"></i>Écart</span>
-                            <span class="fs-8 fw-bold text-dark">300 Mls</span>
-                        </div>
-                    </div>
-
+                <div class="panel-tabs">
+                    <button class="panel-tab" [class.active]="chartTab === 'concordance'" (click)="setChartTab('concordance')">
+                        Concordance
+                    </button>
+                    <button class="panel-tab" [class.active]="chartTab === 'nature'" (click)="setChartTab('nature')">
+                        Par Nature
+                    </button>
+                    <button class="panel-tab" [class.active]="chartTab === 'evolution'" (click)="setChartTab('evolution')">
+                        Évolution M-1
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Chart 2: Répartition by Organigram -->
-        <div class="col-12 col-xl-8">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div
-                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Analyse de Répartition (Sect. 2.4/2.5)</h6>
-                    <div class="d-flex gap-2">
-                        <!-- Chart Type Toggle -->
-                        <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check" name="chart2Type" id="c2_bar" value="bar"
-                                autocomplete="off" [(ngModel)]="compChart2Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c2_bar" title="Barre"><i
-                                    class="fas fa-chart-bar fs-9"></i></label>
-
-                            <input type="radio" class="btn-check" name="chart2Type" id="c2_line" value="line"
-                                autocomplete="off" [(ngModel)]="compChart2Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c2_line"
-                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
-
-                            <input type="radio" class="btn-check" name="chart2Type" id="c2_pie" value="pie"
-                                autocomplete="off" [(ngModel)]="compChart2Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="c2_pie"
-                                title="Pie/Doughnut"><i class="fas fa-chart-pie fs-9"></i></label>
-                        </div>
-
-                        <!-- Export Options -->
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false"
-                                style="padding-top: 2px; padding-bottom: 2px;">
-                                <i class="fas fa-download fs-9"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-4 d-flex flex-column justify-content-center">
-
-                    @if (compChart2Type === 'bar') {
-                    <!-- Pseudo Bar Chart -->
-                    <div class="animate__animated animate__fadeIn">
-                        <div class="mb-4 mt-2">
-                            <div class="d-flex justify-content-between fs-8 mb-2">
-                                <span class="text-dark fw-bold">Ministère de la Santé et de l'Hygiène Publique</span>
-                                <span class="text-secondary fw-medium">4.2 Mds (45%)</span>
-                            </div>
-                            <div class="progress rounded-pill bg-light" style="height: 10px;">
-                                <div class="progress-bar bg-primary-700 rounded-pill" role="progressbar"
-                                    style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="panel-body">
+                <!-- SVG Pipeline / Flow Visualizer -->
+                <div class="flow-canvas-container">
+                    <div class="flow-nodes-row">
+                        <!-- Step 1: Relevés Bancaires -->
+                        <div class="flow-column">
+                            <div class="flow-node-box source-node">
+                                <div class="flow-node-header">
+                                    <span>1. RELEVÉ BCEAO</span>
+                                    <i class="fas fa-circle-arrow-right text-primary"></i>
+                                </div>
+                                <div class="flow-node-amount">
+                                    {{ currentFlowData.totalVolume }}
+                                </div>
+                                <div class="flow-node-pct text-muted">
+                                    <i class="fas fa-landmark"></i>
+                                    <span>Compte Unique Trésor</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="mb-4">
-                            <div class="d-flex justify-content-between fs-8 mb-2">
-                                <span class="text-dark fw-bold">Ministère de l'Éducation Nationale</span>
-                                <span class="text-secondary fw-medium">3.1 Mds (35%)</span>
-                            </div>
-                            <div class="progress rounded-pill bg-light" style="height: 10px;">
-                                <div class="progress-bar bg-info rounded-pill" role="progressbar" style="width: 35%"
-                                    aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between fs-8 mb-2">
-                                <span class="text-dark fw-bold">Ministère de l'Équipement et de l'Entretien
-                                    Routier</span>
-                                <span class="text-secondary fw-medium">1.8 Mds (20%)</span>
-                            </div>
-                            <div class="progress rounded-pill bg-light" style="height: 10px;">
-                                <div class="progress-bar bg-accent-500 rounded-pill" role="progressbar"
-                                    style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                    </div>
-                    }
 
-                    @if (compChart2Type === 'pie') {
-                    <!-- Pie Chart Mockup -->
-                    <div
-                        class="d-flex align-items-center justify-content-center gap-4 animate__animated animate__fadeIn mb-3">
-                        <div class="position-relative" style="width: 140px; height: 140px;">
-                            <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100"
-                                style="transform: rotate(-90deg);">
-                                <!-- 45% Santé -->
-                                <path stroke-dasharray="45, 100"
-                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                    fill="none" stroke="var(--primary-700)" stroke-width="6" />
-                                <!-- 35% Education (Offset 45) -->
-                                <path stroke-dasharray="35, 100" stroke-dashoffset="-45"
-                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                    fill="none" stroke="var(--info)" stroke-width="6" />
-                                <!-- 20% Equipement (Offset 45+35=80) -->
-                                <path stroke-dasharray="20, 100" stroke-dashoffset="-80"
-                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                    fill="none" stroke="var(--accent-500)" stroke-width="6" />
+                        <!-- Stream Connector Curves -->
+                        <div class="flow-svg-connector">
+                            <svg width="100" height="140" viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M 0 35 C 50 35, 50 20, 100 20" stroke="#10b981" stroke-width="6" stroke-opacity="0.6" fill="none"/>
+                                <path d="M 0 55 C 50 55, 50 70, 100 70" stroke="#f59e0b" stroke-width="4" stroke-opacity="0.6" fill="none"/>
+                                <path d="M 0 75 C 50 75, 50 120, 100 120" stroke="#ef4444" stroke-width="3" stroke-opacity="0.6" fill="none"/>
                             </svg>
                         </div>
-                        <div class="d-flex flex-column gap-2 flex-grow-1 fs-8">
-                            <div class="d-flex justify-content-between align-items-center"><span
-                                    class="text-secondary"><i class="fas fa-circle text-primary me-2 fs-9"></i>Santé
-                                    (45%)</span><span class="fw-bold">4.2 Mds</span></div>
-                            <div class="d-flex justify-content-between align-items-center"><span
-                                    class="text-secondary"><i class="fas fa-circle text-info me-2 fs-9"></i>Éducation
-                                    (35%)</span><span class="fw-bold">3.1 Mds</span></div>
-                            <div class="d-flex justify-content-between align-items-center"><span
-                                    class="text-secondary"><i
-                                        class="fas fa-circle text-success me-2 fs-9"></i>Équipement (20%)</span><span
-                                    class="fw-bold">1.8 Mds</span></div>
+
+                        <!-- Step 2: Distribution -->
+                        <div class="flow-column">
+                            <!-- Rapproche Auto -->
+                            <div class="flow-node-box reg-node">
+                                <div class="flow-node-header">
+                                    <span class="text-success-bold">Lettrés Auto ({{ currentFlowData.tauxAuto }})</span>
+                                    <span class="kpi-status-badge badge-success">Conforme</span>
+                                </div>
+                                <div class="flow-node-amount text-success-bold">
+                                    {{ currentFlowData.lettreAutoAmount }}
+                                </div>
+                                <div class="flow-node-pct text-success">
+                                    <span>Concordance parfaite</span>
+                                </div>
+                            </div>
+
+                            <!-- En cours d'analyse -->
+                            <div class="flow-node-box wait-node">
+                                <div class="flow-node-header">
+                                    <span class="text-warning-bold">En instruction (3.8%)</span>
+                                    <span class="kpi-status-badge badge-warning">&lt; 48h</span>
+                                </div>
+                                <div class="flow-node-amount text-warning-bold">
+                                    {{ currentFlowData.instructionAmount }}
+                                </div>
+                                <div class="flow-node-pct text-warning">
+                                    <span>Vérification pièces de caisse</span>
+                                </div>
+                            </div>
+
+                            <!-- Écarts résiduels -->
+                            <div class="flow-node-box late-node">
+                                <div class="flow-node-header">
+                                    <span class="text-danger-bold">Écarts à justifier (1.4%)</span>
+                                    <span class="kpi-status-badge badge-danger">Audit</span>
+                                </div>
+                                <div class="flow-node-amount text-danger-bold">
+                                    {{ currentFlowData.ecartAmount }}
+                                </div>
+                                <div class="flow-node-pct text-danger">
+                                    <span>Rejets / Suspens bancaires</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    }
 
-                    @if (compChart2Type === 'line') {
-                    <!-- Line Chart Mockup -->
-                    <div class="w-100 position-relative animate__animated animate__fadeIn mt-2 mb-3"
-                        style="height: 140px;">
-                        <svg class="w-100 h-100" viewBox="0 0 300 100" preserveAspectRatio="none">
-                            <path d="M 0,20 L 50,40 L 100,30 L 150,50 L 200,10 L 250,60 L 300,45" fill="none"
-                                stroke="var(--primary-700)" stroke-width="3" stroke-linecap="round"
-                                stroke-linejoin="round"></path>
-                            <path d="M 0,80 L 50,70 L 100,50 L 150,60 L 200,80 L 250,30 L 300,40" fill="none"
-                                stroke="var(--info)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            </path>
-                            <path d="M 0,90 L 50,85 L 100,95 L 150,70 L 200,60 L 250,90 L 300,75" fill="none"
-                                stroke="var(--accent-500)" stroke-width="3" stroke-linecap="round"
-                                stroke-linejoin="round"></path>
+                    <!-- Footer stats bar -->
+                    <div class="flow-footer-stats">
+                        <div class="flow-stat-item">
+                            <div class="flow-stat-label">Rapprochement Auto</div>
+                            <div class="flow-stat-val text-success">{{ currentFlowData.tauxAuto }}</div>
+                        </div>
+                        <div class="flow-stat-item border-start ps-3">
+                            <div class="flow-stat-label">Débit Total Lettré</div>
+                            <div class="flow-stat-val text-primary">{{ currentFlowData.debitLettre }}</div>
+                        </div>
+                        <div class="flow-stat-item border-start ps-3">
+                            <div class="flow-stat-label">Écart Net Résiduel</div>
+                            <div class="flow-stat-val text-danger">{{ currentFlowData.ecartNet }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: RÉPARTITION PAR NATURE & AUDIT ALERTS -->
+        <div class="panel-card donut-breakdown-card">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box orange">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">Répartition par Nature</h2>
+                        <div class="panel-subtitle">Imputations budgétaires</div>
+                    </div>
+                </div>
+                <button class="table-action-btn" title="Détails" (click)="triggerToast('Rapport détaillé des natures généré')">
+                    <i class="fas fa-up-right-and-down-left-from-center"></i>
+                </button>
+            </div>
+
+            <div class="panel-body">
+                <!-- SVG Donut Chart -->
+                <div class="donut-hero-area">
+                    <div class="donut-chart-wrapper">
+                        <svg viewBox="0 0 36 36" class="donut-chart-svg">
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3.8"/>
+                            <!-- Recettes fiscales (55%) -->
+                            <path stroke-dasharray="55, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F77F00" stroke-width="4.2" stroke-linecap="round"/>
+                            <!-- Salaires fonctionnaires (30%) -->
+                            <path stroke-dasharray="30, 100" stroke-dashoffset="-55" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981" stroke-width="4.2"/>
+                            <!-- Investissements & Divers (15%) -->
+                            <path stroke-dasharray="15, 100" stroke-dashoffset="-85" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#0284c7" stroke-width="4.2"/>
                         </svg>
-                    </div>
-                    <div class="d-flex justify-content-center gap-3 fs-9 mt-2">
-                        <span class="text-secondary"><i
-                                class="fas fa-minus text-primary border-bottom border-primary border-2 me-1"></i>
-                            Santé</span>
-                        <span class="text-secondary"><i
-                                class="fas fa-minus text-info border-bottom border-info border-2 me-1"></i>
-                            Éducation</span>
-                        <span class="text-secondary"><i
-                                class="fas fa-minus text-success border-bottom border-success border-2 me-1"></i>
-                            Équipement</span>
-                    </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Table Row -->
-    <div class="row g-4">
-        <!-- Table Example -->
-        <div class="col-12">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div
-                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Livrables Comptables (CCB / CIP / Quote-parts)</h6>
-                    <div class="d-flex gap-2">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown">
-                                <i class="fas fa-sort-amount-down me-1 text-secondary"></i> Trier
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
-                                <li><a class="dropdown-item py-2" href="#">Montant (Décroissant)</a></li>
-                                <li><a class="dropdown-item py-2" href="#">Date</a></li>
-                            </ul>
+                        <div class="donut-center-text">
+                            <div class="donut-center-val">348 Mds</div>
+                            <div class="donut-center-sub">Total imputé</div>
                         </div>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false"
-                                style="padding-top: 5px; padding-bottom: 5px;">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="far fa-file-excel text-success me-2"></i> Exporter Excel</a></li>
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="far fa-file-pdf text-danger me-2"></i> Exporter PDF</a></li>
-                            </ul>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="donut-legend-col">
+                        <div class="legend-item">
+                            <span class="legend-dot bg-orange" style="background: #F77F00"></span>
+                            <span class="fw-bold">55%</span>
+                            <span class="text-muted">Fiscal & Douane</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot bg-success"></span>
+                            <span class="fw-bold">30%</span>
+                            <span class="text-muted">Salaires Fonction</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot bg-info"></span>
+                            <span class="fw-bold">15%</span>
+                            <span class="text-muted">Investissements</span>
                         </div>
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light text-secondary fs-8 text-uppercase tracking-wider">
-                                <tr>
-                                    <th class="ps-4 fw-medium border-0 py-3">Réf / Compte</th>
-                                    <th class="fw-medium border-0 py-3">Nature Opération</th>
-                                    <th class="fw-medium border-0 py-3">Date</th>
-                                    <th class="fw-medium border-0 py-3 text-end pe-4">Montant (FCFA)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="ps-4">
-                                        <div class="fw-bold text-dark">OP-2026-001</div>
-                                        <div class="text-secondary fs-8">Compte 4711</div>
-                                    </td>
-                                    <td>Régularisation transferts</td>
-                                    <td><span class="badge bg-light text-dark fw-medium border">12 Mars 2026</span></td>
-                                    <td class="text-end pe-4 fw-bold">45 000 000</td>
-                                </tr>
-                                <tr>
-                                    <td class="ps-4">
-                                        <div class="fw-bold text-dark">OP-2026-009</div>
-                                        <div class="text-secondary fs-8">Compte 4712</div>
-                                    </td>
-                                    <td>Virements non identifiés</td>
-                                    <td><span class="badge bg-light text-dark fw-medium border">10 Mars 2026</span></td>
-                                    <td class="text-end pe-4 fw-bold text-warning">120 500 000</td>
-                                </tr>
-                                <tr>
-                                    <td class="ps-4">
-                                        <div class="fw-bold text-dark">OP-2026-014</div>
-                                        <div class="text-secondary fs-8">Compte 4780</div>
-                                    </td>
-                                    <td>Ajustement de caisse</td>
-                                    <td><span class="badge bg-light text-dark fw-medium border">05 Mars 2026</span></td>
-                                    <td class="text-end pe-4 fw-bold">8 250 000</td>
-                                </tr>
-                                <tr>
-                                    <td class="ps-4 pb-4">
-                                        <div class="fw-bold text-dark">OP-2026-022</div>
-                                        <div class="text-secondary fs-8">Compte 4711</div>
-                                    </td>
-                                    <td class="pb-4">Frais de mandat en suspens</td>
-                                    <td class="pb-4"><span class="badge bg-light text-dark fw-medium border">01 Mars
-                                            2026</span></td>
-                                    <td class="pb-4 text-end pe-4 fw-bold text-danger">235 000 000</td>
-                                </tr>
-                            </tbody>
-                        </table>
+
+                <!-- Progress Bars -->
+                <div class="status-bars-list">
+                    <div class="status-bar-row">
+                        <div class="bar-row-info">
+                            <span class="bar-name-with-dot">
+                                <span class="dot-indicator" style="background: #F77F00"></span>
+                                <span>Recettes Fiscales & Douanières</span>
+                            </span>
+                            <span class="fw-bold text-primary">55% (191.6 Mds)</span>
+                        </div>
+                        <div class="track-wrapper">
+                            <div class="track-progress" style="width: 55%; background: #F77F00"></div>
+                        </div>
+                    </div>
+
+                    <div class="status-bar-row">
+                        <div class="bar-row-info">
+                            <span class="bar-name-with-dot">
+                                <span class="dot-indicator bg-success"></span>
+                                <span>Paiement Traitements & Salaires</span>
+                            </span>
+                            <span class="fw-bold text-success">30% (104.5 Mds)</span>
+                        </div>
+                        <div class="track-wrapper">
+                            <div class="track-progress bg-success" style="width: 30%"></div>
+                        </div>
+                    </div>
+
+                    <div class="status-bar-row">
+                        <div class="bar-row-info">
+                            <span class="bar-name-with-dot">
+                                <span class="dot-indicator bg-info"></span>
+                                <span>Dépenses d'Équipement & Projets</span>
+                            </span>
+                            <span class="fw-bold text-info">15% (52.3 Mds)</span>
+                        </div>
+                        <div class="track-wrapper">
+                            <div class="track-progress bg-info" style="width: 15%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Critical Alert Callout -->
+                <div class="service-alert-callout">
+                    <i class="fas fa-triangle-exclamation callout-icon"></i>
+                    <div>
+                        <div class="callout-text-title">Virements non lettrés en compte 4712</div>
+                        <div class="callout-text-desc">
+                            120.5 M FCFA de recettes fiscales dématérialisées sont en attente d'imputation définitive depuis plus de 48 heures.
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
+
+    <!-- 5. REAL-TIME TELEMETRY STRIP & MODERN DATA TABLE -->
+    <section class="table-section">
+        <!-- Live Header Strip -->
+        <div class="cashflow-live-bar">
+            <div class="live-title-box">
+                <div class="pulse-dot"></div>
+                <div>
+                    <div class="live-title-text">
+                        <i class="fas fa-bolt text-primary"></i>
+                        <span>Journal Centralisateur & Rapprochement — Temps Réel</span>
+                    </div>
+                    <div class="live-subtitle-text">
+                        Synchronisation avec le système SYGACUT Comptabilité Générale
+                    </div>
+                </div>
+            </div>
+
+            <div class="live-telemetry-metrics">
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-circle-arrow-down"></i> TOTAL DÉBIT :</span>
+                    <span class="metric-val val-orange">{{ currentTelemetry.totalDebit }}</span>
+                </div>
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-circle-arrow-up"></i> TOTAL CRÉDIT :</span>
+                    <span class="metric-val val-green">{{ currentTelemetry.totalCredit }}</span>
+                </div>
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-scale-balanced"></i> ÉCART BRUT :</span>
+                    <span class="metric-val val-amber">{{ currentTelemetry.ecartBrut }}</span>
+                </div>
+                <button class="btn-svc-primary btn-sm-svc" (click)="triggerToast('Audit d\'équilibrage des comptes exécuté')">
+                    <i class="fas fa-rotate-right"></i>
+                    <span>Auditer</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Table Container Card -->
+        <div class="table-container-card">
+            <!-- Toolbar -->
+            <div class="table-filter-toolbar">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-magnifying-glass search-icon"></i>
+                    <input type="text" placeholder="Rechercher par compte, opération, libellé..." [(ngModel)]="searchQuery" />
+                </div>
+
+                <div class="table-quick-filters">
+                    <span class="filter-caption">Afficher :</span>
+                    <button class="pill-filter" [class.active]="tableFilter === 'all'" (click)="setTableFilter('all')">
+                        Tous ({{ getCount('all') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'rapproche'" (click)="setTableFilter('rapproche')">
+                        Rapprochés ({{ getCount('rapproche') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'en-cours'" (click)="setTableFilter('en-cours')">
+                        En revue ({{ getCount('en-cours') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'ecart'" (click)="setTableFilter('ecart')">
+                        Écarts ({{ getCount('ecart') }})
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Responsive -->
+            <div class="table-responsive">
+                <!-- Rapprochement Table -->
+                @if (activeSubDomain === 'rapprochement') {
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>RÉF / COMPTE</th>
+                                <th>NATURE & LIBELLÉ OPÉRATION</th>
+                                <th>DATE VALEUR</th>
+                                <th>ÉCHÉANCE / ÉTAT</th>
+                                <th>MONTANT</th>
+                                <th>RÉCONCILIATION</th>
+                                <th>STATUT</th>
+                                <th class="text-end pe-4">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of filteredOperations; track item.ref) {
+                                <tr>
+                                    <td>
+                                        <span class="ref-code-cell">{{ item.ref }}</span>
+                                        <div class="fs-9 text-muted mt-1">{{ item.compte }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="ministry-cell">
+                                            <div class="ministry-badge-avatar {{ item.avatarClass }}">{{ item.avatarInitials }}</div>
+                                            <div>
+                                                <div class="ministry-name">{{ item.nature }}</div>
+                                                <div class="ministry-subtext">{{ item.libelle }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted fs-8">{{ item.dateOp }}</td>
+                                    <td>
+                                        <div class="fw-bold fs-8" [class.text-success]="item.statut === 'rapproche'" [class.text-warning]="item.statut === 'en-cours'" [class.text-danger]="item.statut === 'ecart'">
+                                            {{ item.statutLabel }}
+                                        </div>
+                                        <div class="fs-9 text-muted">{{ item.echeanceSub }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="amount-cell" [class.text-danger]="item.typeOp === 'debit'" [class.text-success]="item.typeOp === 'credit'">
+                                            {{ item.typeOp === 'debit' ? '-' : '+' }} {{ item.montant }}
+                                        </span>
+                                        <span class="amount-unit ms-1">{{ item.montantUnite }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress-cell-box">
+                                            <div class="progress-cell-bar">
+                                                <div class="progress-cell-fill" [style.width.%]="item.progression" [class.bg-success]="item.progression === 100" [class.bg-warning]="item.progression >= 50 && item.progression < 100" [class.bg-danger]="item.progression < 50"></div>
+                                            </div>
+                                            <span class="progress-pct-label" [class.text-success]="item.progression === 100" [class.text-warning]="item.progression >= 50 && item.progression < 100" [class.text-danger]="item.progression < 50">{{ item.progression }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-tag" [class.regule]="item.statut === 'rapproche'" [class.en-cours]="item.statut === 'en-cours'" [class.retard]="item.statut === 'ecart'">
+                                            <i class="fas" [class.fa-circle-check]="item.statut === 'rapproche'" [class.fa-clock]="item.statut === 'en-cours'" [class.fa-triangle-exclamation]="item.statut === 'ecart'"></i>
+                                            {{ item.statutLabel }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="table-action-btn me-1" title="Voir écriture" (click)="triggerToast('Détails écriture ' + item.ref)">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                        <button class="table-action-btn" title="Télécharger justificatif" (click)="triggerToast('Justificatif téléchargé')">
+                                            <i class="fas fa-file-invoice"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <!-- Journaux Table -->
+                @if (activeSubDomain === 'journaux') {
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>RÉF JOURNAL</th>
+                                <th>PIÈCE COMPTABLE</th>
+                                <th>LIBELLÉ ÉCRITURE</th>
+                                <th>DATE</th>
+                                <th>MONTANT</th>
+                                <th>STATUT</th>
+                                <th class="text-end pe-4">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of filteredJournaux; track item.ref) {
+                                <tr>
+                                    <td>
+                                        <span class="ref-code-cell">{{ item.ref }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold fs-8 text-dark">{{ item.piece }}</div>
+                                        <div class="fs-9 text-muted">{{ item.journal }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="ministry-cell">
+                                            <div class="ministry-badge-avatar {{ item.avatarClass }}">{{ item.avatarInitials }}</div>
+                                            <div>
+                                                <div class="ministry-name">{{ item.libelle }}</div>
+                                                <div class="ministry-subtext">Imputation validée par le contrôleur</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted fs-8">{{ item.dateOp }}</td>
+                                    <td>
+                                        <span class="amount-cell">{{ item.montant }}</span>
+                                        <span class="amount-unit ms-1">{{ item.montantUnite }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-tag" [class.regule]="item.statut === 'rapproche'" [class.en-cours]="item.statut === 'en-cours'" [class.retard]="item.statut === 'ecart'">
+                                            <i class="fas" [class.fa-circle-check]="item.statut === 'rapproche'" [class.fa-clock]="item.statut === 'en-cours'" [class.fa-triangle-exclamation]="item.statut === 'ecart'"></i>
+                                            {{ item.statutLabel }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="table-action-btn me-1" title="Voir écriture" (click)="triggerToast('Consultation ' + item.ref)">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                        <button class="table-action-btn" title="Télécharger pièce" (click)="triggerToast('Pièce téléchargée')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <!-- Balance Table -->
+                @if (activeSubDomain === 'balance') {
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>COMPTE & CLASSE</th>
+                                <th>INTITULÉ DU COMPTE</th>
+                                <th>SOLDE DÉBITEUR</th>
+                                <th>SOLDE CRÉDITEUR</th>
+                                <th>APUREMENT</th>
+                                <th>STATUT</th>
+                                <th class="text-end pe-4">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of filteredBalance; track item.compte) {
+                                <tr>
+                                    <td>
+                                        <span class="ref-code-cell">{{ item.compte }}</span>
+                                        <div class="fs-9 text-muted mt-1">{{ item.classe }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="ministry-cell">
+                                            <div class="ministry-badge-avatar {{ item.avatarClass }}">{{ item.avatarInitials }}</div>
+                                            <div>
+                                                <div class="ministry-name">{{ item.intitule }}</div>
+                                                <div class="ministry-subtext">Conforme aux normes SYSCOHADA</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="amount-cell text-danger">{{ item.soldeDebiteur }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="amount-cell text-success">{{ item.soldeCrediteur }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress-cell-box">
+                                            <div class="progress-cell-bar">
+                                                <div class="progress-cell-fill bg-success" [style.width.%]="item.progression"></div>
+                                            </div>
+                                            <span class="progress-pct-label text-success">{{ item.progression }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-tag" [class.regule]="item.statut === 'rapproche'" [class.en-cours]="item.statut === 'en-cours'">
+                                            <i class="fas fa-circle-check"></i>
+                                            {{ item.statutLabel }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="table-action-btn me-1" title="Voir grand livre" (click)="triggerToast('Grand livre compte ' + item.compte)">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                        <button class="table-action-btn" title="Télécharger balance" (click)="triggerToast('Extrait téléchargé')">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <!-- Table Pagination -->
+            <div class="table-pagination">
+                <div>
+                    Affichage de <strong>1 à {{ activeSubDomain === 'rapprochement' ? filteredOperations.length : (activeSubDomain === 'journaux' ? filteredJournaux.length : filteredBalance.length) }}</strong> sur <strong>{{ getCount('all') }} opérations</strong>
+                </div>
+                <div class="page-numbers">
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <span class="px-1 text-muted">...</span>
+                    <button class="page-btn">18</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FLOATING AI ASSISTANT FAB -->
+    <div class="floating-fab" title="Assistant Comptabilité IA" (click)="triggerToast('Assistant Comptable IA activé. Posez votre question.')">
+        <i class="fas fa-robot fs-5"></i>
     </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="export-toast" [class.show]="showToast">
+        <i class="fas fa-circle-check text-success fs-5"></i>
+        <span>{{ toastMessage }}</span>
+    </div>
+
+</div>
