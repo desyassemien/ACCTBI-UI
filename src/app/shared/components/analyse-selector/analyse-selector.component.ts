@@ -19,7 +19,23 @@ export class AnalyseSelectorComponent implements AfterViewInit {
   
   // State for the selector
   @Input() isDragDropMode: boolean = false;
-  @Input() selectedPeriod: string = 'Ce mois-ci';
+  @Input() forceDragDrop: boolean = false;
+  @Input() selectedPeriod: string = 'Ce mois-ci (Mars 2026)';
+  @Input() periodsList: string[] = [];
+
+  get allPeriods(): string[] {
+    if (this.periodsList && this.periodsList.length > 0) {
+      return this.periodsList;
+    }
+    return [
+      "Aujourd'hui",
+      'Cette semaine',
+      'Ce mois-ci (Mars 2026)',
+      '1er Trimestre 2026',
+      'Exercice 2026',
+      'Exercice 2025'
+    ];
+  }
   
   @Input() availableIndicators: string[] = [];
   @Input() selectedIndicators: string[] = [];

@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { AnalyseSelectorComponent } from '../../shared/components/analyse-selector/analyse-selector.component';
 
 export interface ComptaOperation {
@@ -56,11 +58,15 @@ export interface BalanceAccount {
 @Component({
     selector: 'app-comptabilite',
     standalone: true,
-    imports: [CommonModule, FormsModule, AnalyseSelectorComponent],
+    imports: [CommonModule, FormsModule, AnalyseSelectorComponent, BaseChartDirective],
     templateUrl: './comptabilite.component.html',
     styleUrl: './comptabilite.component.scss'
 })
-export class ComptabiliteComponent {
+export class ComptabiliteComponent implements OnInit {
+
+    constructor(private cdr: ChangeDetectorRef, private ngZone: NgZone) {}
+
+    @ViewChildren(BaseChartDirective) chartDirectives?: QueryList<BaseChartDirective>;
 
     // Sub-modules: 'rapprochement' | 'journaux' | 'balance'
     activeSubDomain: 'rapprochement' | 'journaux' | 'balance' = 'rapprochement';
@@ -101,8 +107,10 @@ export class ComptabiliteComponent {
 
     selectPeriod(period: string) {
         this.activePeriod = period;
-        this.selectedPeriod = period;
         this.triggerToast(`Période sélectionnée : ${period}`);
+        if (this.isAnalysisGenerated) {
+            this.generateAnalysis();
+        }
     }
 
     selectPoste(poste: string) {
@@ -116,8 +124,14 @@ export class ComptabiliteComponent {
     private toastTimer: any = null;
 
     // Legacy Selector Support
-    isDragDropMode = false;
-    selectedPeriod: string = 'Ce mois-ci';
+    isDragDropMode = true;
+    
+    get selectedPeriod(): string {
+        return this.activePeriod;
+    }
+    set selectedPeriod(period: string) {
+        this.activePeriod = period;
+    }
 
     availableIndicators = [
         'Vol. imputations provisoires',
@@ -140,7 +154,7 @@ export class ComptabiliteComponent {
         'Région',
         'Taux erreur'
     ];
-    selectedAxes = ['Date (Jour/Mois/Exercice)'];
+    selectedAxes = ['Poste comptable'];
 
     // --- Deliverables Datasets with Multi-Period & Multi-Poste ---
     operationsRapprochement: ComptaOperation[] = [
@@ -717,5 +731,805 @@ export class ComptabiliteComponent {
     // --- Legacy Selector Methods ---
     toggleMode(mode: 'classic' | 'dragdrop') {
         this.isDragDropMode = mode === 'dragdrop';
+    }
+
+    // --- ADVANCED ANALYSIS DYNAMIC CHARTS & TABLES ---
+    barChartType: ChartType = 'bar';
+    barChartData: ChartData<'bar'> = { labels: [], datasets: [] };
+
+    get currentBarLabels(): string[] {
+        return (this.barChartData?.labels || []).map(l => String(l));
+    }
+
+    getTooltipDrilldownHint(label: string): string {
+        const l = (label || '').toLowerCase();
+        if (l.includes('exercice') || l.includes('2024') || l.includes('2025') || l.includes('2026') || l.includes('2027') || l.includes('année')) {
+            return '🔍 Cliquer pour forer : Passer aux Trimestres';
+        }
+        if (l.includes('trimestre') || l.includes('t1') || l.includes('t2') || l.includes('t3') || l.includes('t4')) {
+            return '🔍 Cliquer pour forer : Passer aux Mois';
+        }
+        if (l.includes('janvier') || l.includes('février') || l.includes('fevrier') ||
+            l.includes('mars') || l.includes('avril') || l.includes('mai') ||
+            l.includes('juin') || l.includes('juillet') || l.includes('août') ||
+            l.includes('aout') || l.includes('septembre') || l.includes('octobre') ||
+            l.includes('novembre') || l.includes('décembre') || l.includes('decembre')) {
+            return '🔍 Cliquer pour forer : Passer aux Semaines';
+        }
+        if (l.includes('semaine') || l.includes('sem')) {
+            return '🔍 Cliquer pour forer : Passer aux Jours';
+        }
+        if (l.includes('lundi') || l.includes('mardi') || l.includes('mercredi') || l.includes('jeudi') || l.includes('vendredi')) {
+            return '🔍 Cliquer pour forer : Passer aux Plages horaires';
+        }
+        return '🔍 Cliquer pour forer : Détail par Trimestre';
+    }
+
+    barChartOptions: ChartConfiguration['options'] = {
+        responsive: true,
+        maintainAspectRatio: false,
+        onClick: (event, elements, chart) => {
+            if (elements && elements.length > 0) {
+                const index = elements[0].index;
+                const label = chart.data.labels?.[index] as string;
+                if (label) {
+                    this.drillDown(label, index);
+                }
+            }
+        },
+        onHover: (event, elements) => {
+            const nativeEvent = event.native;
+            if (nativeEvent && nativeEvent.target) {
+                (nativeEvent.target as HTMLElement).style.cursor = elements.length > 0 ? 'pointer' : 'default';
+            }
+        },
+        plugins: { 
+            legend: { 
+                display: true, 
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    boxWidth: 8,
+                    font: { size: 12, weight: 600 }
+                }
+            },
+            tooltip: {
+                backgroundColor: '#0f172a',
+                titleFont: { size: 13, weight: 'bold' },
+                bodyFont: { size: 12 },
+                footerFont: { size: 11, weight: 'bold', style: 'italic' },
+                footerColor: '#fb923c',
+                padding: 12,
+                cornerRadius: 8,
+                callbacks: {
+                    afterBody: (tooltipItems) => {
+                        if (!tooltipItems || tooltipItems.length === 0) return '';
+                        const label = tooltipItems[0].label || '';
+                        return '\n' + this.getTooltipDrilldownHint(label);
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { font: { size: 11, weight: 500 }, color: '#64748b' }
+            },
+            y: {
+                grid: { color: '#f1f5f9' },
+                ticks: { font: { size: 11 }, color: '#64748b' }
+            }
+        }
+    };
+
+    lineChartType: ChartType = 'line';
+    lineChartData: ChartData<'line'> = { labels: [], datasets: [] };
+    lineChartOptions: ChartConfiguration['options'] = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { 
+            legend: { 
+                display: true, 
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    boxWidth: 8,
+                    font: { size: 12, weight: 600 }
+                }
+            },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                padding: 10,
+                cornerRadius: 8
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { font: { size: 11, weight: 500 }, color: '#64748b' }
+            },
+            y: {
+                grid: { color: '#f1f5f9' },
+                ticks: { font: { size: 11 }, color: '#64748b' }
+            }
+        }
+    };
+
+    analysisTableData: any[] = [];
+    analysisTableHeaders: string[] = [];
+    isAnalysisGenerated: boolean = false;
+
+    // Drilldown State Tracking
+    drilldownStack: {
+        title: string;
+        parentLabel: string;
+        barData: ChartData<'bar'>;
+        lineData: ChartData<'line'>;
+        tableHeaders: string[];
+        tableData: any[];
+    }[] = [];
+    currentDrillLabel: string = '';
+    currentDrillLevel: number = 0;
+
+    ngOnInit() {
+        // Initial setup
+    }
+
+    onChartClick(event: { event?: any; active?: any[] }) {
+        if (event.active && event.active.length > 0) {
+            const index = event.active[0].index;
+            const label = this.barChartData.labels?.[index] as string;
+            if (label) {
+                this.drillDown(label, index);
+            }
+        }
+    }
+
+    // --- Deterministic Mock Data Engine ---
+    private getDimensionCategories(axis: string, period: string): { name: string; icon: string }[] {
+        const axisLower = axis.toLowerCase();
+        if (axisLower.includes('poste')) {
+            return [
+                { name: 'BCEAO Siège & Agence', icon: 'fa-landmark' },
+                { name: 'Trésorerie P. Abidjan', icon: 'fa-building-columns' },
+                { name: 'Trésorerie R. Yamoussoukro', icon: 'fa-building' },
+                { name: 'Trésorerie R. San-Pedro', icon: 'fa-ship' },
+                { name: 'Trésorerie R. Bouaké', icon: 'fa-city' }
+            ];
+        } else if (axisLower.includes('agence')) {
+            return [
+                { name: 'Agence Plateau-Banque', icon: 'fa-building-columns' },
+                { name: 'Agence Cocody-Trésor', icon: 'fa-vault' },
+                { name: 'Agence Yamoussoukro Ville', icon: 'fa-building' },
+                { name: 'Agence San-Pedro Port', icon: 'fa-anchor' },
+                { name: 'Agence Bouaké Commerce', icon: 'fa-shop' }
+            ];
+        } else if (axisLower.includes('type') || (axisLower.includes('nature') && !axisLower.includes('impôt'))) {
+            return [
+                { name: 'Virements Interbancaires BCEAO', icon: 'fa-arrows-rotate' },
+                { name: 'Avis de Crédit Directs', icon: 'fa-file-invoice-dollar' },
+                { name: 'Régularisations Transferts', icon: 'fa-scale-balanced' },
+                { name: 'Ajustements Caisses & Devises', icon: 'fa-money-bill-transfer' },
+                { name: 'Frais & Commissions Mandats', icon: 'fa-receipt' }
+            ];
+        } else if (axisLower.includes('impôt')) {
+            return [
+                { name: 'TVA & Taxes Assimilées', icon: 'fa-receipt' },
+                { name: 'Impôt sur le Revenu & Salaires', icon: 'fa-user-tie' },
+                { name: 'Droits de Douane & Transit', icon: 'fa-truck-front' },
+                { name: 'Droits d\'Enregistrement & Timbre', icon: 'fa-stamp' },
+                { name: 'Taxes Pétrolières & Énergie', icon: 'fa-gas-pump' }
+            ];
+        } else if (axisLower.includes('contribuable')) {
+            return [
+                { name: 'Grandes Entreprises (DGE)', icon: 'fa-building' },
+                { name: 'Moyennes Entreprises (DME)', icon: 'fa-store' },
+                { name: 'Particuliers & Professions', icon: 'fa-user' },
+                { name: 'Établissements Publics (EPN)', icon: 'fa-landmark-dome' },
+                { name: 'Collectivités Territoriales', icon: 'fa-tree-city' }
+            ];
+        } else if (axisLower.includes('région')) {
+            return [
+                { name: 'District Autonome d\'Abidjan', icon: 'fa-map-pin' },
+                { name: 'Région du Bélier (Yamoussoukro)', icon: 'fa-map-pin' },
+                { name: 'Région de San-Pedro', icon: 'fa-map-pin' },
+                { name: 'Région du Gbêkê (Bouaké)', icon: 'fa-map-pin' },
+                { name: 'Région du Poro (Korhogo)', icon: 'fa-map-pin' }
+            ];
+        } else if (axisLower.includes('erreur') || axisLower.includes('taux erreur')) {
+            return [
+                { name: 'Concordance Parfaite (0.00%)', icon: 'fa-circle-check' },
+                { name: 'Écarts Minimes (< 0.05%)', icon: 'fa-circle-info' },
+                { name: 'Écarts Modérés (0.05% - 0.20%)', icon: 'fa-triangle-exclamation' },
+                { name: 'Suspensions Critiques (> 0.20%)', icon: 'fa-circle-exclamation' }
+            ];
+        } else if (axisLower.includes('date')) {
+            if (period.includes('Aujourd')) {
+                return [
+                    { name: '08h - 10h', icon: 'fa-clock' },
+                    { name: '10h - 12h', icon: 'fa-clock' },
+                    { name: '12h - 14h', icon: 'fa-clock' },
+                    { name: '14h - 16h', icon: 'fa-clock' },
+                    { name: '16h - 18h', icon: 'fa-clock' }
+                ];
+            } else if (period.includes('semaine')) {
+                return [
+                    { name: 'Lundi', icon: 'fa-calendar-day' },
+                    { name: 'Mardi', icon: 'fa-calendar-day' },
+                    { name: 'Mercredi', icon: 'fa-calendar-day' },
+                    { name: 'Jeudi', icon: 'fa-calendar-day' },
+                    { name: 'Vendredi', icon: 'fa-calendar-day' }
+                ];
+            } else if (period.includes('trimestre')) {
+                return [
+                    { name: 'Mois 1 (Janvier)', icon: 'fa-calendar' },
+                    { name: 'Mois 2 (Février)', icon: 'fa-calendar' },
+                    { name: 'Mois 3 (Mars)', icon: 'fa-calendar' }
+                ];
+            } else if (period.includes('2025') || period.includes('année') || period.includes('Exercice')) {
+                return [
+                    { name: 'Trimestre 1', icon: 'fa-calendar' },
+                    { name: 'Trimestre 2', icon: 'fa-calendar' },
+                    { name: 'Trimestre 3', icon: 'fa-calendar' },
+                    { name: 'Trimestre 4', icon: 'fa-calendar' }
+                ];
+            } else {
+                return [
+                    { name: 'Semaine 1 (01-07)', icon: 'fa-calendar-week' },
+                    { name: 'Semaine 2 (08-14)', icon: 'fa-calendar-week' },
+                    { name: 'Semaine 3 (15-21)', icon: 'fa-calendar-week' },
+                    { name: 'Semaine 4 (22-31)', icon: 'fa-calendar-week' }
+                ];
+            }
+        }
+        
+        return [
+            { name: 'Catégorie Principale', icon: 'fa-folder' },
+            { name: 'Catégorie Secondaire A', icon: 'fa-folder' },
+            { name: 'Catégorie Secondaire B', icon: 'fa-folder' },
+            { name: 'Catégorie Régionale', icon: 'fa-folder' }
+        ];
+    }
+
+    private getPeriodTimeLabels(period: string): string[] {
+        if (period.includes('Aujourd')) {
+            return ['08h00', '10h30', '13h00', '15h30', '18h00'];
+        } else if (period.includes('semaine')) {
+            return ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+        } else if (period.includes('trimestre') || period.includes('Trimestre')) {
+            return ['Mois 1 (Jan)', 'Mois 2 (Fév)', 'Mois 3 (Mar)'];
+        } else if (period.includes('2025')) {
+            return ['T1 2025', 'T2 2025', 'T3 2025', 'T4 2025'];
+        } else if (period.includes('année') || period.includes('2026') || period.includes('Exercice')) {
+            return ['T1 2026', 'T2 2026', 'T3 2026 (Proj)', 'T4 2026 (Proj)'];
+        } else if (period.includes('Personnalisé')) {
+            return ['Début', 'Phase 1', 'Phase 2', 'Clôture'];
+        }
+        // Default Month
+        return ['Semaine 1', 'Semaine 2', 'Semaine 3', 'Semaine 4'];
+    }
+
+    private generateMockIndicatorValue(ind: string, period: string, catIdx: number, catCount: number): { raw: number; formatted: string; unit: string; badgeClass: string } {
+        const indLower = ind.toLowerCase();
+        
+        // Period scale factors
+        let scaleFactor = 1.0;
+        let periodBias = 0;
+        if (period.includes('Aujourd')) {
+            scaleFactor = 0.05;
+            periodBias = 2.0; // Higher accuracy for daily check
+        } else if (period.includes('semaine')) {
+            scaleFactor = 0.25;
+            periodBias = 1.0;
+        } else if (period.includes('trimestre')) {
+            scaleFactor = 3.0;
+            periodBias = 0.5;
+        } else if (period.includes('2025')) {
+            scaleFactor = 12.0;
+            periodBias = 1.8; // Audited 2025 has high rates
+        } else if (period.includes('année') || period.includes('2026')) {
+            scaleFactor = 12.0;
+            periodBias = 0.8;
+        }
+
+        // Specific Indicator logic
+        if (indLower.includes('taux rapprochement auto') || indLower.includes('taux de rapprochement')) {
+            const baseRates = [98.5, 96.2, 94.8, 92.4, 89.2];
+            const raw = Math.min(99.9, Math.max(80.0, Number((baseRates[catIdx % baseRates.length] + periodBias).toFixed(1))));
+            const formatted = raw.toFixed(1) + ' %';
+            const badgeClass = raw >= 95 ? 'badge-success' : (raw >= 90 ? 'badge-warning' : 'badge-danger');
+            return { raw, formatted, unit: '%', badgeClass };
+        } 
+        
+        if (indLower.includes('délai moyen rapprochement') || indLower.includes('délai moyen')) {
+            const baseDelays = [0.8, 1.1, 1.4, 1.9, 2.4];
+            const raw = Math.max(0.2, Number((baseDelays[catIdx % baseDelays.length] - (periodBias * 0.1)).toFixed(1)));
+            const formatted = raw.toFixed(1) + ' j';
+            const badgeClass = raw <= 1.0 ? 'badge-success' : (raw <= 2.0 ? 'badge-warning' : 'badge-danger');
+            return { raw, formatted, unit: 'j', badgeClass };
+        }
+
+        if (indLower.includes('écart concordance') || indLower.includes('ecart concordance') || indLower.includes('écart')) {
+            const baseEcarts = [0.00, 0.01, 0.02, 0.05, 0.08];
+            const raw = Number((baseEcarts[catIdx % baseEcarts.length]).toFixed(2));
+            const formatted = raw.toFixed(2) + ' %';
+            const badgeClass = raw === 0 ? 'badge-success' : (raw <= 0.05 ? 'badge-warning' : 'badge-danger');
+            return { raw, formatted, unit: '%', badgeClass };
+        }
+
+        if (indLower.includes('vol. imputations provisoires') || indLower.includes('imputations provisoires')) {
+            const baseVols = [45.0, 120.5, 32.8, 8.25, 235.0];
+            const raw = Math.round(baseVols[catIdx % baseVols.length] * scaleFactor * 10) / 10;
+            const unit = (scaleFactor >= 10) ? 'Mds FCFA' : 'M FCFA';
+            const formatted = raw.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' ' + unit;
+            const badgeClass = raw > 100 * scaleFactor ? 'badge-danger' : 'badge-info';
+            return { raw, formatted, unit, badgeClass };
+        }
+
+        if (indLower.includes('ancienneté moy. imputations') || indLower.includes('ancienneté')) {
+            const baseDays = [1.8, 3.4, 5.2, 7.8, 12.5];
+            const raw = Number((baseDays[catIdx % baseDays.length]).toFixed(1));
+            const formatted = raw.toFixed(1) + ' j';
+            const badgeClass = raw <= 3.0 ? 'badge-success' : (raw <= 7.0 ? 'badge-warning' : 'badge-danger');
+            return { raw, formatted, unit: 'j', badgeClass };
+        }
+
+        if (indLower.includes('répartition recettes par nature') || indLower.includes('recettes')) {
+            const baseRecettes = [191.6, 104.5, 52.3, 24.8, 12.0];
+            const raw = Math.round(baseRecettes[catIdx % baseRecettes.length] * scaleFactor * 10) / 10;
+            const unit = (scaleFactor >= 10) ? 'Mds FCFA' : 'M FCFA';
+            const formatted = raw.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' ' + unit;
+            const badgeClass = 'badge-success';
+            return { raw, formatted, unit, badgeClass };
+        }
+
+        if (indLower.includes('taux de collecte tva') || indLower.includes('tva')) {
+            const baseTva = [96.4, 93.8, 91.2, 88.5, 85.0];
+            const raw = Math.min(99.5, Number((baseTva[catIdx % baseTva.length] + periodBias).toFixed(1)));
+            const formatted = raw.toFixed(1) + ' %';
+            const badgeClass = raw >= 92 ? 'badge-success' : 'badge-warning';
+            return { raw, formatted, unit: '%', badgeClass };
+        }
+
+        // Generic fallback for any custom indicator
+        const raw = Math.round((50 + (catIdx * 12) + (scaleFactor * 10)) * 10) / 10;
+        return { raw, formatted: raw.toString(), unit: 'pts', badgeClass: 'badge-info' };
+    }
+
+    private generateTrendSeries(ind: string, period: string, timePointsCount: number, baseAvg: number): number[] {
+        const indLower = ind.toLowerCase();
+        const isRate = indLower.includes('taux') || indLower.includes('écart');
+        
+        const series: number[] = [];
+        let current = baseAvg;
+        for (let i = 0; i < timePointsCount; i++) {
+            const progressRatio = (i + 1) / timePointsCount;
+            let val = 0;
+            if (isRate) {
+                // Rates usually improve slightly over time
+                val = Math.min(99.9, Math.max(70.0, current + (progressRatio * 1.5) + (Math.sin(i) * 0.8)));
+                series.push(Number(val.toFixed(1)));
+            } else if (indLower.includes('délai') || indLower.includes('ancienneté')) {
+                // Delays decrease over time
+                val = Math.max(0.3, current - (progressRatio * 0.4) + (Math.cos(i) * 0.2));
+                series.push(Number(val.toFixed(1)));
+            } else {
+                // Volumes fluctuate per period
+                val = Math.max(1, Math.round(current * (0.85 + (progressRatio * 0.3) + (Math.sin(i * 2) * 0.15))));
+                series.push(val);
+            }
+        }
+        return series;
+    }
+
+    generateAnalysis(event?: any) {
+        this.isAnalysisGenerated = true;
+        if (event?.period) {
+            this.activePeriod = event.period;
+        }
+        const period = this.activePeriod;
+        const indicators = event?.indicators || this.selectedIndicators;
+        const axes = event?.axes || this.selectedAxes;
+        
+        if (axes.length === 0 || indicators.length === 0) {
+            this.barChartData = { labels: [], datasets: [] };
+            this.lineChartData = { labels: [], datasets: [] };
+            this.analysisTableData = [];
+            this.analysisTableHeaders = [];
+            return;
+        }
+
+        const primaryAxis = axes[0];
+        const categoriesWithIcons = this.getDimensionCategories(primaryAxis, period);
+        const categories = categoriesWithIcons.map(c => c.name);
+        const timeLabels = this.getPeriodTimeLabels(period);
+
+        // Curated color palette
+        const colorPalette = [
+            { main: '#F77F00', light: 'rgba(247, 127, 0, 0.2)', border: '#F77F00' }, // Orange Brand
+            { main: '#10b981', light: 'rgba(16, 185, 129, 0.2)', border: '#10b981' }, // Green
+            { main: '#0284c7', light: 'rgba(2, 132, 199, 0.2)', border: '#0284c7' },   // Blue
+            { main: '#8b5cf6', light: 'rgba(139, 92, 246, 0.2)', border: '#8b5cf6' }, // Purple
+            { main: '#f59e0b', light: 'rgba(245, 158, 11, 0.2)', border: '#f59e0b' }, // Amber
+            { main: '#06b6d4', light: 'rgba(6, 182, 212, 0.2)', border: '#06b6d4' },   // Cyan
+            { main: '#ec4899', light: 'rgba(236, 72, 153, 0.2)', border: '#ec4899' }  // Pink
+        ];
+
+        // 1. Generate Bar Chart Datasets
+        const barDatasets = indicators.map((ind: string, idx: number) => {
+            const color = colorPalette[idx % colorPalette.length];
+            const data = categories.map((_, catIdx) => {
+                const mockObj = this.generateMockIndicatorValue(ind, period, catIdx, categories.length);
+                return mockObj.raw;
+            });
+
+            return {
+                data,
+                label: ind,
+                backgroundColor: color.main,
+                borderRadius: 6,
+                barPercentage: 0.65,
+                categoryPercentage: 0.75
+            };
+        });
+
+        this.barChartData = {
+            labels: categories,
+            datasets: barDatasets
+        };
+
+        // 2. Generate Temporal Line Chart Datasets
+        const lineDatasets = indicators.map((ind: string, idx: number) => {
+            const color = colorPalette[idx % colorPalette.length];
+            const total = barDatasets[idx].data.reduce((a: number, b: number) => a + b, 0);
+            const avg = total / barDatasets[idx].data.length;
+            const trendData = this.generateTrendSeries(ind, period, timeLabels.length, avg);
+
+            return {
+                data: trendData,
+                label: ind,
+                borderColor: color.border,
+                backgroundColor: color.light,
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: color.border,
+                pointBorderWidth: 2
+            };
+        });
+
+        this.lineChartData = {
+            labels: timeLabels,
+            datasets: lineDatasets
+        };
+
+        // 3. Generate Details Data Table matching exactly the values
+        this.analysisTableHeaders = [primaryAxis, ...indicators];
+        this.analysisTableData = categoriesWithIcons.map((catObj, catIdx) => {
+            const row: any = { 
+                AxisCategory: catObj.name,
+                categoryIcon: catObj.icon,
+                indicatorDetails: {}
+            };
+
+            indicators.forEach((ind: string) => {
+                const valObj = this.generateMockIndicatorValue(ind, period, catIdx, categories.length);
+                row[ind] = valObj.raw;
+                row[ind + '_formatted'] = valObj.formatted;
+                row[ind + '_unit'] = valObj.unit;
+                row[ind + '_badge'] = valObj.badgeClass;
+                row.indicatorDetails[ind] = valObj;
+            });
+
+            return row;
+        });
+        
+        this.drilldownStack = [];
+        this.currentDrillLevel = 0;
+        this.currentDrillLabel = '';
+
+        this.cdr.detectChanges();
+        setTimeout(() => {
+            this.chartDirectives?.forEach(c => c.update());
+            this.cdr.detectChanges();
+        }, 20);
+
+        if (event) {
+            this.triggerToast(`Analyse générée : ${primaryAxis} sur ${period} (${indicators.length} indicateurs)`);
+        }
+    }
+
+    get currentTemporalLevelLabel(): string {
+        if (this.drilldownStack.length === 0) {
+            return 'Vue Globale';
+        }
+        const current = this.currentDrillLabel.toLowerCase();
+        if (current.includes('exercice') || current.includes('2024') || current.includes('2025') || current.includes('2026') || current.includes('2027') || current.includes('année')) {
+            return 'Trimestres';
+        }
+        if (current.includes('trimestre') || current.includes('t1') || current.includes('t2') || current.includes('t3') || current.includes('t4')) {
+            return 'Mois';
+        }
+        if (current.includes('janvier') || current.includes('février') || current.includes('fevrier') ||
+            current.includes('mars') || current.includes('avril') || current.includes('mai') ||
+            current.includes('juin') || current.includes('juillet') || current.includes('août') ||
+            current.includes('aout') || current.includes('septembre') || current.includes('octobre') ||
+            current.includes('novembre') || current.includes('décembre') || current.includes('decembre')) {
+            return 'Semaines';
+        }
+        if (current.includes('semaine') || current.includes('sem')) {
+            return 'Jours';
+        }
+        if (current.includes('lundi') || current.includes('mardi') || current.includes('mercredi') || current.includes('jeudi') || current.includes('vendredi')) {
+            return 'Plages horaires';
+        }
+        return `Trimestres (${this.currentDrillLabel})`;
+    }
+
+    // --- PURE TEMPORAL DRILLDOWN ENGINE ---
+    private getDrilldownCategories(parentLabel: string): { name: string; icon: string; subPeriod?: string }[] {
+        const labelLower = parentLabel.toLowerCase();
+
+        // 1. Plages horaires -> Sous-détail final
+        if (labelLower.includes('08h') || labelLower.includes('10h') || labelLower.includes('12h') || labelLower.includes('14h') || labelLower.includes('16h')) {
+            return [
+                { name: `${parentLabel} — Sas 47`, icon: 'fa-clock' },
+                { name: `${parentLabel} — Lettré Direct`, icon: 'fa-check-double' },
+                { name: `${parentLabel} — Télé-transmission`, icon: 'fa-network-wired' }
+            ];
+        }
+
+        // 2. Jours -> Plages horaires
+        if (labelLower.includes('lundi') || labelLower.includes('mardi') || labelLower.includes('mercredi') || labelLower.includes('jeudi') || labelLower.includes('vendredi') || labelLower.includes('samedi')) {
+            return [
+                { name: '08h00 - 10h00', icon: 'fa-clock', subPeriod: 'Aujourd\'hui' },
+                { name: '10h00 - 12h00', icon: 'fa-clock', subPeriod: 'Aujourd\'hui' },
+                { name: '12h00 - 14h00', icon: 'fa-clock', subPeriod: 'Aujourd\'hui' },
+                { name: '14h00 - 16h00', icon: 'fa-clock', subPeriod: 'Aujourd\'hui' },
+                { name: '16h00 - 18h00', icon: 'fa-clock', subPeriod: 'Aujourd\'hui' }
+            ];
+        }
+
+        // 3. Semaines -> Jours de la semaine
+        if (labelLower.includes('semaine') || labelLower.includes('sem')) {
+            return [
+                { name: 'Lundi', icon: 'fa-calendar-day', subPeriod: 'semaine' },
+                { name: 'Mardi', icon: 'fa-calendar-day', subPeriod: 'semaine' },
+                { name: 'Mercredi', icon: 'fa-calendar-day', subPeriod: 'semaine' },
+                { name: 'Jeudi', icon: 'fa-calendar-day', subPeriod: 'semaine' },
+                { name: 'Vendredi', icon: 'fa-calendar-day', subPeriod: 'semaine' }
+            ];
+        }
+
+        // 4. Mois -> Semaines du mois
+        if (labelLower.includes('janvier') || labelLower.includes('février') || labelLower.includes('fevrier') ||
+            labelLower.includes('mars') || labelLower.includes('avril') || labelLower.includes('mai') ||
+            labelLower.includes('juin') || labelLower.includes('juillet') || labelLower.includes('août') ||
+            labelLower.includes('aout') || labelLower.includes('septembre') || labelLower.includes('octobre') ||
+            labelLower.includes('novembre') || labelLower.includes('décembre') || labelLower.includes('decembre')) {
+            return [
+                { name: 'Semaine 1 (01-07)', icon: 'fa-calendar-week', subPeriod: 'Semaine' },
+                { name: 'Semaine 2 (08-14)', icon: 'fa-calendar-week', subPeriod: 'Semaine' },
+                { name: 'Semaine 3 (15-21)', icon: 'fa-calendar-week', subPeriod: 'Semaine' },
+                { name: 'Semaine 4 (22-31)', icon: 'fa-calendar-week', subPeriod: 'Semaine' }
+            ];
+        }
+
+        // 5. Trimestres -> Mois du trimestre
+        if (labelLower.includes('trimestre 1') || labelLower.includes('t1') || labelLower.includes('1er trimestre')) {
+            return [
+                { name: 'Janvier', icon: 'fa-calendar-day', subPeriod: 'Mois' },
+                { name: 'Février', icon: 'fa-calendar-day', subPeriod: 'Mois' },
+                { name: 'Mars', icon: 'fa-calendar-day', subPeriod: 'Mois' }
+            ];
+        } else if (labelLower.includes('trimestre 2') || labelLower.includes('t2') || labelLower.includes('2ème trimestre') || labelLower.includes('2e trimestre')) {
+            return [
+                { name: 'Avril', icon: 'fa-calendar-day', subPeriod: 'Mois' },
+                { name: 'Mai', icon: 'fa-calendar-day', subPeriod: 'Mois' },
+                { name: 'Juin', icon: 'fa-calendar-day', subPeriod: 'Mois' }
+            ];
+        } else if (labelLower.includes('trimestre 3') || labelLower.includes('t3') || labelLower.includes('3ème trimestre') || labelLower.includes('3e trimestre')) {
+            return [
+                { name: 'Juillet', icon: 'fa-calendar-day', subPeriod: 'Mois' },
+                { name: 'Août', icon: 'fa-calendar-day', subPeriod: 'Mois' },
+                { name: 'Septembre', icon: 'fa-calendar-day', subPeriod: 'Mois' }
+            ];
+        } else if (labelLower.includes('trimestre 4') || labelLower.includes('t4') || labelLower.includes('4ème trimestre') || labelLower.includes('4e trimestre')) {
+            return [
+                { name: 'Octobre', icon: 'fa-calendar-day', subPeriod: 'Mois' },
+                { name: 'Novembre', icon: 'fa-calendar-day', subPeriod: 'Mois' },
+                { name: 'Décembre', icon: 'fa-calendar-day', subPeriod: 'Mois' }
+            ];
+        }
+
+        // 6. Années / Exercice ou Entité racine (Poste, Agence, etc.) -> 4 Trimestres
+        const yearMatch = labelLower.match(/202[0-9]/);
+        const yr = yearMatch ? yearMatch[0] : '2026';
+        return [
+            { name: `1er Trimestre (T1 ${yr})`, icon: 'fa-calendar', subPeriod: 'Trimestre 1' },
+            { name: `2ème Trimestre (T2 ${yr})`, icon: 'fa-calendar', subPeriod: 'Trimestre 2' },
+            { name: `3ème Trimestre (T3 ${yr})`, icon: 'fa-calendar', subPeriod: 'Trimestre 3' },
+            { name: `4ème Trimestre (T4 ${yr})`, icon: 'fa-calendar', subPeriod: 'Trimestre 4' }
+        ];
+    }
+
+    private getDrillTimeLabels(categories: string[]): string[] {
+        if (!categories || categories.length === 0) return [];
+        const first = categories[0].toLowerCase();
+        if (first.includes('trimestre') || first.includes('t1')) {
+            return ['T1', 'T2', 'T3', 'T4'];
+        }
+        if (first.includes('janvier') || first.includes('avril') || first.includes('juillet') || first.includes('octobre') || first.includes('février') || first.includes('mars')) {
+            return categories.map(m => m.substring(0, 3) + '.');
+        }
+        if (first.includes('semaine') || first.includes('sem')) {
+            return ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+        }
+        if (first.includes('lundi') || first.includes('mardi')) {
+            return ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
+        }
+        if (first.includes('08h') || first.includes('10h')) {
+            return ['08h', '10h', '12h', '14h', '16h'];
+        }
+        return categories.map(c => c.length > 12 ? c.substring(0, 10) + '...' : c);
+    }
+
+    drillDown(label: string, index?: number) {
+        if (!this.isAnalysisGenerated) return;
+
+        this.ngZone.run(() => {
+            const indicators = this.selectedIndicators;
+            const period = this.selectedPeriod;
+
+            // Save current level in stack
+            this.drilldownStack.push({
+                title: this.currentDrillLabel || (this.selectedAxes[0] || 'Vue Globale'),
+                parentLabel: label,
+                barData: JSON.parse(JSON.stringify(this.barChartData)),
+                lineData: JSON.parse(JSON.stringify(this.lineChartData)),
+                tableHeaders: [...this.analysisTableHeaders],
+                tableData: JSON.parse(JSON.stringify(this.analysisTableData))
+            });
+
+            this.currentDrillLabel = label;
+            this.currentDrillLevel++;
+
+            const subCategories = this.getDrilldownCategories(label);
+            const categories = subCategories.map(s => s.name);
+            const subTimeLabels = this.getDrillTimeLabels(categories);
+
+            const colorPalette = [
+                { main: '#F77F00', light: 'rgba(247, 127, 0, 0.2)', border: '#F77F00' },
+                { main: '#10b981', light: 'rgba(16, 185, 129, 0.2)', border: '#10b981' },
+                { main: '#0284c7', light: 'rgba(2, 132, 199, 0.2)', border: '#0284c7' },
+                { main: '#8b5cf6', light: 'rgba(139, 92, 246, 0.2)', border: '#8b5cf6' },
+                { main: '#f59e0b', light: 'rgba(245, 158, 11, 0.2)', border: '#f59e0b' }
+            ];
+
+            // 1. Bar Chart Drilldown
+            const barDatasets = indicators.map((ind: string, idx: number) => {
+                const color = colorPalette[idx % colorPalette.length];
+                const data = categories.map((_, catIdx) => {
+                    const mockObj = this.generateMockIndicatorValue(ind, period, catIdx, categories.length);
+                    return mockObj.raw;
+                });
+
+                return {
+                    data,
+                    label: ind,
+                    backgroundColor: color.main,
+                    borderRadius: 6,
+                    barPercentage: 0.65,
+                    categoryPercentage: 0.75
+                };
+            });
+
+            this.barChartData = {
+                labels: [...categories],
+                datasets: barDatasets
+            };
+
+            // 2. Line Chart Drilldown
+            const lineDatasets = indicators.map((ind: string, idx: number) => {
+                const color = colorPalette[idx % colorPalette.length];
+                const total = barDatasets[idx].data.reduce((a: number, b: number) => a + b, 0);
+                const avg = total / barDatasets[idx].data.length;
+                const trendData = this.generateTrendSeries(ind, period, subTimeLabels.length, avg);
+
+                return {
+                    data: trendData,
+                    label: ind,
+                    borderColor: color.border,
+                    backgroundColor: color.light,
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: color.border,
+                    pointBorderWidth: 2
+                };
+            });
+
+            this.lineChartData = {
+                labels: [...subTimeLabels],
+                datasets: lineDatasets
+            };
+
+            // 3. Table Drilldown
+            const drillHeader = `Période / Détail (${label})`;
+            this.analysisTableHeaders = [drillHeader, ...indicators];
+            this.analysisTableData = subCategories.map((catObj, catIdx) => {
+                const row: any = { 
+                    AxisCategory: catObj.name,
+                    categoryIcon: catObj.icon,
+                    indicatorDetails: {}
+                };
+
+                indicators.forEach((ind: string) => {
+                    const valObj = this.generateMockIndicatorValue(ind, period, catIdx, categories.length);
+                    row[ind] = valObj.raw;
+                    row[ind + '_formatted'] = valObj.formatted;
+                    row[ind + '_unit'] = valObj.unit;
+                    row[ind + '_badge'] = valObj.badgeClass;
+                    row.indicatorDetails[ind] = valObj;
+                });
+
+                return row;
+            });
+
+            this.cdr.detectChanges();
+            setTimeout(() => {
+                this.chartDirectives?.forEach(c => c.update());
+                this.cdr.detectChanges();
+            }, 10);
+
+            this.triggerToast(`Niveau temporel : ${label}`);
+        });
+    }
+
+    drillUp() {
+        if (this.drilldownStack.length === 0) return;
+        this.ngZone.run(() => {
+            const previousState = this.drilldownStack.pop();
+            if (previousState) {
+                this.barChartData = { ...previousState.barData };
+                this.lineChartData = { ...previousState.lineData };
+                this.analysisTableHeaders = [...previousState.tableHeaders];
+                this.analysisTableData = [...previousState.tableData];
+                this.currentDrillLevel--;
+                this.currentDrillLabel = this.drilldownStack.length > 0 
+                    ? this.drilldownStack[this.drilldownStack.length - 1].parentLabel 
+                    : '';
+                this.cdr.detectChanges();
+                setTimeout(() => {
+                    this.chartDirectives?.forEach(c => c.update());
+                    this.cdr.detectChanges();
+                }, 10);
+                this.triggerToast(`Retour : ${previousState.title}`);
+            }
+        });
+    }
+
+    resetDrilldown() {
+        if (this.drilldownStack.length === 0) return;
+        this.ngZone.run(() => {
+            const rootState = this.drilldownStack[0];
+            this.barChartData = { ...rootState.barData };
+            this.lineChartData = { ...rootState.lineData };
+            this.analysisTableHeaders = [...rootState.tableHeaders];
+            this.analysisTableData = [...rootState.tableData];
+            this.drilldownStack = [];
+            this.currentDrillLevel = 0;
+            this.currentDrillLabel = '';
+            this.cdr.detectChanges();
+            setTimeout(() => {
+                this.chartDirectives?.forEach(c => c.update());
+                this.cdr.detectChanges();
+            }, 10);
+            this.triggerToast('Retour à l\'analyse initiale');
+        });
     }
 }
