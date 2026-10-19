@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../header/header.component';
 import { ChatWidgetComponent } from '../../shared/components/chat-widget/chat-widget.component';
+import { AlertService } from '../../core/services/alert.service';
 
 @Component({
     selector: 'app-main-layout',
@@ -11,4 +12,5 @@ import { ChatWidgetComponent } from '../../shared/components/chat-widget/chat-wi
     styleUrl: './main-layout.component.scss'
 })
 export class MainLayoutComponent {
+    public alertService = inject(AlertService);
 }

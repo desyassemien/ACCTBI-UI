@@ -1,10 +1,16 @@
 import { inject } from '@angular/core';
 import { Router, type CanActivateFn } from '@angular/router';
 import Keycloak from 'keycloak-js';
+import { environment } from '../../../environments/environment';
 
 export const roleRedirectGuard: CanActivateFn = async () => {
-  const keycloak = inject(Keycloak);
   const router = inject(Router);
+
+  if (!environment.useKeycloak) {
+    return router.parseUrl('/dashboard');
+  }
+
+  const keycloak = inject(Keycloak);
 
   console.log('[RoleRedirectGuard] Initialisation du guard...');
 

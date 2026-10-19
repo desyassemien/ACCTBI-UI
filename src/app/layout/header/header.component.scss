@@ -1,12 +1,14 @@
-// ============================================
-// TOPBAR — Falcon-inspired horizontal navbar
-// ============================================
+:host {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+    width: 100%;
+}
 
 .topbar {
     background: var(--sidebar-bg); // Reuse the existing sidebar gradient
-    position: sticky;
-    top: 0;
-    z-index: 1030;
+    position: relative;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
     min-height: 60px;
     padding: 0;

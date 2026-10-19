@@ -1,28 +1,32 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { KeycloakService } from 'keycloak-angular';
+import Keycloak from 'keycloak-js';
+import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-header',
     standalone: true,
-    imports: [RouterLink, RouterLinkActive],
+    imports: [RouterLink, RouterLinkActive, CommonModule],
+    providers: [DatePipe],
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss'
 })
 export class HeaderComponent implements OnInit {
     private router = inject(Router);
-    private keycloak = inject(KeycloakService);
+    private keycloak = inject(Keycloak);
+    private authService = inject(AuthService);
     public notificationService = inject(NotificationService);
 
     userProfile: any | null = null;
     notificationCount = 3;
     isDarkMode = false;
+    user = this.authService.currentUser;
 
     async ngOnInit() {
         try {
-            if (this.keycloak.isLoggedIn()) {
+            if (this.keycloak.authenticated) {
                 this.userProfile = await this.keycloak.loadUserProfile();
             }
         } catch (err) {
@@ -35,6 +39,7 @@ export class HeaderComponent implements OnInit {
         const url = this.router.url;
         return this.serviceItems.some(item => url.startsWith(item.path));
     }
+
 
     // Navigation items
     readonly serviceItems = [
@@ -79,7 +84,9 @@ export class HeaderComponent implements OnInit {
 
     async logout() {
         console.log('[Header] Tentative de déconnexion via l\'instance native Keycloak...');
-        await this.keycloak.logout(window.location.origin);
+        await this.keycloak.logout({
+            redirectUri: window.location.origin
+        });
     }
 
     markAsRead(id: string, event: Event) {

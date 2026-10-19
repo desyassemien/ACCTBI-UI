@@ -8,6 +8,29 @@
         <router-outlet></router-outlet>
     </main>
 
-    <!-- Floating Chat Widget -->
+    <!-- Floating Chat Widget (visible on all pages) -->
     <app-chat-widget></app-chat-widget>
+
+    <!-- Global Access Denied Modal -->
+    @if (alertService.alert().show) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 9999;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-body p-5 text-center">
+                    <div class="mb-4">
+                        <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex p-4 shadow-sm">
+                            <i class="fas fa-shield-alt fs-1"></i>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">{{ alertService.alert().title }}</h4>
+                    <p class="text-secondary mb-4">{{ alertService.alert().message }}</p>
+                    <button type="button" class="btn btn-dark w-100 py-3 fw-bold rounded-pill shadow-sm" (click)="alertService.hideAlert()">
+                        COMPRIS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+
 </div>

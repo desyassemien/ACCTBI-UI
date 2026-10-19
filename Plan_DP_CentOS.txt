@@ -1,0 +1,240 @@
+# Guide Industriel de Déploiement Production — ACCTBI
+**Technologies :** Angular 20, Keycloak 24, PostgreSQL 16, Docker, Nginx (sans conflits)
+**Realm Keycloak :** `projetBi`
+**Version OS :** CentOS 7 / RHEL 7 (et compatible CentOS 8+)
+
+---
+
+## 1. Pourquoi utiliser Docker et Docker Compose ?
+
+Le passage d'un environnement de développement local (`localhost`) à un serveur de production introduit de nombreux risques d'incompatibilité. Docker s'impose comme la solution standard pour les raisons suivantes :
+* **Isolation complète :** PostgreSQL et Keycloak s'exécutent dans des conteneurs étanches sans interférer avec le système de votre serveur ni vos autres applications de production.
+* **Parité Dev/Prod :** Le conteneur s'exécute de la même manière sur votre machine que sur le serveur, éliminant le piège du "ça marche sur ma machine".
+* **Gestion des dépendances :** Aucune obligation d'installer Java (requis pour Keycloak) ou PostgreSQL en natif sur le serveur. Tout est packagé dans les images officielles.
+* **Persistance sécurisée :** Les volumes Docker garantissent que vos données restent stockées sur le disque dur du serveur, même si un conteneur est redémarré ou mis à jour.
+
+---
+
+## 2. Étape 1 : Préparation du Serveur Hôte
+
+Connectez-vous à votre serveur Linux (CentOS) via votre terminal en SSH, mettez à jour le système et installez les outils requis.
+
+    # 1. Connexion à votre serveur
+    ssh utilisateur@ip_de_votre_serveur
+
+    # 2. Mise à jour des paquets du système
+    sudo dnf update -y
+
+    # 3. Ajout du dépôt officiel Docker (requis sur CentOS, non inclus par défaut)
+    sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+    # 4. Installation de Docker, Nginx et Certbot (SSL)
+    # Note importante : Sur CentOS 7, le plugin Nginx de Certbot utilise Python 2 et s'appelle "python2-certbot-nginx".
+    # Sur CentOS 8+, Rocky Linux ou AlmaLinux, il s'appelle "python3-certbot-nginx".
+    sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin nginx certbot python2-certbot-nginx
+
+    # 5. Activation et démarrage du service Docker
+    sudo systemctl enable docker
+    sudo systemctl start docker
+
+    # 6. Ouverture des ports dans le pare-feu CentOS (firewalld)
+    # Règle d'or : Ouvrez le port 80/443 pour Nginx, 8080 pour Keycloak et 8081 pour Angular (évite tout conflit !)
+    sudo firewall-cmd --permanent --add-service=http
+    sudo firewall-cmd --permanent --add-service=https
+    sudo firewall-cmd --permanent --add-port=8080/tcp
+    sudo firewall-cmd --permanent --add-port=8081/tcp
+    sudo firewall-cmd --reload
+
+---
+
+## 3. Étape 2 : Exportation du Realm local projetBi
+
+Avant de configurer le serveur, vous devez récupérer la configuration de votre Realm local.
+
+    1. Connectez-vous à votre console d'administration Keycloak locale (http://localhost:8080).
+    2. Sélectionnez le Realm projetBi dans le menu déroulant en haut à gauche.
+    3. Dans le menu latéral gauche, cliquez sur Realm settings.
+    4. En haut à droite, cliquez sur le bouton Action puis choisissez Partial Export.
+    5. Cochez les cases Export groups and roles et Export clients, puis validez.
+    6. Sauvegardez le fichier téléchargé sous le nom projetBi-realm.json.
+       Vous le réimporterez une fois Keycloak en ligne.
+
+---
+
+## 4. Étape 3 : Déploiement de PostgreSQL et Keycloak via Docker Compose
+
+### 3.1. Création de l'arborescence projet
+Exécutez ces commandes sur le serveur pour préparer l'espace de travail :
+
+    # Création du dossier racine du projet
+    sudo mkdir -p /opt/acctbi
+
+    # Attribution des droits à votre utilisateur
+    sudo chown -R $USER:$USER /opt/acctbi
+
+    # Navigation dans le dossier (IMPORTANT : Toutes les commandes Docker doivent être lancées ICI)
+    cd /opt/acctbi
+
+    # Création et ouverture du fichier de configuration
+    nano docker-compose.yml
+
+### 3.2. Contenu du fichier docker-compose.yml (Version Validée sans espaces de marge)
+> [!WARNING]
+> Attention à la syntaxe YAML : aucune marge ou espace ne doit exister au tout début des lignes principales (version:, services:, etc.). Mettez également les mots de passe numériques entre guillemets.
+> Les identifiants Postgres de la base de données et de connexion Keycloak (KC_DB_USERNAME) doivent correspondre exactement.
+
+```yaml
+version: '3.8'
+
+services:
+  postgres_acctbi:
+    image: postgres:16-alpine
+    container_name: postgres_acctbi
+    restart: always
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "2056"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - acctbi_network
+
+  keycloak_acctbi:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: keycloak_acctbi
+    restart: always
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres_acctbi:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: "2056"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: 162.215.172.50 # Mettre votre adresse IP publique ou domaine
+      KC_PROXY_HEADERS: xforwarded
+      KC_HTTP_ENABLED: "true"
+    depends_on:
+      - postgres_acctbi
+    ports:
+      - "8080:8080"
+    networks:
+      - acctbi_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  acctbi_network:
+    driver: bridge
+```
+
+Pour sauvegarder et quitter Nano : `Ctrl+O` puis `Entrée`, puis `Ctrl+X`.
+
+### 3.3. Lancement et Vérification
+Depuis le dossier `/opt/acctbi` :
+
+    # Lancement des conteneurs en mode détaché
+    docker compose up -d
+
+    # Si vous modifiez le fichier yml plus tard, forcez la recréation avec :
+    docker compose up -d --force-recreate
+
+    # Vérification du statut des conteneurs
+    docker compose ps
+
+    # Suivi des logs de démarrage de Keycloak
+    docker compose logs -f keycloak_acctbi
+
+Faites `Ctrl+C` pour quitter le suivi des logs une fois la mention de démarrage affichée.
+
+---
+
+## 5. Étape 4 : Déploiement sans conflits de l'application Angular 20 (ACCTBI)
+
+Si votre serveur VPS héberge déjà d'autres applications en production sur Nginx (port 80), il est indispensable de **ne pas créer de conflit**. Nous allons configurer l'application Angular sur un port dédié et libre : le **port 8081**.
+
+### 4.1. Modification des environnements (Sur votre machine locale)
+Modifiez le fichier `src/environments/environment.prod.ts` (ou `environment.ts` de travail) :
+
+```typescript
+export const environment = {
+  production: true,
+  keycloak: {
+    url: 'http://162.215.172.50:8080', // L'adresse IP en ligne de votre Keycloak
+    realm: 'projetBi',
+    clientId: 'acctBI-front' // Votre ID de client frontend configuré sur Keycloak
+  }
+};
+```
+
+### 4.2. Compilation de production (Sur votre machine locale)
+Dans le dossier racine de votre projet local :
+
+    npx ng build --configuration production
+
+Cette commande produit votre build optimisé dans le répertoire `dist/sygacut-bi/browser` (ou `dist/acctbi`).
+
+### 4.3. Transfert des fichiers compilés vers le serveur VPS
+Depuis votre terminal local, transférez le dossier de build vers le dossier du VPS :
+
+    # Assurez-vous d'avoir créé le dossier cible sur le VPS d'abord (/opt/acctbi/angular-dist)
+    scp -r ./dist/sygacut-bi/browser/* root@162.215.172.50:/opt/acctbi/angular-dist
+
+### 4.4. Configuration de Nginx pour servir Angular sur le port 8081 (Zéro conflit)
+Sur votre VPS, créez le fichier de configuration de l'application :
+
+    sudo nano /etc/nginx/conf.d/acctbi.conf
+
+Collez la configuration suivante (configurée sur le port `8081`) :
+
+```nginx
+server {
+    listen 8081; # Écoute sur le port 8081 pour éviter tout conflit avec vos applications existantes !
+    server_name 162.215.172.50;
+
+    root /opt/acctbi/angular-dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|ttf|svg)$ {
+        expires 6m;
+        access_log off;
+        add_header Cache-Control "public";
+    }
+}
+```
+
+Sauvegardez et quittez (`Ctrl+O`, `Entrée`, `Ctrl+X`).
+
+### 4.5. Test et Démarrage
+Sur votre VPS, validez et appliquez la configuration sans couper vos autres sites :
+
+    # 1. Test de syntaxe Nginx
+    sudo nginx -t
+
+    # 2. Recharger Nginx pour appliquer la modification
+    sudo systemctl reload nginx
+
+Désormais, votre application Angular est accessible sans aucun conflit sur :
+👉 **`http://162.215.172.50:8081`**
+
+---
+
+## 6. Commandes d'Administration et Maintenance au Quotidien
+
+Exécutez ces commandes depuis le dossier `/opt/acctbi` de votre serveur.
+
+Objectif                    | Commande
+----------------------------|----------------------------------------------------------
+Démarrer l'infrastructure   | docker compose up -d
+Arrêter l'infrastructure    | docker compose down
+Consulter les logs Keycloak | docker compose logs -f keycloak_acctbi
+Sauvegarder la base données | docker exec -t postgres_acctbi pg_dump -U postgres keycloak > backup_$(date +%F).sql
+Recharger le serveur Web    | sudo systemctl reload nginx
+Consulter le statut Docker  | docker compose ps
