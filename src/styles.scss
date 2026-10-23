@@ -58,25 +58,865 @@ body {
 }
 
 [data-bs-theme="dark"] {
-  --bg-body: #121212;
-  --surface: #1e1e1e;
-  --text-primary: #e0e0e0;
-  --text-secondary: #a0a0a0;
-  --border: #333333;
+  --bg-body: #0b1120; // Deep slate/navy body
+  --surface: #162032; // Primary card surface
+  --surface-card: #162032;
+  --surface-elevated: #1e293b; // Slightly lighter for inputs & hover
+  --surface-subtle: #0f172a; // Deep background for inner pills & headers
+  --surface-hover: #223046;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #283548;
+  --border-light: rgba(255, 255, 255, 0.08);
 
-  --sidebar-bg: #1A2639; // Un bleu nuit plus gris/doux pour le mode sombre
-  --sidebar-text: #e0e0e0;
-  --sidebar-hover: rgba(255, 255, 255, 0.05);
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #e2e8f0;
+  --sidebar-hover: rgba(255, 255, 255, 0.06);
 
+  // --- 1. ALL CARDS & SURFACE CONTAINERS ---
   .bg-white,
-  .card {
+  .card,
+  .page-header-svc,
+  .service-header-card,
+  .header-container,
+  .header-card,
+  .filter-strip,
+  .filter-bar-unified,
+  .filter-container,
+  .filter-box,
+  .filter-card,
+  .filter-wrapper,
+  .kpi-card,
+  .metric-card-interactive,
+  .kpi-card-refined,
+  .stat-card,
+  .dashboard-kpi-card,
+  .chart-panel,
+  .panel-refined,
+  .panel-card,
+  .chart-box-card,
+  .table-panel,
+  .glass-panel,
+  .custom-card,
+  .data-panel,
+  .dashboard-card,
+  .alert-container-card,
+  .alert-portrait-card,
+  .fcw-mini-feed,
+  .pipeline-flow-card,
+  .olap-filter-panel,
+  .analysis-builder-card,
+  .table-container,
+  .card-table,
+  .table-card,
+  .table-section,
+  .reports-catalog-section,
+  .summary-banner,
+  .flow-col,
+  .modal-content,
+  .offcanvas {
     background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
   }
 
+  // --- 1b. STATISTIQUES REPORTS CATALOG (16 RAPPORTS) ---
+  .reports-catalog-section {
+    .report-card {
+      background-color: var(--surface-subtle) !important;
+      border: 1px solid var(--border) !important;
+
+      &:hover {
+        background-color: var(--surface-hover) !important;
+        border-color: #F77F00 !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+      }
+
+      .report-title {
+        color: var(--text-primary) !important;
+      }
+
+      .report-desc {
+        color: var(--text-secondary) !important;
+      }
+
+      .arrow-icon {
+        color: var(--text-muted) !important;
+      }
+    }
+
+    .records-pill {
+      background: var(--surface-subtle) !important;
+      color: var(--text-secondary) !important;
+      border: 1px solid var(--border) !important;
+    }
+  }
+
+  // --- 1c. FLOW PIPELINES & TELEMETRY ---
+  .flow-node-box,
+  .flow-node-box.source-node,
+  .flow-node-box.reg-node,
+  .stage-box,
+  .step-node {
+    background-color: var(--surface-subtle) !important;
+    border: 1px solid var(--border) !important;
+
+    .flow-node-header span {
+      color: #e2e8f0 !important;
+    }
+
+    .flow-node-amount {
+      color: #ffffff !important;
+    }
+
+    .flow-node-pct {
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  .fast-alert-callout {
+    background-color: var(--surface-subtle) !important;
+    border: 1px solid var(--border) !important;
+
+    .alert-callout-title {
+      color: var(--text-primary) !important;
+    }
+
+    .alert-callout-desc {
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  .donut-center-label,
+  .donut-center-info {
+    .donut-center-val,
+    .donut-val {
+      color: #ffffff !important;
+    }
+    .donut-center-sub,
+    .donut-lbl {
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  .donut-legend-list .legend-row {
+    .legend-name {
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  .donut-metrics-grid .metric-tag {
+    background: var(--surface-subtle) !important;
+    border: 1px solid var(--border) !important;
+
+    .tag-title {
+      color: var(--text-secondary) !important;
+    }
+    .tag-val {
+      color: var(--text-primary) !important;
+    }
+  }
+
+  .telemetry-bar,
+  .cashflow-live-bar {
+    background-color: var(--surface-subtle) !important;
+    border: 1px solid var(--border) !important;
+
+    .telemetry-label,
+    .telemetry-sub,
+    .metric-lbl,
+    .live-subtitle-text {
+      color: var(--text-secondary) !important;
+    }
+
+    .telemetry-val,
+    .metric-val,
+    .live-title-text {
+      color: var(--text-primary) !important;
+    }
+  }
+
+  .panel-tabs,
+  .chart-actions {
+    background: var(--surface-subtle) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+
+    .panel-tab,
+    .btn {
+      background: transparent !important;
+      border: none !important;
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        color: var(--text-primary) !important;
+        background: var(--surface-elevated) !important;
+      }
+
+      &.active {
+        background: #F77F00 !important;
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  // --- 2. DOMAIN TABS / SWITCHER BAR ---
+  .domain-switcher-bar,
+  .domain-tabs-row {
+    .switcher-tab,
+    .domain-tab {
+      background: var(--surface) !important;
+      border-color: var(--border) !important;
+      color: var(--text-secondary) !important;
+
+      .tab-badge {
+        background: var(--surface-subtle) !important;
+        color: var(--text-secondary) !important;
+      }
+
+      &:hover {
+        background: var(--surface-elevated) !important;
+        border-color: #475569 !important;
+        color: var(--text-primary) !important;
+      }
+
+      &.active {
+        background: #F77F00 !important;
+        border-color: #F77F00 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(247, 127, 0, 0.3) !important;
+
+        .tab-badge {
+          background: rgba(255, 255, 255, 0.25) !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+  }
+
+  // --- 3. FILTER STRIP, INPUTS & CHIPS ---
+  .filter-strip,
+  .filter-bar-unified {
+    .filter-controls-row {
+      .control-label {
+        color: var(--text-secondary) !important;
+      }
+
+      .select-pill,
+      .custom-filter-select,
+      .date-picker-trigger {
+        background: var(--surface-subtle) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+
+        &:hover {
+          background: var(--surface-elevated) !important;
+          border-color: #475569 !important;
+        }
+      }
+    }
+
+    .filter-chips,
+    .filter-pills-row {
+      .filter-chip,
+      .filter-pill {
+        background: var(--surface-subtle) !important;
+        border-color: var(--border) !important;
+        color: #e2e8f0 !important;
+
+        .chip-close,
+        .pill-close {
+          color: var(--text-secondary) !important;
+          &:hover {
+            color: #ef4444 !important;
+          }
+        }
+
+        &:hover {
+          background: var(--surface-elevated) !important;
+          border-color: #475569 !important;
+        }
+
+        &.bg-white,
+        &.btn-add-chip {
+          background: rgba(247, 127, 0, 0.15) !important;
+          border-color: #F77F00 !important;
+          color: #F77F00 !important;
+
+          &:hover {
+            background: #F77F00 !important;
+            color: #ffffff !important;
+          }
+        }
+      }
+    }
+
+    .view-mode-bar {
+      border-top-color: var(--border) !important;
+
+      .mode-tab-btn {
+        background: var(--surface-subtle) !important;
+        border-color: var(--border) !important;
+        color: var(--text-secondary) !important;
+
+        &:hover {
+          background: var(--surface-elevated) !important;
+          color: var(--text-primary) !important;
+        }
+
+        &.active {
+          background: #F77F00 !important;
+          border-color: #F77F00 !important;
+          color: #ffffff !important;
+          box-shadow: 0 4px 14px rgba(247, 127, 0, 0.25) !important;
+        }
+      }
+    }
+  }
+
+  // --- 4. HEADER ACTION BUTTONS ---
+  .btn-export,
+  .btn-outline-light-custom,
+  .btn-refresh {
+    background: var(--surface-elevated) !important;
+    border-color: var(--border) !important;
+    color: #f1f5f9 !important;
+
+    &:hover {
+      background: #2b394f !important;
+      border-color: #475569 !important;
+      color: #ffffff !important;
+    }
+  }
+
+  // --- 5. HEADINGS, LABELS & TYPOGRAPHY ---
+  .service-title,
+  .panel-title,
+  .card-title,
+  .chart-title,
+  .section-title,
+  .table-title,
+  .report-title,
   .text-dark {
     color: var(--text-primary) !important;
   }
 
+  .service-description,
+  .panel-subtitle,
+  .chart-subtitle,
+  .section-subtitle,
+  .table-subtitle,
+  .report-desc,
+  .text-muted,
+  .text-secondary {
+    color: var(--text-secondary) !important;
+  }
+
+  .brand-breadcrumb {
+    color: var(--text-muted) !important;
+  }
+
+  // KPI card values & subtitles
+  .kpi-card,
+  .metric-card-interactive,
+  .kpi-card-refined,
+  .stat-card {
+    .kpi-title,
+    .metric-title {
+      color: var(--text-secondary) !important;
+    }
+
+    .kpi-val,
+    .kpi-value,
+    .kpi-big-value,
+    .kpi-number,
+    .kpi-main-number,
+    .metric-val,
+    .value-main {
+      color: #ffffff !important;
+    }
+
+    .kpi-unit,
+    .metric-unit,
+    .value-sub,
+    .kpi-bench,
+    .metric-footer {
+      color: var(--text-secondary) !important;
+    }
+
+    .progress,
+    .progress-bar-container,
+    .kpi-bar-track,
+    .mini-bar-track {
+      background-color: var(--surface-elevated) !important;
+    }
+
+    &:hover {
+      border-color: #F77F00 !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+    }
+  }
+
+  // --- 6. TABLES & DATA GRIDS ---
+  .table,
+  .table-refined,
+  .custom-table,
+  .modern-table {
+    background-color: transparent !important;
+    color: var(--text-primary) !important;
+
+    thead,
+    thead th,
+    th {
+      background-color: var(--surface-subtle) !important;
+      color: var(--text-secondary) !important;
+      border-bottom-color: var(--border) !important;
+      border-top-color: transparent !important;
+    }
+
+    tbody tr {
+      background-color: var(--surface) !important;
+      border-bottom-color: var(--border) !important;
+
+      &:hover {
+        background-color: var(--surface-hover) !important;
+      }
+    }
+
+    tbody td {
+      color: #e2e8f0 !important;
+      border-color: var(--border) !important;
+      background-color: transparent !important;
+    }
+
+    .ref-code,
+    .ref-code-cell {
+      background: var(--surface-subtle) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text-primary) !important;
+    }
+
+    .aggregate-title,
+    strong,
+    b {
+      color: var(--text-primary) !important;
+    }
+
+    .cell-sub,
+    .small-muted {
+      color: var(--text-secondary) !important;
+    }
+
+    .amount-cell {
+      color: #F77F00 !important;
+      font-weight: 700 !important;
+    }
+  }
+
+  .table-toolbar,
+  .table-filter-pills-bar {
+    background: transparent !important;
+    border-bottom-color: var(--border) !important;
+
+    .search-input-box,
+    .search-input-wrap {
+      background: var(--surface-subtle) !important;
+      border: 1px solid var(--border) !important;
+
+      input {
+        background: transparent !important;
+        color: var(--text-primary) !important;
+      }
+
+      .search-icon,
+      i {
+        color: var(--text-muted) !important;
+      }
+    }
+
+    .pill-filter,
+    .filter-caption {
+      color: var(--text-secondary) !important;
+    }
+
+    .pill-filter {
+      background: var(--surface-subtle) !important;
+      border-color: var(--border) !important;
+
+      &:hover {
+        background: var(--surface-elevated) !important;
+        color: var(--text-primary) !important;
+      }
+
+      &.active {
+        background: #F77F00 !important;
+        border-color: #F77F00 !important;
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  .table-action-btn {
+    background: var(--surface-subtle) !important;
+    border-color: var(--border) !important;
+    color: var(--text-secondary) !important;
+
+    &:hover {
+      background: #F77F00 !important;
+      border-color: #F77F00 !important;
+      color: #ffffff !important;
+    }
+  }
+
+  .table-footer,
+  .pagination-bar {
+    background-color: var(--surface-subtle) !important;
+    border-top-color: var(--border) !important;
+    color: var(--text-secondary) !important;
+
+    .btn-page {
+      background: var(--surface) !important;
+      border-color: var(--border) !important;
+      color: var(--text-primary) !important;
+    }
+  }
+
+  // --- 7. FORM INPUTS & DROPDOWNS ---
+  input.form-control,
+  select.form-select,
+  textarea.form-control,
+  .form-select-custom,
+  .custom-select {
+    background-color: var(--surface-subtle) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+
+    &:focus {
+      border-color: #F77F00 !important;
+      box-shadow: 0 0 0 2px rgba(247, 127, 0, 0.25) !important;
+    }
+
+    option {
+      background-color: var(--surface) !important;
+      color: var(--text-primary) !important;
+    }
+  }
+
+  .dropdown-menu {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6) !important;
+
+    .dropdown-header {
+      color: var(--text-secondary) !important;
+    }
+
+    .dropdown-item {
+      color: #e2e8f0 !important;
+
+      &:hover {
+        background-color: var(--surface-hover) !important;
+        color: #ffffff !important;
+      }
+    }
+
+    .dropdown-divider {
+      border-color: var(--border) !important;
+    }
+  }
+
+  // --- 8. ADVANCED ANALYSES / OLAP MULTIDIMENSIONAL ---
+  .olap-filter-panel,
+  .pipeline-flow-card,
+  .analysis-builder-card,
+  .interactive-flow-wrapper {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+
+    .flow-step,
+    .flow-col,
+    .stage-card,
+    .drop-zone {
+      background: var(--surface-subtle) !important;
+      border-color: var(--border) !important;
+      color: #e2e8f0 !important;
+    }
+
+    .drag-chip {
+      background: var(--surface-elevated) !important;
+      border-color: var(--border) !important;
+      color: var(--text-primary) !important;
+    }
+  }
+
+  // --- 9. DASHBOARD SPECIFIC WIDGETS ---
+  .dashboard-sticky-bar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .fcw-mini-feed {
+    background: var(--surface) !important;
+
+    .fcw-tx-row {
+      border-bottom-color: var(--border) !important;
+      color: #f8fafc !important;
+
+      &:hover {
+        background: var(--surface-hover) !important;
+      }
+
+      .fcw-tx-time {
+        color: #e2e8f0 !important;
+        font-weight: 700 !important;
+      }
+
+      .fcw-tx-desc {
+        color: #f8fafc !important;
+        font-weight: 600 !important;
+      }
+
+      .fcw-tx-solde {
+        color: #cbd5e1 !important;
+        font-weight: 600 !important;
+      }
+
+      .fcw-tx-svc {
+        font-weight: 800 !important;
+      }
+    }
+  }
+
+  .alert-portrait-card {
+    // Toutes les écritures à l'intérieur des cards en BLANC et bien visibles
+    .alert-service-title {
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      font-size: 0.95rem !important;
+      letter-spacing: -0.01em;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .alert-card-text {
+      color: #ffffff !important;
+      font-weight: 600 !important;
+      font-size: 0.82rem !important;
+      line-height: 1.4 !important;
+      opacity: 0.96 !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .alert-action-label {
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      opacity: 0.95 !important;
+    }
+
+    .alert-action-arrow i {
+      color: #ffffff !important;
+    }
+
+    .alert-card-footer {
+      border-top-color: rgba(255, 255, 255, 0.18) !important;
+    }
+
+    // Icônes lumineuses et watermark ultra-visible
+    .alert-type-badge {
+      color: #ffffff !important;
+      font-size: 0.9rem !important;
+      font-weight: 900 !important;
+    }
+
+    .alert-watermark-icon {
+      opacity: 0.32 !important;
+    }
+
+    &:hover .alert-watermark-icon {
+      opacity: 0.52 !important;
+    }
+
+    &.alert-card-danger {
+      background: linear-gradient(160deg, #23334d 0%, rgba(239, 68, 68, 0.18) 100%) !important;
+      border: 1px solid rgba(239, 68, 68, 0.4) !important;
+      border-top: 4px solid #ef4444 !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+
+      .alert-watermark-icon {
+        color: #ef4444 !important;
+        filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.45)) !important;
+      }
+
+      .alert-type-badge {
+        background-color: #ef4444 !important;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.6) !important;
+      }
+
+      .alert-type-pill {
+        background-color: rgba(239, 68, 68, 0.24) !important;
+        border: 1px solid #ef4444 !important;
+        color: #fca5a5 !important;
+      }
+    }
+
+    &.alert-card-warning {
+      background: linear-gradient(160deg, #23334d 0%, rgba(245, 158, 11, 0.18) 100%) !important;
+      border: 1px solid rgba(245, 158, 11, 0.4) !important;
+      border-top: 4px solid #f59e0b !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+
+      .alert-watermark-icon {
+        color: #f59e0b !important;
+        filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.45)) !important;
+      }
+
+      .alert-type-badge {
+        background-color: #f59e0b !important;
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.6) !important;
+      }
+
+      .alert-type-pill {
+        background-color: rgba(245, 158, 11, 0.24) !important;
+        border: 1px solid #f59e0b !important;
+        color: #fde68a !important;
+      }
+    }
+
+    &.alert-card-info {
+      background: linear-gradient(160deg, #23334d 0%, rgba(2, 132, 199, 0.18) 100%) !important;
+      border: 1px solid rgba(2, 132, 199, 0.4) !important;
+      border-top: 4px solid #0ea5e9 !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+
+      .alert-watermark-icon {
+        color: #38bdf8 !important;
+        filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.45)) !important;
+      }
+
+      .alert-type-badge {
+        background-color: #0284c7 !important;
+        box-shadow: 0 0 10px rgba(2, 132, 199, 0.6) !important;
+      }
+
+      .alert-type-pill {
+        background-color: rgba(2, 132, 199, 0.24) !important;
+        border: 1px solid #0ea5e9 !important;
+        color: #bae6fd !important;
+      }
+    }
+  }
+
+  // --- 10. CORRECTION DES CARTES BLANCHES ET TEXTES ILLISIBLES ---
+  .page-title,
+  .service-title,
+  h1.page-title,
+  h1.service-title,
+  .title-with-pill h1 {
+    color: #f8fafc !important;
+  }
+
+  .panel-card,
+  .panel-card .panel-header,
+  .filter-strip-card {
+    background-color: var(--surface) !important;
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .flow-canvas-container {
+    background: #111a2e !important;
+    border: 1px dashed rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .flow-node-box {
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+
+    &.source-node {
+      background: linear-gradient(to right, rgba(247, 127, 0, 0.22), #1e293b) !important;
+    }
+
+    .flow-node-header span {
+      color: #94a3b8 !important;
+    }
+
+    .flow-node-amount {
+      color: #f8fafc !important;
+    }
+
+    .flow-node-pct {
+      color: #cbd5e1 !important;
+    }
+  }
+
+  .flow-footer-stats {
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+
+    .flow-stat-label {
+      color: #94a3b8 !important;
+    }
+
+    .flow-stat-val {
+      color: #f8fafc !important;
+    }
+  }
+
+  .fast-alert-callout {
+    background: rgba(245, 158, 11, 0.14) !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+
+    .alert-callout-title,
+    .alert-callout-desc,
+    i {
+      color: #fef3c7 !important;
+    }
+  }
+
+  .subdomain-tabs {
+    background: transparent !important;
+
+    .tab-pill {
+      background: var(--surface-subtle) !important;
+      border: 1px solid var(--border) !important;
+      color: #cbd5e1 !important;
+
+      &.active {
+        background: #F77F00 !important;
+        border-color: #F77F00 !important;
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  .ministry-name,
+  .aggregate-title,
+  .ref-code-cell {
+    color: #f8fafc !important;
+  }
+
+  .ministry-subtext,
+  .cell-sub {
+    color: #94a3b8 !important;
+  }
+
+  .btn-outline-light-custom {
+    background: var(--surface-subtle) !important;
+    border-color: var(--border) !important;
+    color: #cbd5e1 !important;
+  }
+
+  .btn-export.excel,
+  .btn-export.pdf {
+    background: var(--surface-subtle) !important;
+    border-color: var(--border) !important;
+  }
+
+
+  // --- 10. BORDERS & SHADOW UTILITIES ---
   .border,
   .border-bottom,
   .border-top,
@@ -87,7 +927,13 @@ body {
 
   .shadow-sm,
   .shadow {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .bg-light,
+  .bg-body-secondary,
+  .bg-body-tertiary {
+    background-color: var(--surface-subtle) !important;
   }
 }
 
@@ -480,4 +1326,9 @@ table.modern-table,
       text-overflow: clip !important;
     }
   }
-}
+}
+
+.svc-page-container {
+  padding-top: 0.75rem !important;
+}
+

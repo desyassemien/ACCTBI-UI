@@ -1,33 +1,39 @@
 .dashboard-sticky-bar {
-    position: sticky;
-    top: 60px; // Placé immédiatement sous la barre topbar (60px)
-    z-index: 1020;
-    background: var(--bg-body, #E9ECEF);
-    margin-left: -3rem;
-    margin-right: -3rem;
-    padding-left: 3rem;
-    padding-right: 3rem;
-    margin-top: -1.5rem;
-    padding-top: 0.85rem;
-    padding-bottom: 0.85rem;
-    margin-bottom: 1.25rem;
-    border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.08));
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-    backdrop-filter: blur(10px);
-    transition: all 0.2s ease;
+    position: relative;
+    z-index: 10;
+    background: transparent !important;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-top: 0.85rem !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 1.25rem !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+
+    h4 {
+        margin-bottom: 0.15rem !important;
+        font-size: 1.25rem;
+    }
+
+    p {
+        font-size: 0.82rem;
+    }
 
     @media (max-width: 767.98px) {
-        margin-left: -2rem;
-        margin-right: -2rem;
-        padding-left: 2rem;
-        padding-right: 2rem;
-        margin-top: -1rem;
-        top: 56px;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+        margin-top: 0.25rem !important;
     }
 }
 
 .dashboard-container {
-    padding-top: 0;
+    padding-top: 0 !important;
 
     // Animation pour le texte défilant
     .scrolling-text {
@@ -682,54 +688,62 @@
     width: 100%;
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-top: 3.5px solid #64748b;
-    border-radius: 10px;
-    padding: 0.75rem 0.75rem;
-    height: 175px;
+    border-top: 4px solid #64748b;
+    border-radius: 12px;
+    padding: 0.85rem 0.85rem;
+    height: 180px;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     position: relative;
     overflow: hidden;
 
-    // Icône transparente en arrière-plan (Watermark)
+    // Icône transparente en arrière-plan (Watermark) beaucoup plus visible
     .alert-watermark-icon {
         position: absolute;
-        right: -8px;
-        bottom: -8px;
-        font-size: 3.8rem;
+        right: -6px;
+        bottom: -6px;
+        font-size: 4.2rem;
         line-height: 1;
         pointer-events: none;
-        opacity: 0.07;
+        opacity: 0.28;
         z-index: 0;
         transform: rotate(-10deg);
         transition: transform 0.35s ease, opacity 0.35s ease;
     }
 
     .alert-type-badge {
-        width: 24px;
-        height: 24px;
-        font-size: 0.8rem;
+        width: 26px;
+        height: 26px;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff !important;
+        font-weight: 900;
     }
 
     .alert-type-pill {
-        font-size: 0.66rem;
-        letter-spacing: 0.04em;
-        padding: 2px 6px;
+        font-size: 0.68rem;
+        letter-spacing: 0.05em;
+        padding: 2px 7px;
         border-radius: 4px;
+        font-weight: 800;
     }
 
     .alert-service-title {
-        font-size: 0.86rem;
+        font-size: 0.95rem;
         letter-spacing: -0.01em;
+        font-weight: 800 !important;
         color: #1e293b;
     }
 
     .alert-card-text {
-        font-size: 0.78rem;
+        font-size: 0.82rem;
         color: #334155;
-        line-height: 1.35;
-        font-weight: 500;
+        line-height: 1.4;
+        font-weight: 600;
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
@@ -737,117 +751,114 @@
     }
 
     .alert-action-label {
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: #94a3b8;
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: #64748b;
     }
 
     .alert-action-arrow {
-        font-size: 0.72rem;
-        color: #94a3b8;
+        font-size: 0.74rem;
+        color: #64748b;
         transition: transform 0.2s ease, color 0.2s ease;
     }
 
     &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
 
         .alert-watermark-icon {
-            opacity: 0.16;
-            transform: rotate(0deg) scale(1.08);
+            opacity: 0.45;
+            transform: rotate(0deg) scale(1.1);
         }
 
         .alert-action-arrow {
-            transform: translateX(2px);
-            color: #0f172a;
+            transform: translateX(3px);
+            color: #ffffff !important;
         }
 
         .alert-action-label {
-            color: #0f172a;
+            color: #ffffff !important;
         }
     }
 
     // Danger Type (Rouge)
     &.alert-card-danger {
-        border-top-color: #dc2626;
-        background: linear-gradient(180deg, #ffffff 65%, #fef2f2 100%);
+        border-top-color: #ef4444;
+        background: linear-gradient(180deg, #ffffff 60%, #fee2e2 100%);
 
         .alert-watermark-icon {
-            color: #dc2626;
+            color: #ef4444;
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.35));
         }
 
         .alert-type-badge {
-            background-color: #fee2e2;
+            background-color: #ef4444;
+            color: #ffffff !important;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         }
 
         .alert-type-pill {
             background-color: #fee2e2;
             color: #b91c1c;
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .alert-service-title {
-            color: #991b1b;
-        }
-
-        &:hover {
-            border-color: #fca5a5;
-            border-top-color: #dc2626;
+            color: #b91c1c;
         }
     }
 
     // Warning Type (Orange / Ambre)
     &.alert-card-warning {
-        border-top-color: #d97706;
-        background: linear-gradient(180deg, #ffffff 65%, #fffbeb 100%);
+        border-top-color: #f59e0b;
+        background: linear-gradient(180deg, #ffffff 60%, #fef3c7 100%);
 
         .alert-watermark-icon {
-            color: #d97706;
+            color: #f59e0b;
+            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.35));
         }
 
         .alert-type-badge {
-            background-color: #fef3c7;
+            background-color: #f59e0b;
+            color: #ffffff !important;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
         }
 
         .alert-type-pill {
             background-color: #fef3c7;
             color: #92400e;
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
 
         .alert-service-title {
             color: #92400e;
-        }
-
-        &:hover {
-            border-color: #fde68a;
-            border-top-color: #d97706;
         }
     }
 
     // Info Type (Bleu)
     &.alert-card-info {
         border-top-color: #0284c7;
-        background: linear-gradient(180deg, #ffffff 65%, #f0f9ff 100%);
+        background: linear-gradient(180deg, #ffffff 60%, #e0f2fe 100%);
 
         .alert-watermark-icon {
             color: #0284c7;
+            filter: drop-shadow(0 0 8px rgba(2, 132, 199, 0.35));
         }
 
         .alert-type-badge {
-            background-color: #e0f2fe;
+            background-color: #0284c7;
+            color: #ffffff !important;
+            box-shadow: 0 0 10px rgba(2, 132, 199, 0.5);
         }
 
         .alert-type-pill {
             background-color: #e0f2fe;
-            color: #075985;
+            color: #0369a1;
+            border: 1px solid rgba(2, 132, 199, 0.3);
         }
 
         .alert-service-title {
-            color: #075985;
-        }
-
-        &:hover {
-            border-color: #bae6fd;
-            border-top-color: #0284c7;
+            color: #0369a1;
         }
     }
 }
