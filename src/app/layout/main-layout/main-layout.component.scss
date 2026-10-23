@@ -1,8 +1,13 @@
 .app-wrapper {
     background-color: var(--bg-body);
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
 }
 
 .page-content {
-    overflow-x: clip;
+    overflow-x: hidden;
     max-width: 100vw;
+    width: 100%;
+    box-sizing: border-box;
 }

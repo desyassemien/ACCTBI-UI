@@ -1,482 +1,514 @@
-<div class="compte-gestion-container">
+<div class="svc-page-container">
 
-    <!-- Page Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 gap-md-0">
-        <div>
-            <h4 class="fw-bold text-primary-900 mb-1">Compte de Gestion</h4>
-            <p class="text-secondary mb-0">SYGACUT-BI / Services / Compte de Gestion</p>
+    <!-- 1. EN-TÊTE OFFICIEL DE SERVICE -->
+    <header class="page-header-svc">
+        <div class="breadcrumb-area">
+            <div class="brand-breadcrumb">
+                <span>SYGACUT-BI</span>
+                <i class="fas fa-chevron-right separator"></i>
+                <span>Services Analytiques</span>
+                <i class="fas fa-chevron-right separator"></i>
+                <span class="active-crumb">Compte de Gestion & Reddition</span>
+            </div>
+            <h1 class="service-title">
+                Service du Compte de Gestion & Reddition des Comptes
+            </h1>
+            <p class="service-description">
+                Reddition des comptes des comptables assignataires, concordance budgétaire, apurement administratif et transmission à la Cour des Comptes
+            </p>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
-                <i class="far fa-file-excel me-2 text-success"></i> Export Excel
+
+        <div class="header-actions-area">
+            <button class="btn btn-outline-light-custom" (click)="refreshData()" title="Rafraîchir les comptes de gestion">
+                <i class="fas fa-arrows-rotate"></i>
             </button>
-            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
-                <i class="far fa-file-pdf me-2 text-danger"></i> Export PDF
-            </button>
+            <div class="export-group">
+                <button class="btn btn-export excel" (click)="exportExcel()">
+                    <i class="far fa-file-excel"></i>
+                    <span>Export Excel</span>
+                </button>
+                <button class="btn btn-export pdf" (click)="exportPdf()">
+                    <i class="far fa-file-pdf"></i>
+                    <span>Export PDF</span>
+                </button>
+            </div>
         </div>
+    </header>
+
+    <!-- 2. SÉLECTEUR DE SOUS-DOMAINES (PILL TABS) -->
+    <div class="domain-switcher-bar">
+        <button class="switcher-tab" [class.active]="activeSubDomain === 'developpements'" (click)="switchSubDomain('developpements')" title="Développements Budgétaires & Titres">
+            <i class="fas fa-file-invoice-dollar me-1.5 flex-shrink-0"></i>
+            <span class="tab-label">Développements Budgétaires & Titres</span>
+            <span class="tab-badge">4</span>
+        </button>
+        <button class="switcher-tab" [class.active]="activeSubDomain === 'balance'" (click)="switchSubDomain('balance')" title="Balance Générale & Concordance">
+            <i class="fas fa-scale-balanced me-1.5 flex-shrink-0"></i>
+            <span class="tab-label">Balance Générale & Concordance</span>
+            <span class="tab-badge">3</span>
+        </button>
+        <button class="switcher-tab" [class.active]="activeSubDomain === 'reddition'" (click)="switchSubDomain('reddition')" title="Comptables Assignataires & Postes">
+            <i class="fas fa-user-tie me-1.5 flex-shrink-0"></i>
+            <span class="tab-label">Comptables Assignataires & Postes</span>
+            <span class="tab-badge">4</span>
+        </button>
+        <button class="switcher-tab" [class.active]="activeSubDomain === 'apurement'" (click)="switchSubDomain('apurement')" title="Restes à Recouvrer & Apurement">
+            <i class="fas fa-clock-rotate-left me-1.5 flex-shrink-0"></i>
+            <span class="tab-label">Restes à Recouvrer & Apurement</span>
+            <span class="tab-badge">3</span>
+        </button>
     </div>
 
-    <!-- Analyse Selector Area -->
-    <app-analyse-selector 
-        title="Sélecteur d'Analyse Actif"
-        [isDragDropMode]="isDragDropMode"
-        [(selectedPeriod)]="selectedPeriod"
-        [availableIndicators]="availableIndicators"
-        [selectedIndicators]="selectedIndicators"
-        [availableAxes]="availableAxes"
-        [selectedAxes]="selectedAxes"
-        (modeChanged)="isDragDropMode = $event === 'dragdrop'">
-    </app-analyse-selector>
+    <!-- 3. BARRE DE CONTRÔLE ET FILTRES HARMONISÉE -->
+    <section class="filter-strip">
+        <div class="filter-controls-row">
+            <!-- Période Selector -->
+            <div class="filter-control-item dropdown">
+                <label class="control-label">Période :</label>
+                <button class="select-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="far fa-calendar-days me-1.5 text-primary"></i>
+                    <span>{{ activePeriod }}</span>
+                    <i class="fas fa-chevron-down fs-9 text-muted ms-1.5"></i>
+                </button>
+                <ul class="dropdown-menu shadow-lg border-0 rounded-3 py-2 fs-8">
+                    @for (p of periodsList; track p) {
+                        <li>
+                            <a class="dropdown-item py-1.5 px-3 d-flex align-items-center justify-content-between"
+                               [class.active]="activePeriod === p" (click)="selectPeriod(p)">
+                                <span>{{ p }}</span>
+                                @if (activePeriod === p) {
+                                    <i class="fas fa-check text-primary fs-9 ms-2"></i>
+                                }
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
 
-    <!-- Contextual KPIs based on filters -->
-    <div class="row g-4 mb-4">
-        @for (kpi of kpis; track kpi.titre) {
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100 bg-white rounded-3 kpi-card">
-                <div class="card-body p-4">
-                    <h6 class="text-secondary fw-semibold mb-3">{{ kpi.titre }}</h6>
-                    <h3 class="fw-bold text-dark mb-1">{{ kpi.valeur }}</h3>
-                    <span class="fs-8 fw-medium" [class.text-success]="kpi.type === 'success'"
-                        [class.text-warning]="kpi.type === 'warning'" [class.text-secondary]="kpi.type === 'primary'">
-                        {{ kpi.info }}
+            <!-- Périmètre / Poste Comptable Selector -->
+            <div class="filter-control-item dropdown">
+                <label class="control-label">Poste Comptable :</label>
+                <button class="select-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-building-columns me-1.5 text-primary"></i>
+                    <span>{{ activePerimetre }}</span>
+                    <i class="fas fa-chevron-down fs-9 text-muted ms-1.5"></i>
+                </button>
+                <ul class="dropdown-menu shadow-lg border-0 rounded-3 py-2 fs-8">
+                    @for (perim of perimetresList; track perim) {
+                        <li>
+                            <a class="dropdown-item py-1.5 px-3 d-flex align-items-center justify-content-between"
+                               [class.active]="activePerimetre === perim" (click)="selectPerimetre(perim)">
+                                <span>{{ perim }}</span>
+                                @if (activePerimetre === perim) {
+                                    <i class="fas fa-check text-primary fs-9 ms-2"></i>
+                                }
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Filtres Dynamiques Amovibles (Chips) -->
+            <div class="active-chips-area">
+                @for (chip of filterChips; track chip) {
+                    <span class="filter-chip">
+                        <span>{{ chip }}</span>
+                        <i class="fas fa-xmark remove-chip" (click)="removeChip(chip); $event.stopPropagation()" title="Supprimer le filtre"></i>
                     </span>
-                </div>
-            </div>
-        </div>
-        }
-    </div>
+                }
 
-    <!-- Main Analysis Content -->
-
-    <!-- Charts Row 1 -->
-    <div class="row g-4 mb-4">
-
-        <!-- Chart 1: Exécution Budgétaire -->
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div
-                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Exécution Budgétaire</h6>
-                    <div class="d-flex gap-2">
-                        <!-- Chart Type Toggle -->
-                        <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check" name="chart1Type" id="cg1_bar" value="bar"
-                                autocomplete="off" [(ngModel)]="cgChart1Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg1_bar"
-                                title="Barre"><i class="fas fa-chart-bar fs-9"></i></label>
-
-                            <input type="radio" class="btn-check" name="chart1Type" id="cg1_line" value="line"
-                                autocomplete="off" [(ngModel)]="cgChart1Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg1_line"
-                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
-
-                            <input type="radio" class="btn-check" name="chart1Type" id="cg1_area" value="area"
-                                autocomplete="off" [(ngModel)]="cgChart1Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg1_area"
-                                title="Zone"><i class="fas fa-chart-area fs-9"></i></label>
-                        </div>
-
-                        <!-- Export Options -->
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false"
-                                style="padding-top: 2px; padding-bottom: 2px;">
-                                <i class="fas fa-download fs-9"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
-
-                    @if (cgChart1Type === 'bar') {
-                    <!-- CSS Mockup for Bar Chart -->
-                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
-                        style="width: 100%; height: 250px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px;">
-                        <div style="width: 12%; height: 65%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 12%; height: 78%; background: linear-gradient(to top, #00cc66, #009d4a); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 12%; height: 52%; background: linear-gradient(to top, #ff9900, #cc7a00); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 12%; height: 71%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 12%; height: 84%; background: linear-gradient(to top, #00cc66, #009d4a); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 12%; height: 62%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
-                    </div>
-                    }
-                    @else if (cgChart1Type === 'line') {
-                    <!-- CSS Mockup for Line Chart -->
-                    <svg class="animate__animated animate__fadeIn" viewBox="0 0 400 250" style="width: 100%; height: 250px; margin: 12px 0;">
-                        <polyline points="20,180 70,140 120,165 170,120 220,90 270,110 320,70 370,95" style="fill:none;stroke:#0066cc;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;" />
-                        <polyline points="20,180 70,140 120,165 170,120 220,90 270,110 320,70 370,95" style="fill:none;stroke:#00cc66;stroke-width:2;stroke-dasharray:5,5;stroke-linecap:round;" />
-                    </svg>
-                    }
-                    @else {
-                    <!-- CSS Mockup for Area Chart -->
-                    <svg class="animate__animated animate__fadeIn" viewBox="0 0 400 250" style="width: 100%; height: 250px; margin: 12px 0;">
-                        <defs>
-                            <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" style="stop-color:#0066cc;stop-opacity:0.3" />
-                                <stop offset="100%" style="stop-color:#0066cc;stop-opacity:0" />
-                            </linearGradient>
-                        </defs>
-                        <polygon points="20,180 70,140 120,165 170,120 220,90 270,110 320,70 370,95 370,250 20,250" style="fill:url(#grad1)" />
-                        <polyline points="20,180 70,140 120,165 170,120 220,90 270,110 320,70 370,95" style="fill:none;stroke:#0066cc;stroke-width:3;" />
-                    </svg>
-                    }
-
-                    <div class="text-center mt-3">
-                        <p class="text-secondary mb-1 fs-8">LFI vs LFR vs Réalisé</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chart 2: Mandats et Imputations -->
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div
-                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Mandats et Imputations</h6>
-                    <div class="d-flex gap-2">
-                        <!-- Chart Type Toggle -->
-                        <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check" name="chart2Type" id="cg2_pie" value="pie"
-                                autocomplete="off" [(ngModel)]="cgChart2Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg2_pie"
-                                title="Pie/Doughnut"><i class="fas fa-chart-pie fs-9"></i></label>
-
-                            <input type="radio" class="btn-check" name="chart2Type" id="cg2_bar" value="bar"
-                                autocomplete="off" [(ngModel)]="cgChart2Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg2_bar" title="Barre"><i
-                                    class="fas fa-chart-bar fs-9"></i></label>
-
-                            <input type="radio" class="btn-check" name="chart2Type" id="cg2_donut" value="donut"
-                                autocomplete="off" [(ngModel)]="cgChart2Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg2_donut"
-                                title="Donut"><i class="fas fa-ring fs-9"></i></label>
-                        </div>
-
-                        <!-- Export Options -->
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false"
-                                style="padding-top: 2px; padding-bottom: 2px;">
-                                <i class="fas fa-download fs-9"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
-
-                    @if (cgChart2Type === 'pie') {
-                    <!-- CSS Mockup for Pie Chart -->
-                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
-                        style="width: 160px; height: 160px;">
-                        <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#0066cc" stroke-width="20" stroke-dasharray="62.8 314" />
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#00cc66" stroke-width="20" stroke-dasharray="50.24 314" style="transform: rotate(-71deg); transform-origin: 50% 50%;" />
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#ff9900" stroke-width="20" stroke-dasharray="62.8 314" style="transform: rotate(-165deg); transform-origin: 50% 50%;" />
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#cc00cc" stroke-width="20" stroke-dasharray="50.24 314" style="transform: rotate(274deg); transform-origin: 50% 50%;" />
-                        </svg>
-                    </div>
-                    }
-                    @else if (cgChart2Type === 'bar') {
-                    <!-- CSS Mockup for Bar Chart -->
-                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
-                        style="width: 100%; height: 200px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px;">
-                        <div style="width: 18%; height: 75%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 18%; height: 60%; background: linear-gradient(to top, #00cc66, #009d4a); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 18%; height: 45%; background: linear-gradient(to top, #ff9900, #cc7a00); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 18%; height: 85%; background: linear-gradient(to top, #cc00cc, #990099); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 18%; height: 55%; background: linear-gradient(to top, #00cccc, #009999); border-radius: 6px 6px 0 0;"></div>
-                    </div>
-                    }
-                    @else {
-                    <!-- CSS Mockup for Donut Chart -->
-                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
-                        style="width: 160px; height: 160px;">
-                        <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#0066cc" stroke-width="15" stroke-dasharray="62.8 314" />
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#00cc66" stroke-width="15" stroke-dasharray="50.24 314" style="transform: rotate(-71deg); transform-origin: 50% 50%;" />
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#ff9900" stroke-width="15" stroke-dasharray="62.8 314" style="transform: rotate(-165deg); transform-origin: 50% 50%;" />
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#cc00cc" stroke-width="15" stroke-dasharray="50.24 314" style="transform: rotate(274deg); transform-origin: 50% 50%;" />
-                            <circle cx="50" cy="50" r="25" fill="white" />
-                        </svg>
-                    </div>
-                    }
-
-                    <div class="text-center mt-3">
-                        <p class="text-secondary mb-1 fs-8">Ventilation par Nature</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Charts Row 2 -->
-    <div class="row g-4 mb-4">
-
-        <!-- Chart 3: Disponibilités -->
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div
-                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Disponibilités</h6>
-                    <div class="d-flex gap-2">
-                        <!-- Chart Type Toggle -->
-                        <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check" name="chart3Type" id="cg3_bar" value="bar"
-                                autocomplete="off" [(ngModel)]="cgChart1Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg3_bar"
-                                title="Barre Empilée"><i class="fas fa-chart-bar fs-9"></i></label>
-
-                            <input type="radio" class="btn-check" name="chart3Type" id="cg3_line" value="line"
-                                autocomplete="off" [(ngModel)]="cgChart1Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg3_line"
-                                title="Ligne"><i class="fas fa-chart-line fs-9"></i></label>
-                        </div>
-
-                        <!-- Export Options -->
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false"
-                                style="padding-top: 2px; padding-bottom: 2px;">
-                                <i class="fas fa-download fs-9"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
-
-                    <!-- CSS Mockup for Stacked Bar Chart -->
-                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
-                        style="width: 100%; height: 250px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px;">
-                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
-                            <div style="width: 100%; height: 60%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
-                            <div style="width: 100%; height: 25%; background: #0066cc;"></div>
-                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
-                        </div>
-                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
-                            <div style="width: 100%; height: 55%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
-                            <div style="width: 100%; height: 30%; background: #0066cc;"></div>
-                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
-                        </div>
-                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
-                            <div style="width: 100%; height: 65%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
-                            <div style="width: 100%; height: 20%; background: #0066cc;"></div>
-                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
-                        </div>
-                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
-                            <div style="width: 100%; height: 50%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
-                            <div style="width: 100%; height: 35%; background: #0066cc;"></div>
-                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
-                        </div>
-                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
-                            <div style="width: 100%; height: 70%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
-                            <div style="width: 100%; height: 15%; background: #0066cc;"></div>
-                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
-                        </div>
-                        <div style="width: 12%; height: 100%; display: flex; flex-direction: column-reverse;">
-                            <div style="width: 100%; height: 58%; background: #00cc66; border-radius: 3px 3px 0 0;"></div>
-                            <div style="width: 100%; height: 27%; background: #0066cc;"></div>
-                            <div style="width: 100%; height: 15%; background: #ff9900;"></div>
-                        </div>
-                    </div>
-
-                    <div class="text-center mt-3">
-                        <p class="text-secondary mb-1 fs-8">Disponible / Engagé / Bloqué</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chart 4: Balance Comptable -->
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div
-                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Balance Comptable</h6>
-                    <div class="d-flex gap-2">
-                        <!-- Chart Type Toggle -->
-                        <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check" name="chart4Type" id="cg4_bar" value="bar"
-                                autocomplete="off" [(ngModel)]="cgChart2Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg4_bar"
-                                title="Barre"><i class="fas fa-chart-bar fs-9"></i></label>
-
-                            <input type="radio" class="btn-check" name="chart4Type" id="cg4_table" value="table"
-                                autocomplete="off" [(ngModel)]="cgChart2Type">
-                            <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="cg4_table"
-                                title="Tableau"><i class="fas fa-table fs-9"></i></label>
-                        </div>
-
-                        <!-- Export Options -->
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false"
-                                style="padding-top: 2px; padding-bottom: 2px;">
-                                <i class="fas fa-download fs-9"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-8">
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="fas fa-image text-primary me-2"></i> Image (PNG)</a></li>
-                                <li><a class="dropdown-item py-2" href="#"><i
-                                            class="far fa-file-pdf text-danger me-2"></i> Document PDF</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-4">
-
-                    @if (cgChart2Type === 'bar') {
-                    <!-- CSS Mockup for Comparison Chart -->
-                    <div class="position-relative mb-4 mt-2 animate__animated animate__fadeIn"
-                        style="width: 100%; height: 250px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px;">
-                        <div style="width: 15%; height: 80%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 15%; height: 78%; background: linear-gradient(to top, #00cc66, #009d4a); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 15%; height: 2%; background: linear-gradient(to top, #ff9900, #cc7a00); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 15%; height: 75%; background: linear-gradient(to top, #0066cc, #0052a3); border-radius: 6px 6px 0 0;"></div>
-                        <div style="width: 15%; height: 73%; background: linear-gradient(to top, #00cc66, #009d4a); border-radius: 6px 6px 0 0;"></div>
-                    </div>
-                    }
-                    @else {
-                    <!-- CSS Mockup for Table -->
-                    <table class="table table-sm table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Compte</th>
-                                <th class="text-end">Débit</th>
-                                <th class="text-end">Crédit</th>
-                                <th class="text-end">Solde</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>6011 - Fournitures</td>
-                                <td class="text-end">250,000</td>
-                                <td class="text-end">0</td>
-                                <td class="text-end fw-bold text-success">250,000</td>
-                            </tr>
-                            <tr>
-                                <td>7011 - Revenus Divers</td>
-                                <td class="text-end">0</td>
-                                <td class="text-end">180,500</td>
-                                <td class="text-end fw-bold text-danger">-180,500</td>
-                            </tr>
-                            <tr>
-                                <td>4011 - Clients</td>
-                                <td class="text-end">420,000</td>
-                                <td class="text-end">150,000</td>
-                                <td class="text-end fw-bold">270,000</td>
-                            </tr>
-                            <tr class="table-active fw-bold">
-                                <td>Total</td>
-                                <td class="text-end">670,000</td>
-                                <td class="text-end">330,500</td>
-                                <td class="text-end">339,500</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    }
-
-                    <div class="text-center mt-3">
-                        <p class="text-secondary mb-0 fs-8">Taux de lignes lettrées: 95.2%</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Data Table -->
-    <div class="row g-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm bg-white rounded-3">
-                <div
-                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Situation Détaillée - Compte de Gestion</h6>
-                    <button class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-filter me-2"></i> Filtres
+                <!-- "+ Ajouter un filtre" Dropdown -->
+                <div class="dropdown d-inline-block position-relative" [class.show]="isFilterDropdownOpen">
+                    <button class="btn-add-filter" type="button" (click)="toggleFilterDropdown($event)">
+                        <i class="fas fa-plus me-1 text-primary"></i>
+                        <span>Ajouter un filtre</span>
+                        <i class="fas fa-chevron-down fs-9 ms-1 text-muted"></i>
                     </button>
-                </div>
-                <div class="card-body p-4">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Bailleur</th>
-                                    <th class="text-end">LFI</th>
-                                    <th class="text-end">LFR</th>
-                                    <th class="text-end">Engagé</th>
-                                    <th class="text-end">Mandaté</th>
-                                    <th class="text-end">Payé</th>
-                                    <th class="text-end">% Exécution</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>SODE</strong></td>
-                                    <td class="text-end">2,500,000</td>
-                                    <td class="text-end">2,750,000</td>
-                                    <td class="text-end">2,400,000</td>
-                                    <td class="text-end">2,350,000</td>
-                                    <td class="text-end">2,280,000</td>
-                                    <td class="text-end fw-bold text-success">96%</td>
-                                    <td><span class="badge bg-success-light text-success">Bon</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>EPN</strong></td>
-                                    <td class="text-end">1,800,000</td>
-                                    <td class="text-end">1,950,000</td>
-                                    <td class="text-end">1,620,000</td>
-                                    <td class="text-end">1,580,000</td>
-                                    <td class="text-end">1,520,000</td>
-                                    <td class="text-end fw-bold text-warning">82%</td>
-                                    <td><span class="badge bg-warning-light text-warning">Alerte</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>COLLECTIVIT2</strong></td>
-                                    <td class="text-end">950,000</td>
-                                    <td class="text-end">1,050,000</td>
-                                    <td class="text-end">920,000</td>
-                                    <td class="text-end">880,000</td>
-                                    <td class="text-end">850,000</td>
-                                    <td class="text-end fw-bold text-success">88%</td>
-                                    <td><span class="badge bg-success-light text-success">Bon</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>AUTRES</strong></td>
-                                    <td class="text-end">750,000</td>
-                                    <td class="text-end">820,000</td>
-                                    <td class="text-end">680,000</td>
-                                    <td class="text-end">650,000</td>
-                                    <td class="text-end">600,000</td>
-                                    <td class="text-end fw-bold text-info">85%</td>
-                                    <td><span class="badge bg-info-light text-info">Suivi</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end filter-menu-dropdown shadow-lg border-0 rounded-3 py-2 fs-8"
+                        [class.show]="isFilterDropdownOpen"
+                        (click)="$event.stopPropagation()">
+                        <li class="dropdown-header text-uppercase fs-9 fw-bold text-muted px-3 py-1">Critères disponibles</li>
+                        @for (available of allAvailableChips; track available) {
+                            @if (!filterChips.includes(available)) {
+                                <li>
+                                    <a class="dropdown-item py-1.5 px-3 d-flex align-items-center" (click)="addChip(available)">
+                                        <i class="fas fa-filter text-primary me-2 fs-9"></i>
+                                        <span>{{ available }}</span>
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Mode Switcher (Synthèse vs Analyses Avancées) -->
+        <div class="view-mode-bar">
+            <button class="mode-tab-btn" [class.active]="viewMode === 'synthese'" (click)="viewMode = 'synthese'">
+                <i class="fas fa-table-cells-large"></i>
+                <span>Synthèse & Indicateurs Clés</span>
+            </button>
+            <button class="mode-tab-btn" [class.active]="viewMode === 'avancee'" (click)="viewMode = 'avancee'">
+                <i class="fas fa-chart-line"></i>
+                <span>Analyses Avancées</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 4. ADVANCED OLAP DWH SELECTOR (WHEN IN 'AVANCEE' MODE) -->
+    @if (viewMode === 'avancee') {
+        <div class="advanced-selector-wrap animate-fadeIn">
+            <app-analyse-selector 
+                [title]="'Analyse Multidimensionnelle: ' + getSubDomainLabel(activeSubDomain)"
+                [isDragDropMode]="isDragDropMode"
+                [forceDragDrop]="true"
+                [periodsList]="periodsList"
+                [(selectedPeriod)]="activePeriod"
+                [(availableIndicators)]="availableIndicators"
+                [(selectedIndicators)]="selectedIndicators"
+                [(availableAxes)]="availableAxes"
+                [(selectedAxes)]="selectedAxes"
+                (modeChanged)="isDragDropMode = $event === 'dragdrop'">
+            </app-analyse-selector>
+        </div>
+    }
+
+    @if (viewMode === 'synthese') {
+    <!-- 5. KPI METRICS GRID -->
+    <section class="kpi-grid">
+        @for (kpi of currentKpis; track kpi.titre) {
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-title">
+                        <i class="fas {{ kpi.icon }}"></i>
+                        {{ kpi.titre }}
+                    </span>
+                    <div class="kpi-icon-box" [class.orange]="kpi.colorTheme === 'orange'" [class.green]="kpi.colorTheme === 'green'" [class.blue]="kpi.colorTheme === 'blue'" [class.red]="kpi.colorTheme === 'red'">
+                        <i class="fas {{ kpi.icon }}"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-big-value">{{ kpi.valeur }}</span>
+                    <span class="kpi-unit">{{ kpi.unite }}</span>
+                </div>
+                <div class="mini-bar-track">
+                    <div class="mini-bar-fill fill-{{ kpi.progressColor }}" [style.width.%]="kpi.progress"></div>
+                </div>
+                <div class="kpi-footer">
+                    <span class="kpi-status-badge {{ kpi.badgeClass }}">
+                        <i class="fas {{ kpi.badgeIcon }}"></i>
+                        {{ kpi.badgeText }}
+                    </span>
+                    <span class="kpi-bench">{{ kpi.bench }}</span>
+                </div>
+            </div>
+        }
+    </section>
+
+    <!-- 6. ANALYTICS & CHARTS SECTION -->
+    <section class="charts-grid-row">
+        <!-- Chart 1: Exécution Budgétaire & Mandatements -->
+        <div class="chart-box-card">
+            <div class="chart-box-header">
+                <div class="title-wrap">
+                    <div class="chart-badge-icon primary">
+                        <i class="fas fa-chart-column"></i>
+                    </div>
+                    <div>
+                        <h3 class="chart-title">
+                            @if (activeSubDomain === 'developpements') {
+                                Exécution des Crédits : Dotation Votée vs Mandaté vs Payé
+                            } @else if (activeSubDomain === 'balance') {
+                                Concordance des Flux Financiers BCEAO / CUT & Balance
+                            } @else if (activeSubDomain === 'reddition') {
+                                Évolution de la Transmission des Comptes à la Cour des Comptes
+                            } @else {
+                                Profil d'Apurement des Restes & Imputations Provisoires
+                            }
+                        </h3>
+                        <p class="chart-subtitle">{{ activePerimetre }} — Données consolidées DGTCP</p>
+                    </div>
+                </div>
+                <div class="chart-actions">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary" [class.active]="chart1Type === 'bar'" (click)="chart1Type = 'bar'" title="Graphique en Barres">
+                            <i class="fas fa-chart-bar fs-9"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" [class.active]="chart1Type === 'line'" (click)="chart1Type = 'line'" title="Graphique en Lignes">
+                            <i class="fas fa-chart-line fs-9"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-box-body">
+                @if (chart1Type === 'bar') {
+                    <div class="macro-chart-mockup">
+                        <div class="chart-bars-container">
+                            @for (b of currentBarChartData; track b.label) {
+                                <div class="bar-col">
+                                    <div class="bar-track">
+                                        <div class="bar-fill primary-fill" [style.height.%]="b.val" [title]="b.label + ': ' + b.val + '%'"></div>
+                                    </div>
+                                    <span class="bar-label">{{ b.label }}</span>
+                                    <span class="bar-val">{{ b.val }}%</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                } @else {
+                    <div class="macro-chart-mockup line-view">
+                        <svg class="line-svg" viewBox="0 0 500 160">
+                            <defs>
+                                <linearGradient id="chartGradCG" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#F77F00" stop-opacity="0.35"/>
+                                    <stop offset="100%" stop-color="#F77F00" stop-opacity="0.0"/>
+                                </linearGradient>
+                            </defs>
+                            <polygon points="30,120 110,85 190,45 270,70 350,30 430,20 430,150 30,150" fill="url(#chartGradCG)"/>
+                            <polyline points="30,120 110,85 190,45 270,70 350,30 430,20" fill="none" stroke="#F77F00" stroke-width="3.5" stroke-linecap="round"/>
+                            <circle cx="30" cy="120" r="4.5" fill="#F77F00" stroke="#fff" stroke-width="2"/>
+                            <circle cx="110" cy="85" r="4.5" fill="#F77F00" stroke="#fff" stroke-width="2"/>
+                            <circle cx="190" cy="45" r="4.5" fill="#F77F00" stroke="#fff" stroke-width="2"/>
+                            <circle cx="270" cy="70" r="4.5" fill="#F77F00" stroke="#fff" stroke-width="2"/>
+                            <circle cx="350" cy="30" r="4.5" fill="#F77F00" stroke="#fff" stroke-width="2"/>
+                            <circle cx="430" cy="20" r="4.5" fill="#F77F00" stroke="#fff" stroke-width="2"/>
+                        </svg>
+                        <div class="line-labels-row">
+                            <span>Jan</span><span>Fév</span><span>Mar</span><span>Avr</span><span>Mai</span><span>Juin</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Chart 2: Ventilation par Nature & Statut d'Apurement -->
+        <div class="chart-box-card">
+            <div class="chart-box-header">
+                <div class="title-wrap">
+                    <div class="chart-badge-icon warning">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div>
+                        <h3 class="chart-title">Ventilation des Opérations & Nature Comptable</h3>
+                        <p class="chart-subtitle">Répartition des comptes et taux de conformité globale</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-box-body donut-body">
+                <div class="donut-visual">
+                    <svg viewBox="0 0 36 36" class="circular-chart">
+                        <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3.5" />
+                        <path class="circle" [attr.stroke-dasharray]="currentDonutData.rateDash + ', 100'" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F77F00" stroke-width="3.5" />
+                    </svg>
+                    <div class="donut-center-info">
+                        <span class="donut-val">{{ currentDonutData.rate }}</span>
+                        <span class="donut-lbl">Conformité</span>
+                    </div>
+                </div>
+                <div class="donut-metrics-grid">
+                    @for (m of currentDonutData.metrics; track m.label) {
+                        <div class="metric-tag">
+                            <span class="dot" [style.background]="m.color"></span>
+                            <span class="tag-title">{{ m.label }}</span>
+                            <strong class="tag-val ms-auto">{{ m.val }}</strong>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. REGISTRE CENTRAL STRIP (DARK NAVY BANNER IDENTIQUE TRÉSORERIE & CAUTIONNEMENT) -->
+    <section class="table-section">
+        <div class="cashflow-live-bar">
+            <div class="live-title-box">
+                <div class="pulse-dot"></div>
+                <div>
+                    <div class="live-title-text">
+                        <i class="fas fa-bolt text-primary"></i>
+                        <span>Registre Central du Compte de Gestion — Reddition & Conformité DGTCP</span>
+                    </div>
+                    <div class="live-subtitle-text">
+                        Synchronisation avec la Cour des Comptes, SIGFIP et la Balance Générale du Trésor
+                    </div>
+                </div>
+            </div>
+
+            <div class="live-telemetry-metrics">
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-vault"></i> BUDGET ASSIGNÉ :</span>
+                    <span class="metric-val val-orange">{{ currentTelemetry.budgetGere }}</span>
+                </div>
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-check-double"></i> CERTIFIÉS :</span>
+                    <span class="metric-val val-green">{{ currentTelemetry.comptesCertifies }}</span>
+                </div>
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-clock"></i> RESTES EN INSTANCE :</span>
+                    <span class="metric-val val-blue">{{ currentTelemetry.restesInstance }}</span>
+                </div>
+                <button class="btn-live-audit" (click)="triggerAudit()">
+                    <i class="fas fa-rotate"></i>
+                    <span>Auditer</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 8. MODERN DATA TABLE -->
+        <div class="table-card mt-3">
+            <!-- Table Header Toolbar -->
+            <div class="table-toolbar">
+                <div class="toolbar-left">
+                    <h3 class="table-title">
+                        <i class="fas fa-list-check text-primary me-2"></i>
+                        Dossiers du Compte de Gestion — {{ getSubDomainLabel(activeSubDomain) }}
+                    </h3>
+                    <p class="table-subtitle">
+                        <span class="badge bg-light text-primary border border-primary-subtle me-1.5 fw-bold">{{ activePerimetre }}</span>
+                        Suivi des opérations assignées, conformité des titres et certificats de reddition
+                    </p>
+                </div>
+                <div class="toolbar-right">
+                    <div class="search-input-wrap">
+                        <i class="fas fa-magnifying-glass search-icon"></i>
+                        <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="updateFilteredItems()" placeholder="Rechercher référence, comptable, poste, ministère..." class="search-field" />
+                        @if (searchQuery) {
+                            <i class="fas fa-xmark clear-search-icon" (click)="searchQuery = ''; updateFilteredItems()"></i>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Quick Pills Filter -->
+            <div class="table-filter-pills-bar">
+                <span class="filter-caption">Afficher :</span>
+                <button class="pill-filter" [class.active]="tableFilter === 'all'" (click)="setTableFilter('all')">
+                    Tous ({{ getCount('all') }})
+                </button>
+                <button class="pill-filter" [class.active]="tableFilter === 'valide'" (click)="setTableFilter('valide')">
+                    Comptes Apurés / Conformes ({{ getCount('valide') }})
+                </button>
+                <button class="pill-filter" [class.active]="tableFilter === 'consolidation'" (click)="setTableFilter('consolidation')">
+                    En instruction / Apurement ({{ getCount('consolidation') }})
+                </button>
+                <button class="pill-filter" [class.active]="tableFilter === 'alerte'" (click)="setTableFilter('alerte')">
+                    Alertes & Pièces Manquantes ({{ getCount('alerte') }})
+                </button>
+            </div>
+
+            <!-- Table Responsive (Strict Anti-Overflow & Compact - Pas de défilement horizontal) -->
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 13%;">RÉF / DOSSIER</th>
+                            <th style="width: 23%;">COMPTABLE ASSIGNATAIRE & POSTE</th>
+                            <th style="width: 17%;">MINISTÈRE / SECTEUR</th>
+                            <th style="width: 13%;">EXERCICE & DATE</th>
+                            <th style="width: 13%;">MONTANT / CRÉDITS</th>
+                            <th style="width: 11%;">CONFORMITÉ</th>
+                            <th style="width: 5%;">STATUT</th>
+                            <th class="text-center actions-col" style="width: 5%;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of filteredItems; track item.ref) {
+                            <tr>
+                                <td>
+                                    <span class="ref-code-cell">{{ item.ref }}</span>
+                                    <div class="fs-9 text-muted mt-0.5">{{ item.domaine }}</div>
+                                </td>
+                                <td>
+                                    <div class="aggregate-cell">
+                                        <div class="aggregate-avatar {{ item.avatarClass }}">{{ item.avatarInitials }}</div>
+                                        <div>
+                                            <div class="aggregate-title">{{ item.titre }}</div>
+                                            <div class="fs-9 text-muted"><i class="fas fa-user-tie me-1 text-primary"></i>{{ item.comptable }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold fs-8 text-dark">{{ item.ministere }}</div>
+                                    <div class="fs-9 text-muted"><i class="fas fa-building me-1 text-primary"></i>{{ item.posteComptable }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold fs-8 text-dark">{{ item.exercice }}</div>
+                                    <div class="fs-9 text-muted"><i class="far fa-calendar-check me-1 text-primary"></i>{{ item.dateTransmission }}</div>
+                                </td>
+                                <td>
+                                    <span class="amount-cell text-primary">
+                                        {{ item.montant }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="progress-cell-box">
+                                        <div class="progress-cell-bar">
+                                            <div class="progress-cell-fill" [style.width.%]="item.tauxConformite"
+                                                [class.bg-success]="item.tauxConformite >= 90"
+                                                [class.bg-warning]="item.tauxConformite >= 75 && item.tauxConformite < 90"
+                                                [class.bg-danger]="item.tauxConformite < 75">
+                                            </div>
+                                        </div>
+                                        <span class="progress-cell-value"
+                                            [class.text-success]="item.tauxConformite >= 90"
+                                            [class.text-warning]="item.tauxConformite >= 75 && item.tauxConformite < 90"
+                                            [class.text-danger]="item.tauxConformite < 75">
+                                            {{ item.tauxConformite }}%
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (item.statut === 'valide') {
+                                        <span class="status-pill status-valide">
+                                            <i class="fas fa-circle-check"></i>
+                                            <span>{{ item.statutLabel }}</span>
+                                        </span>
+                                    } @else if (item.statut === 'consolidation') {
+                                        <span class="status-pill status-consolidation">
+                                            <i class="fas fa-clock"></i>
+                                            <span>{{ item.statutLabel }}</span>
+                                        </span>
+                                    } @else {
+                                        <span class="status-pill status-alerte">
+                                            <i class="fas fa-triangle-exclamation"></i>
+                                            <span>{{ item.statutLabel }}</span>
+                                        </span>
+                                    }
+                                </td>
+                                <td class="actions-col">
+                                    <div class="table-actions-stacked">
+                                        <button class="table-action-btn view-btn" (click)="triggerToast('Consultation du dossier ' + item.ref)" title="Consulter le dossier">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                        <button class="table-action-btn pdf-btn" (click)="triggerToast('Téléchargement des pièces justificatives ' + item.ref)" title="Télécharger le compte certifié">
+                                            <i class="far fa-file-pdf"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (filteredItems.length === 0) {
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="fas fa-folder-open fs-2 mb-2 d-block opacity-40"></i>
+                                    Aucun dossier de compte de gestion trouvé pour les critères sélectionnés.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    }
+
+    <!-- 9. TOAST NOTIFICATION -->
+    @if (showToast) {
+        <div class="floating-toast-alert animate-bounceIn">
+            <i class="fas fa-circle-check toast-icon"></i>
+            <span>{{ toastMessage }}</span>
+        </div>
+    }
 
 </div>

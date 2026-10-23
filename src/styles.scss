@@ -45,12 +45,16 @@
   --sidebar-active: var(--primary-700);
 }
 
+html,
 body {
   background-color: var(--bs-body-bg);
   color: var(--bs-body-color);
   font-family: 'Open Sans', 'Poppins', sans-serif;
   font-size: 0.875rem; // 14px default instead of 16px
   line-height: 1.5;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
 }
 
 [data-bs-theme="dark"] {
@@ -253,3 +257,227 @@ h6,
     }
   }
 }
+
+/* ==========================================================================
+   MASTER ANTI-OVERFLOW & RESPONSIVE DATA TABLES ACROSS ALL SERVICES
+   Guarantees 100% visibility without horizontal scrolling on all resolutions
+   ========================================================================== */
+
+.table-responsive {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important; // Strictly eliminates horizontal scrollbar
+}
+
+table.modern-table,
+.modern-table {
+  width: 100% !important;
+  max-width: 100% !important;
+  table-layout: fixed !important; // Strictly prevents content from forcing overflow
+  border-collapse: collapse !important;
+
+  thead th,
+  thead tr th {
+    font-size: 0.67rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+    padding: 7px 5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  tbody td,
+  tbody tr td {
+    padding: 6px 5px !important;
+    font-size: 0.74rem !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+  }
+
+  .ref-code-cell {
+    font-size: 0.71rem !important;
+    padding: 1px 4px !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .ministry-cell,
+  .aggregate-cell {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    .ministry-badge-avatar,
+    .aggregate-avatar {
+      width: 24px !important;
+      height: 24px !important;
+      min-width: 24px !important;
+      min-height: 24px !important;
+      font-size: 0.65rem !important;
+      border-radius: 5px !important;
+      flex-shrink: 0 !important;
+    }
+
+    > div {
+      min-width: 0 !important;
+      flex: 1 !important;
+      overflow: hidden !important;
+    }
+
+    .ministry-name,
+    .aggregate-title {
+      font-size: 0.73rem !important;
+      font-weight: 700 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      max-width: 100% !important;
+      line-height: 1.2 !important;
+    }
+
+    .ministry-subtext,
+    .fs-9 {
+      font-size: 0.65rem !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      max-width: 100% !important;
+      line-height: 1.2 !important;
+    }
+  }
+
+  .amount-cell {
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+  }
+
+  .progress-cell-box {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    width: 100% !important;
+    max-width: 75px !important;
+    min-width: 0 !important;
+
+    .progress-cell-bar {
+      flex: 1 !important;
+      width: auto !important;
+      height: 4px !important;
+      min-width: 20px !important;
+    }
+
+    .progress-pct-label {
+      font-size: 0.66rem !important;
+      font-weight: 700 !important;
+      min-width: 22px !important;
+    }
+  }
+
+  .status-tag {
+    font-size: 0.66rem !important;
+    font-weight: 700 !important;
+    padding: 1px 5px !important;
+    border-radius: 5px !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+  }
+}
+
+/* Global Table Actions & Vertical Stack across all pages */
+.actions-col {
+  width: 54px !important;
+  min-width: 54px !important;
+  max-width: 56px !important;
+  text-align: center !important;
+  padding: 3px 2px !important;
+  font-size: 0.63rem !important;
+  letter-spacing: -0.01em !important;
+}
+
+.table-actions-stack {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  margin: 0 auto !important;
+}
+
+.table-action-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  border-radius: 5px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.7rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transition: all 0.15s ease-in-out;
+
+  &:hover {
+    background: #fff7ed;
+    border-color: #F77F00;
+    color: #F77F00;
+    transform: scale(1.05);
+  }
+}
+
+/* Global Filter Dropdown Menu styling to prevent any text clipping across all services */
+.filter-menu-dropdown,
+.active-chips-area .dropdown-menu,
+.filter-controls-row .dropdown-menu,
+.filter-strip .dropdown-menu,
+.filter-tags-left .dropdown-menu {
+  min-width: 320px !important;
+  width: max-content !important;
+  max-width: 440px !important;
+  right: 0 !important;
+  left: auto !important;
+  padding: 0.5rem 0 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+
+  .dropdown-header {
+    white-space: nowrap !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .dropdown-item {
+    white-space: nowrap !important;
+    padding: 0.55rem 1rem !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+
+    i {
+      font-size: 0.75rem !important;
+      flex-shrink: 0 !important;
+    }
+
+    span {
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+    }
+  }
+}

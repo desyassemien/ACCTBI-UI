@@ -1,146 +1,774 @@
-<div class="comptabilite-container"> <!-- Reusing container class for consistent spacing -->
+<div class="svc-page-container">
 
-    <!-- Page Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3 gap-md-0">
-        <div>
-            <h4 class="fw-bold text-primary-900 mb-1">Cautionnement et Dépôt</h4>
-            <p class="text-secondary mb-0">SYGACUT-BI / Services / Cautionnement et Dépôt</p>
+    <!-- 1. PAGE HEADER: BREADCRUMB + SUB-MODULES + ACTIONS -->
+    <section class="page-header-svc">
+        <div class="breadcrumb-area">
+            <div class="breadcrumb-trail">
+                <span>SYGACUT-BI</span>
+                <i class="fas fa-chevron-right text-muted fs-9"></i>
+                <span>SERVICES</span>
+                <i class="fas fa-chevron-right text-muted fs-9"></i>
+                <span class="active">CAUTIONNEMENT</span>
+            </div>
+            <div class="title-with-pill">
+                <h1 class="page-title">Service Cautionnement & Dépôts</h1>
+                <span class="title-badge">
+                    <i class="fas fa-vault"></i>
+                    Garanties & Consignations
+                </span>
+            </div>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
-                <i class="far fa-file-excel me-2 text-success"></i> Export Excel
+
+        <!-- Segmented Module Switcher (Comptables vs Marchés vs Consignations) -->
+        <div class="service-switcher-bar">
+            <button class="switcher-btn" [class.active]="activeSubDomain === 'comptables'" (click)="switchSubDomain('comptables')">
+                <i class="fas fa-user-shield"></i>
+                <span>Comptables & Régisseurs</span>
             </button>
-            <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm">
-                <i class="far fa-file-pdf me-2 text-danger"></i> Export PDF
+            <button class="switcher-btn" [class.active]="activeSubDomain === 'marches'" (click)="switchSubDomain('marches')">
+                <i class="fas fa-file-contract"></i>
+                <span>Marchés & Garanties</span>
+            </button>
+            <button class="switcher-btn" [class.active]="activeSubDomain === 'consignations'" (click)="switchSubDomain('consignations')">
+                <i class="fas fa-gavel"></i>
+                <span>Consignations & Séquestres</span>
             </button>
         </div>
-    </div>
 
-    <!-- Analyse Selector Area -->
-    <app-analyse-selector 
-        title="Sélecteur d'Analyse Cautionnement"
-        [isDragDropMode]="isDragDropMode"
-        [(selectedPeriod)]="selectedPeriod"
-        [(availableIndicators)]="availableIndicators"
-        [(selectedIndicators)]="selectedIndicators"
-        [(availableAxes)]="availableAxes"
-        [(selectedAxes)]="selectedAxes"
-        (modeChanged)="isDragDropMode = $event === 'dragdrop'">
-    </app-analyse-selector>
+        <!-- Action Buttons -->
+        <div class="action-group-right">
+            <button class="btn-svc-secondary" (click)="exportData('EXCEL')">
+                <i class="far fa-file-excel text-success"></i>
+                <span>Exporter</span>
+            </button>
+            <button class="btn-svc-primary" (click)="refreshData()">
+                <i class="fas fa-arrows-rotate"></i>
+                <span>Actualiser</span>
+            </button>
+        </div>
+    </section>
 
-    <!-- KPIs Grid -->
-    <div class="row g-4 mb-4">
-        @for (kpi of kpis; track kpi.titre) {
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100 bg-white rounded-3 kpi-card">
-                <div class="card-body p-4">
-                    <h6 class="text-secondary fw-semibold mb-3">{{ kpi.titre }}</h6>
-                    <h3 class="fw-bold text-dark mb-1">{{ kpi.valeur }}</h3>
-                    <span class="fs-8 fw-medium" [class.text-success]="kpi.type === 'success'" [class.text-secondary]="kpi.type === 'primary'">
-                        {{ kpi.info }}
+    <!-- 2. REFINED FILTER & CONTROL STRIP -->
+    <section class="filter-strip">
+        <div class="filter-tags-left">
+            <div class="filter-label">
+                <i class="fas fa-sliders-h"></i>
+                <span>Filtres :</span>
+            </div>
+
+            <!-- Période Dropdown -->
+            <div class="filter-dropdown dropdown">
+                <button class="filter-select-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="far fa-calendar-days text-primary"></i>
+                    <span>Période : <strong>{{ activePeriod }}</strong></span>
+                    <i class="fas fa-chevron-down fs-9 text-muted ms-1"></i>
+                </button>
+                <ul class="dropdown-menu shadow-lg border-0 rounded-3 py-2 mt-1 fs-8">
+                    @for (p of periodsList; track p) {
+                        <li>
+                            <a class="dropdown-item py-2 px-3 d-flex align-items-center justify-content-between"
+                               [class.active]="activePeriod === p"
+                               (click)="selectPeriod(p)" style="cursor: pointer;">
+                                <span>{{ p }}</span>
+                                @if (activePeriod === p) {
+                                    <i class="fas fa-check text-primary fs-9 ms-2"></i>
+                                }
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Périmètre Dropdown -->
+            <div class="filter-dropdown dropdown">
+                <button class="filter-select-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-landmark text-primary"></i>
+                    <span>Périmètre : <strong>{{ activePerimetre }}</strong></span>
+                    <i class="fas fa-chevron-down fs-9 text-muted ms-1"></i>
+                </button>
+                <ul class="dropdown-menu shadow-lg border-0 rounded-3 py-2 mt-1 fs-8">
+                    @for (p of currentPerimetres; track p) {
+                        <li>
+                            <a class="dropdown-item py-2 px-3 d-flex align-items-center justify-content-between"
+                               [class.active]="activePerimetre === p"
+                               (click)="selectPerimetre(p)" style="cursor: pointer;">
+                                <span>{{ p }}</span>
+                                @if (activePerimetre === p) {
+                                    <i class="fas fa-check text-primary fs-9 ms-2"></i>
+                                }
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Chips Interactifs -->
+            <div class="filter-chips">
+                @for (chip of filterChips; track chip) {
+                    <div class="filter-chip">
+                        <span>{{ chip }}</span>
+                        <i class="fas fa-xmark chip-close" (click)="removeChip(chip); $event.stopPropagation()" title="Retirer ce filtre"></i>
+                    </div>
+                }
+                <div class="dropdown" [class.show]="isFilterDropdownOpen">
+                    <button class="filter-chip text-primary border-primary bg-white dropdown-toggle" type="button" (click)="toggleFilterDropdown($event)" [attr.aria-expanded]="isFilterDropdownOpen" style="border-style: dashed !important; cursor: pointer;">
+                        <i class="fas fa-plus fs-9 me-1"></i> Ajouter un filtre
+                    </button>
+                    <ul class="dropdown-menu shadow-lg border-0 rounded-3 py-1 fs-8" [class.show]="isFilterDropdownOpen">
+                        @for (c of allAvailableChips; track c) {
+                            @if (!filterChips.includes(c)) {
+                                <li>
+                                    <a class="dropdown-item py-1.5 px-3 cursor-pointer" (click)="addChip(c)">
+                                        <i class="fas fa-plus text-primary fs-9 me-2"></i>{{ c }}
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="view-toggles">
+            <button class="view-toggle-btn" [class.active]="viewMode === 'synthese'" (click)="setViewMode('synthese')">
+                <i class="fas fa-table-cells-large"></i>
+                <span>Vue Synthèse</span>
+            </button>
+            <button class="view-toggle-btn" [class.active]="viewMode === 'avancee'" (click)="setViewMode('avancee')">
+                <i class="fas fa-chart-line"></i>
+                <span>Analyses Avancées</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 2b. ADVANCED MULTIDIMENSIONAL DWH SELECTOR (WHEN IN 'AVANCEE' MODE) -->
+    @if (viewMode === 'avancee') {
+        <div class="advanced-selector-wrap animate-fadeIn">
+            <app-analyse-selector 
+                [title]="'Analyse Multidimensionnelle: ' + (activeSubDomain === 'comptables' ? 'Cautionnement des Comptables' : (activeSubDomain === 'marches' ? 'Marchés & Garanties' : 'Consignations & Séquestres'))"
+                [isDragDropMode]="isDragDropMode"
+                [forceDragDrop]="true"
+                [periodsList]="periodsList"
+                [(selectedPeriod)]="activePeriod"
+                [(availableIndicators)]="currentAvailableIndicators"
+                [(selectedIndicators)]="currentSelectedIndicators"
+                [(availableAxes)]="currentAvailableAxes"
+                [(selectedAxes)]="currentSelectedAxes"
+                (modeChanged)="isDragDropMode = $event === 'dragdrop'"
+                (analysisTriggered)="generateAnalysis($event)">
+            </app-analyse-selector>
+        </div>
+    }
+
+    @if (viewMode === 'synthese') {
+    <!-- 3. KPI METRICS GRID DYNAMIQUE -->
+    <section class="kpi-grid">
+        @for (kpi of currentKpis; track kpi.titre) {
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-title">
+                        <i class="fas {{ kpi.icon }}"></i>
+                        {{ kpi.titre }}
                     </span>
+                    <div class="kpi-icon-box" [class.orange]="kpi.colorTheme === 'orange'" [class.green]="kpi.colorTheme === 'green'" [class.blue]="kpi.colorTheme === 'blue'" [class.red]="kpi.colorTheme === 'red'">
+                        <i class="fas {{ kpi.icon }}"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-big-value">{{ kpi.valeur }}</span>
+                    <span class="kpi-unit">{{ kpi.unite }}</span>
+                </div>
+                <div class="mini-bar-track">
+                    <div class="mini-bar-fill fill-{{ kpi.progressColor }}" [style.width.%]="kpi.progress"></div>
+                </div>
+                <div class="kpi-footer">
+                    <span class="kpi-status-badge {{ kpi.badgeClass }}">
+                        <i class="fas {{ kpi.badgeIcon }}"></i>
+                        {{ kpi.badgeText }}
+                    </span>
+                    <span class="kpi-bench">{{ kpi.bench }}</span>
                 </div>
             </div>
-        </div>
         }
-    </div>
+    </section>
 
-    <!-- Main Analysis Charts Row -->
-    <div class="row g-4 mb-4">
-        <!-- Chart 1: Administratif -->
-        <div class="col-12 col-xl-4">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Couverture par Ministère</h6>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary btn-icon" type="button" data-bs-toggle="dropdown"><i class="fas fa-download fs-9"></i></button>
+    <!-- 4. MAIN ANALYTICS SECTION (2/3 FLOW CANVAS + 1/3 BREAKDOWN) -->
+    <section class="analytics-grid">
+        <!-- LEFT: PIPELINE D'APUREMENT & DE GESTION DES GARANTIES -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box orange">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">
+                            {{ currentFlowData.title }}
+                        </h2>
+                        <div class="panel-subtitle">
+                            Traçabilité ACCT : De la constitution du titre à la mainlevée / restitution
+                        </div>
                     </div>
                 </div>
-                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
-                    <!-- Pie Chart Mockup -->
-                    <div class="position-relative mb-4 mt-2" style="width: 160px; height: 160px;">
-                        <svg viewBox="0 0 36 36" class="circular-chart w-100 h-100">
-                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3" />
-                            <path class="circle" stroke-dasharray="96.2, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" />
+                <div class="panel-tabs">
+                    <button class="panel-tab" [class.active]="chartTab === 'flux'" (click)="setChartTab('flux')">
+                        Cycle de Vie
+                    </button>
+                    <button class="panel-tab" [class.active]="chartTab === 'garant'" (click)="setChartTab('garant')">
+                        Par Garant
+                    </button>
+                    <button class="panel-tab" [class.active]="chartTab === 'anciennete'" (click)="setChartTab('anciennete')">
+                        Ancienneté
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <!-- SVG Pipeline / Flow Visualizer -->
+                <div class="flow-canvas-container">
+                    <div class="flow-nodes-row">
+                        <!-- Step 1: Constitution -->
+                        <div class="flow-column">
+                            <div class="flow-node-box source-node">
+                                <div class="flow-node-header">
+                                    <span>{{ currentFlowData.sourceTitle }}</span>
+                                    <i class="fas fa-circle-arrow-right text-primary"></i>
+                                </div>
+                                <div class="flow-node-amount">
+                                    {{ currentFlowData.totalAmount }}
+                                </div>
+                                <div class="flow-node-pct text-muted">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>{{ currentFlowData.mandatsCount }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Connecting Curves -->
+                        <div class="flow-svg-connector">
+                            <svg width="100" height="140" viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M 0 35 C 50 35, 50 20, 100 20" stroke="#10b981" stroke-width="6" stroke-opacity="0.6" fill="none"/>
+                                <path d="M 0 55 C 50 55, 50 70, 100 70" stroke="#f59e0b" stroke-width="4" stroke-opacity="0.6" fill="none"/>
+                                <path d="M 0 75 C 50 75, 50 120, 100 120" stroke="#ef4444" stroke-width="3" stroke-opacity="0.6" fill="none"/>
+                            </svg>
+                        </div>
+
+                        <!-- Step 2: Distribution des Statuts -->
+                        <div class="flow-column">
+                            <!-- Validés / Actifs -->
+                            <div class="flow-node-box reg-node">
+                                <div class="flow-node-header">
+                                    <span class="text-success-bold">Garanties Actives ({{ currentFlowData.tauxValides }})</span>
+                                    <span class="kpi-status-badge badge-success">Conforme</span>
+                                </div>
+                                <div class="flow-node-amount text-success-bold">
+                                    {{ currentFlowData.validesAmount }}
+                                </div>
+                                <div class="flow-node-pct text-success">
+                                    <span>Titres enregistrés & visés</span>
+                                </div>
+                            </div>
+
+                            <!-- En instruction / Attente de quitus -->
+                            <div class="flow-node-box wait-node">
+                                <div class="flow-node-header">
+                                    <span class="text-warning-bold">En Instruction ({{ currentFlowData.instructionPct }})</span>
+                                    <span class="kpi-status-badge badge-warning">En cours</span>
+                                </div>
+                                <div class="flow-node-amount text-warning-bold">
+                                    {{ currentFlowData.instructionAmount }}
+                                </div>
+                                <div class="flow-node-pct text-warning">
+                                    <span>Vérification mainlevée & quitus</span>
+                                </div>
+                            </div>
+
+                            <!-- Échus / Litiges -->
+                            <div class="flow-node-box late-node">
+                                <div class="flow-node-header">
+                                    <span class="text-danger-bold">Échus / Contentieux ({{ currentFlowData.echuPct }})</span>
+                                    <span class="kpi-status-badge badge-danger">Action requise</span>
+                                </div>
+                                <div class="flow-node-amount text-danger-bold">
+                                    {{ currentFlowData.echuAmount }}
+                                </div>
+                                <div class="flow-node-pct text-danger">
+                                    <span>Mise en jeu caution / Appel</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Stats Bar -->
+                    <div class="flow-footer-stats">
+                        <div class="flow-stat-item">
+                            <div class="flow-stat-label">Taux de Couverture</div>
+                            <div class="flow-stat-val text-success">{{ currentFlowData.tauxCouverture }}</div>
+                        </div>
+                        <div class="flow-stat-item border-start ps-3">
+                            <div class="flow-stat-label">Espèces & Retenues</div>
+                            <div class="flow-stat-val text-primary">{{ currentFlowData.cautionEspeces }}</div>
+                        </div>
+                        <div class="flow-stat-item border-start ps-3">
+                            <div class="flow-stat-label">Garanties Bancaires</div>
+                            <div class="flow-stat-val" style="color: #F77F00; font-weight: 800;">{{ currentFlowData.cautionGarantie }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: RÉPARTITION PAR TYPE DE GARANTIE & ALERTES (100% DYNAMIQUE) -->
+        <div class="panel-card donut-breakdown-card">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box orange">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">Structure des Garanties</h2>
+                        <div class="panel-subtitle">Répartition par instrument</div>
+                    </div>
+                </div>
+                <button class="table-action-btn" title="Détails" (click)="triggerToast('Rapport détaillé des garanties généré')">
+                    <i class="fas fa-up-right-and-down-left-from-center"></i>
+                </button>
+            </div>
+
+            <div class="panel-body">
+                <!-- SVG Donut Chart Dynamique -->
+                <div class="donut-hero-area">
+                    <div class="donut-chart-wrapper">
+                        <svg viewBox="0 0 36 36" class="donut-chart-svg">
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3.8"/>
+                            <!-- Slice 1 -->
+                            <path [attr.stroke-dasharray]="currentDonutData.slice1Dash" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F77F00" stroke-width="4.2" stroke-linecap="round"/>
+                            <!-- Slice 2 -->
+                            <path [attr.stroke-dasharray]="currentDonutData.slice2Dash" [attr.stroke-dashoffset]="currentDonutData.slice2Offset" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981" stroke-width="4.2"/>
+                            <!-- Slice 3 -->
+                            <path [attr.stroke-dasharray]="currentDonutData.slice3Dash" [attr.stroke-dashoffset]="currentDonutData.slice3Offset" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#0284c7" stroke-width="4.2"/>
                         </svg>
-                        <div class="position-absolute top-50 start-50 translate-middle text-center mt-1">
-                            <h3 class="fw-bold text-dark mb-0">96%</h3>
-                            <span class="fs-9 text-secondary text-uppercase tracking-wider">Couvert</span>
+                        <div class="donut-center-text">
+                            <div class="donut-center-val">{{ currentDonutData.totalVal }}</div>
+                            <div class="donut-center-sub">{{ currentDonutData.totalSub }}</div>
                         </div>
                     </div>
-                    <div class="w-100 px-2 mt-auto">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="fs-8 text-secondary"><i class="fas fa-circle text-primary fs-9 me-2"></i>Actif</span>
-                            <span class="fs-8 fw-bold text-dark">4.5B FCFA</span>
+
+                    <!-- Legend Dynamique -->
+                    <div class="donut-legend-col">
+                        <div class="legend-item">
+                            <span class="legend-dot bg-orange" style="background: #F77F00"></span>
+                            <span class="fw-bold">{{ currentDonutData.slice1Pct }}%</span>
+                            <span class="text-muted">{{ currentDonutData.slice1Label }}</span>
                         </div>
+                        <div class="legend-item">
+                            <span class="legend-dot bg-success"></span>
+                            <span class="fw-bold">{{ currentDonutData.slice2Pct }}%</span>
+                            <span class="text-muted">{{ currentDonutData.slice2Label }}</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot bg-info"></span>
+                            <span class="fw-bold">{{ currentDonutData.slice3Pct }}%</span>
+                            <span class="text-muted">{{ currentDonutData.slice3Label }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bars Dynamiques -->
+                <div class="status-bars-list">
+                    <div class="status-bar-row">
+                        <div class="bar-row-info">
+                            <span class="bar-name-with-dot">
+                                <span class="dot-indicator" style="background: #F77F00"></span>
+                                <span>{{ currentDonutData.slice1FullLabel }}</span>
+                            </span>
+                            <span class="fw-bold text-primary">{{ currentDonutData.slice1Pct }}% ({{ currentDonutData.slice1Amount }})</span>
+                        </div>
+                        <div class="track-wrapper">
+                            <div class="track-progress" [style.width.%]="currentDonutData.slice1Pct" style="background: #F77F00"></div>
+                        </div>
+                    </div>
+
+                    <div class="status-bar-row">
+                        <div class="bar-row-info">
+                            <span class="bar-name-with-dot">
+                                <span class="dot-indicator bg-success"></span>
+                                <span>{{ currentDonutData.slice2FullLabel }}</span>
+                            </span>
+                            <span class="fw-bold text-success">{{ currentDonutData.slice2Pct }}% ({{ currentDonutData.slice2Amount }})</span>
+                        </div>
+                        <div class="track-wrapper">
+                            <div class="track-progress bg-success" [style.width.%]="currentDonutData.slice2Pct"></div>
+                        </div>
+                    </div>
+
+                    <div class="status-bar-row">
+                        <div class="bar-row-info">
+                            <span class="bar-name-with-dot">
+                                <span class="dot-indicator bg-info"></span>
+                                <span>{{ currentDonutData.slice3FullLabel }}</span>
+                            </span>
+                            <span class="fw-bold text-info">{{ currentDonutData.slice3Pct }}% ({{ currentDonutData.slice3Amount }})</span>
+                        </div>
+                        <div class="track-wrapper">
+                            <div class="track-progress bg-info" [style.width.%]="currentDonutData.slice3Pct"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Critical Alert Callout Dynamique -->
+                <div class="service-alert-callout">
+                    <i class="fas fa-triangle-exclamation callout-icon"></i>
+                    <div>
+                        <div class="callout-text-title">{{ currentDonutData.alertTitle }}</div>
+                        <div class="callout-text-desc">{{ currentDonutData.alertDesc }}</div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Chart 2: Financier -->
-        <div class="col-12 col-xl-8">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Analyse Financière (Cautions vs Dépôts)</h6>
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1 active"><i class="fas fa-chart-bar fs-9"></i></button>
+    </section>
+    } @else {
+    <!-- 4b. ADVANCED ANALYSIS GRAPHS (DRAG & DROP MODE) -->
+    <section class="analytics-grid" style="grid-template-columns: 1fr;">
+        <div class="panel-card" style="width: 100%;">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box" style="background: #e0e7ff; color: #4f46e5;">
+                        <i class="fas fa-chart-network"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">Résultats de l'Analyse Multidimensionnelle</h2>
+                        <div class="panel-subtitle">Généré dynamiquement selon vos critères ({{ selectedPeriod }})</div>
                     </div>
                 </div>
-                <div class="card-body p-4">
-                    <!-- Progress bars mockup -->
-                    <div class="mb-4 mt-2">
-                        <div class="d-flex justify-content-between fs-8 mb-2"><span class="text-dark fw-bold">Cautionnements nominatifs</span><span class="text-secondary">75%</span></div>
-                        <div class="progress rounded-pill bg-light" style="height: 10px;"><div class="progress-bar bg-primary rounded-pill" style="width: 75%"></div></div>
-                    </div>
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between fs-8 mb-2"><span class="text-dark fw-bold">Précomptes appliqués</span><span class="text-secondary">98%</span></div>
-                        <div class="progress rounded-pill bg-light" style="height: 10px;"><div class="progress-bar bg-success rounded-pill" style="width: 98%"></div></div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between fs-8 mb-2"><span class="text-dark fw-bold">Garanties chèques</span><span class="text-secondary">40%</span></div>
-                        <div class="progress rounded-pill bg-light" style="height: 10px;"><div class="progress-bar bg-warning rounded-pill" style="width: 40%"></div></div>
-                    </div>
+                <div class="action-group-right">
+                    <button class="btn-svc-secondary btn-sm-svc" (click)="triggerToast('Exportation du rapport d\'analyse...')">
+                        <i class="fas fa-download"></i> Exporter
+                    </button>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Table: Deliverables -->
-    <div class="row g-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Livrables: Situation des Cautionnements et Dépôts</h6>
+            <div class="panel-body" style="padding: 24px;">
+                @if (isAnalysisGenerated) {
+                <!-- Temporal Navigation Breadcrumb Strip -->
+                @if (drilldownStack.length > 0) {
+                <div class="drilldown-bar animate-fadeIn">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge bg-primary bg-opacity-10 text-primary fs-8 px-2.5 py-1 rounded-pill fw-bold">
+                            <i class="fas fa-clock-rotate-left me-1"></i> {{ currentTemporalLevelLabel }}
+                        </span>
+                        <div class="drilldown-crumb">
+                            <span class="cursor-pointer text-primary fw-bold" (click)="resetDrilldown()">
+                                <i class="fas fa-house-chimney me-1"></i> Vue Initiale
+                            </span>
+                            @for (step of drilldownStack; track step.title; let isLast = $last) {
+                                <i class="fas fa-chevron-right fs-9 text-muted mx-1"></i>
+                                <span class="text-secondary fw-semibold">{{ step.parentLabel }}</span>
+                            }
+                            <i class="fas fa-chevron-right fs-9 text-muted mx-1"></i>
+                            <span class="crumb-active fw-bold">{{ currentDrillLabel }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn-drill-up" (click)="drillUp()" title="Revenir au niveau supérieur">
+                            <i class="fas fa-arrow-left"></i> Niveau supérieur
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm fs-8 py-1 px-2.5" (click)="resetDrilldown()" title="Réinitialiser la vue">
+                            <i class="fas fa-rotate-left me-1"></i> Réinitialiser
+                        </button>
+                    </div>
                 </div>
-                <div class="card-body p-0">
+                }
+
+                <div class="d-flex gap-4 w-100 mb-4" style="flex-wrap: wrap;">
+                    <!-- Graph 1: Bar Chart (with Temporal Drilldown on Bar Click) -->
+                    <div class="flex-grow-1" style="min-width: 400px; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 20px; background: #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+                        <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                            <div>
+                                <h4 class="fs-6 fw-bold text-dark mb-1">
+                                    {{ currentDrillLabel ? ('Détail : ' + currentDrillLabel) : ('Répartition par ' + (currentSelectedAxes.length > 0 ? currentSelectedAxes[0] : 'Axe')) }}
+                                </h4>
+                                <p class="text-muted fs-8 mb-0">Indicateurs : {{ currentSelectedIndicators.join(', ') }}</p>
+                            </div>
+                        </div>
+
+                        <div style="height: 310px; position: relative; cursor: pointer;">
+                            <canvas baseChart
+                                [data]="barChartData"
+                                [options]="barChartOptions"
+                                [type]="barChartType"
+                                (chartClick)="onChartClick($event)">
+                            </canvas>
+                        </div>
+                    </div>
+
+                    <!-- Graph 2: Line/Area Chart -->
+                    <div class="flex-grow-1" style="min-width: 400px; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 20px; background: #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+                        <div class="mb-3">
+                            <h4 class="fs-6 fw-bold text-dark mb-1">Tendance Évolutive des Cautions</h4>
+                            <p class="text-muted fs-8 mb-0">Évolution temporelle synchronisée sur la période active</p>
+                        </div>
+
+                        <div style="height: 310px; position: relative;">
+                            <canvas baseChart
+                                [data]="lineChartData"
+                                [options]="lineChartOptions"
+                                [type]="lineChartType">
+                            </canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Data Table -->
+                <div class="w-100 mt-3 border rounded-3 overflow-hidden shadow-sm" style="background: #fff;">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <span class="fs-8 fw-bold text-dark text-uppercase tracking-wider">
+                            <i class="fas fa-table-list text-primary me-2"></i> Tableau Détaillé des Cautions & Consignations ({{ selectedPeriod }})
+                        </span>
+                        <div class="d-flex align-items-center gap-2">
+                            @if (currentDrillLabel) {
+                                <span class="badge bg-primary bg-opacity-10 text-primary fs-9 px-2 py-1 rounded-pill">
+                                    <i class="fas fa-clock-rotate-left me-1"></i> {{ currentDrillLabel }}
+                                </span>
+                            }
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary fs-9 px-2 py-1 rounded-pill">
+                                {{ analysisTableData.length }} Enregistrements
+                            </span>
+                        </div>
+                    </div>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light text-secondary fs-8 text-uppercase tracking-wider">
+                        <table class="table table-hover mb-0 align-middle modern-table">
+                            <thead class="bg-light">
                                 <tr>
-                                    <th class="ps-4 fw-medium border-0 py-3">Réf Attestation</th>
-                                    <th class="fw-medium border-0 py-3">Ministère / Bénéficiaire</th>
-                                    <th class="fw-medium border-0 py-3">Date Émission</th>
-                                    <th class="fw-medium border-0 py-3 text-end pe-4">Montant (FCFA)</th>
+                                    @for (header of analysisTableHeaders; track header; let isFirst = $first) {
+                                        <th class="text-uppercase text-secondary fs-8 fw-bold py-3 px-3.5" [class.text-start]="isFirst" [class.text-end]="!isFirst">
+                                            {{ header }}
+                                        </th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of deliverables; track item.ref) {
-                                <tr>
-                                    <td class="ps-4">
-                                        <div class="fw-bold text-dark">{{ item.ref }}</div>
-                                        <div class="text-secondary fs-8">Statut: {{ item.statut }}</div>
-                                    </td>
-                                    <td>{{ item.ministere }}</td>
-                                    <td><span class="badge bg-light text-dark fw-medium border">{{ item.date }}</span></td>
-                                    <td class="text-end pe-4 fw-bold">{{ item.montant }}</td>
-                                </tr>
+                                @for (row of analysisTableData; track row) {
+                                    <tr>
+                                        @for (header of analysisTableHeaders; track header; let isFirst = $first) {
+                                            <td class="py-2.5 px-3.5 fs-8" [class.text-start]="isFirst" [class.text-end]="!isFirst">
+                                                @if (isFirst) {
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="badge-icon-wrap" style="width: 24px; height: 24px; background: rgba(247, 127, 0, 0.08); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;">
+                                                            <i class="fas {{ row.categoryIcon || 'fa-calendar' }} text-primary fs-9"></i>
+                                                        </div>
+                                                        <span class="fw-bold text-dark cursor-pointer category-link" (click)="drillDown(row['AxisCategory'], $index)" title="Afficher le détail de {{ row['AxisCategory'] }}">
+                                                            {{ row['AxisCategory'] }}
+                                                        </span>
+                                                    </div>
+                                                } @else {
+                                                    <span class="cell-value-badge {{ row[header + '_badge'] || 'badge-neutral' }}">
+                                                        {{ row[header + '_formatted'] || row[header] }}
+                                                    </span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                                @if (analysisTableData.length === 0) {
+                                    <tr>
+                                        <td [colSpan]="analysisTableHeaders.length || 1" class="text-center py-5 text-muted">
+                                            <i class="fas fa-folder-open fs-2 mb-3 d-block opacity-50"></i>
+                                            Aucune donnée de cautionnement à afficher pour cette sélection.
+                                        </td>
+                                    </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
                 </div>
+                } @else {
+                    <div class="text-center py-5 text-muted animate-fadeIn" style="min-height: 400px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <div class="mb-4" style="width: 80px; height: 80px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-magic fs-2 text-primary"></i>
+                        </div>
+                        <h4 class="fs-5 fw-bold text-dark mb-2">Prêt pour l'analyse des cautionnements</h4>
+                        <p class="fs-7 text-muted" style="max-width: 400px;">Glissez vos indicateurs et axes d'analyse, puis cliquez sur <strong>"Générer l'Analyse"</strong> pour visualiser les résultats ici.</p>
+                    </div>
+                }
             </div>
         </div>
+    </section>
+    }
+
+    <!-- 5. REAL-TIME TELEMETRY STRIP & MODERN DATA TABLE -->
+    <section class="table-section">
+        <!-- Live Header Strip -->
+        <div class="cashflow-live-bar">
+            <div class="live-title-box">
+                <div class="pulse-dot"></div>
+                <div>
+                    <div class="live-title-text">
+                        <i class="fas fa-bolt text-primary"></i>
+                        <span>Registre Central des Cautionnements & Consignations — Temps Réel</span>
+                    </div>
+                    <div class="live-subtitle-text">
+                        Synchronisation avec le Trésor Public, SIGFIP et la CDC-CI
+                    </div>
+                </div>
+            </div>
+
+            <div class="live-telemetry-metrics">
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-vault"></i> CONSIGNÉ :</span>
+                    <span class="metric-val val-orange">{{ currentTelemetry.totalDepot }}</span>
+                </div>
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-check-double"></i> RESTITUÉ :</span>
+                    <span class="metric-val val-green">{{ currentTelemetry.restitue }}</span>
+                </div>
+                <div class="metric-badge-item">
+                    <span class="metric-lbl"><i class="fas fa-shield-halved"></i> SOLDE ACTIF :</span>
+                    <span class="metric-val val-amber">{{ currentTelemetry.soldeActif }}</span>
+                </div>
+                <button class="btn-svc-primary btn-sm-svc" (click)="triggerToast('Audit de conformité des garanties exécuté')">
+                    <i class="fas fa-rotate-right"></i>
+                    <span>Auditer</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Table Container Card -->
+        <div class="table-container-card">
+            <!-- Toolbar -->
+            <div class="table-filter-toolbar">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-magnifying-glass search-icon"></i>
+                    <input type="text" placeholder="Rechercher par référence, bénéficiaire, banque..." [(ngModel)]="searchQuery" (input)="updateFilteredItems()" />
+                </div>
+
+                <div class="table-quick-filters">
+                    <span class="filter-caption">Afficher :</span>
+                    <button class="pill-filter" [class.active]="tableFilter === 'all'" (click)="setTableFilter('all')">
+                        Tous ({{ getCount('all') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'actif'" (click)="setTableFilter('actif')">
+                        Actifs / Valides ({{ getCount('actif') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'en-attente'" (click)="setTableFilter('en-attente')">
+                        En instruction ({{ getCount('en-attente') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'echu'" (click)="setTableFilter('echu')">
+                        Échus / Alertes ({{ getCount('echu') }})
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Responsive -->
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 12%;">RÉF / ATTESTATION</th>
+                            <th style="width: 23%;">BÉNÉFICIAIRE & FONCTION</th>
+                            <th style="width: 11%;">DATE ÉMISSION</th>
+                            <th style="width: 13%;">ÉCHÉANCE / ÉTAT</th>
+                            <th style="width: 13%;">MONTANT CAUTION</th>
+                            <th style="width: 11%;">CONFORMITÉ</th>
+                            <th style="width: 12%;">STATUT</th>
+                            <th class="text-center actions-col" style="width: 5%;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of filteredItems; track item.ref) {
+                            <tr>
+                                <td>
+                                    <span class="ref-code-cell">{{ item.ref }}</span>
+                                    <div class="fs-9 text-muted mt-1">{{ item.typeCaution }}</div>
+                                </td>
+                                <td>
+                                    <div class="ministry-cell">
+                                        <div class="ministry-badge-avatar {{ item.avatarClass }}">{{ item.avatarInitials }}</div>
+                                        <div>
+                                            <div class="ministry-name">{{ item.beneficiaireFull }}</div>
+                                            <div class="ministry-subtext">{{ item.subtext }}</div>
+                                            @if (item.banqueGarante) {
+                                                <div class="fs-9 text-primary mt-0.5">
+                                                    <i class="fas fa-building-columns me-1"></i>{{ item.banqueGarante }}
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-muted fs-8">{{ item.dateEmission }}</td>
+                                <td>
+                                    <div class="fw-bold fs-8" [class.text-success]="item.echeanceStatus === 'success'" [class.text-warning]="item.echeanceStatus === 'warning'" [class.text-danger]="item.echeanceStatus === 'danger'">
+                                        {{ item.echeance }}
+                                    </div>
+                                    <div class="fs-9 text-muted">{{ item.echeanceSub }}</div>
+                                </td>
+                                <td>
+                                    <span class="amount-cell text-primary">
+                                        {{ item.montant }}
+                                    </span>
+                                    <span class="amount-unit ms-1">{{ item.montantUnite }}</span>
+                                </td>
+                                <td>
+                                    <div class="progress-cell-box">
+                                        <div class="progress-cell-bar">
+                                            <div class="progress-cell-fill" [style.width.%]="item.progression" [class.bg-success]="item.progression >= 90" [class.bg-warning]="item.progression >= 50 && item.progression < 90" [class.bg-danger]="item.progression < 50"></div>
+                                        </div>
+                                        <span class="progress-pct-label" [class.text-success]="item.progression >= 90" [class.text-warning]="item.progression >= 50 && item.progression < 90" [class.text-danger]="item.progression < 50">{{ item.progression }}%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-tag" [class.regule]="item.statut === 'actif'" [class.en-cours]="item.statut === 'en-attente'" [class.retard]="item.statut === 'echu'">
+                                        <i class="fas" [class.fa-circle-check]="item.statut === 'actif'" [class.fa-clock]="item.statut === 'en-attente'" [class.fa-triangle-exclamation]="item.statut === 'echu'"></i>
+                                        {{ item.statutLabel }}
+                                    </span>
+                                </td>
+                                <td class="text-center actions-col">
+                                    <div class="table-actions-stack">
+                                        <button class="table-action-btn" title="Voir attestation" (click)="triggerToast('Attestation ' + item.ref + ' consultée')">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                        <button class="table-action-btn" title="Télécharger récépissé" (click)="triggerToast('Récépissé ' + item.ref + ' téléchargé')">
+                                            <i class="fas fa-file-invoice"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (filteredItems.length === 0) {
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="fas fa-shield-halved fs-2 mb-3 d-block opacity-50"></i>
+                                    Aucun cautionnement ne correspond aux filtres sélectionnés.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer -->
+            <div class="table-footer-pagination">
+                <div class="records-info">
+                    Affichage de <strong>{{ filteredItems.length }}</strong> sur <strong>{{ currentItems.length }}</strong> cautionnements enregistrés
+                </div>
+                <div class="pagination-buttons">
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FLOATING AI ASSISTANT FAB -->
+    <div class="floating-fab" title="Assistant Cautionnement IA" (click)="triggerToast('Assistant Cautionnement activé. Posez votre question.')">
+        <i class="fas fa-robot fs-5"></i>
     </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="export-toast" [class.show]="showToast">
+        <i class="fas fa-circle-check text-success fs-5"></i>
+        <span>{{ toastMessage }}</span>
+    </div>
+
 </div>

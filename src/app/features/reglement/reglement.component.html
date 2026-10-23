@@ -1,203 +1,581 @@
-<div class="container-fluid py-4 animate__animated animate__fadeIn">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold text-dark mb-1">Service Règlement</h4>
-            <p class="text-secondary mb-0">Gestion centralisée des paiements et rapprochements inter-agences</p>
-        </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary btn-sm px-3 shadow-sm border-2">
-                <i class="fas fa-file-export me-2"></i> Exporter
-            </button>
-            <button class="btn btn-primary btn-sm px-3 shadow-sm">
-                <i class="fas fa-plus me-2"></i> Nouveau Règlement
-            </button>
-        </div>
-    </div>
+<div class="svc-page-container">
 
-    <!-- Analyse Selector Component -->
-    <app-analyse-selector 
-        title="Configuration de l'Analyse Règlement" 
-        [isDragDropMode]="isDragDropMode"
-        [(selectedPeriod)]="selectedPeriod" 
-        [(availableIndicators)]="availableIndicators"
-        [(selectedIndicators)]="selectedIndicators" 
-        [(availableAxes)]="availableAxes" 
-        [(selectedAxes)]="selectedAxes"
-        (modeChanged)="toggleMode($event)" 
-        (analysisTriggered)="onAnalysisTriggered($event)">
-    </app-analyse-selector>
+    <!-- 1. EN-TÊTE OFFICIEL DE SERVICE -->
+    <header class="page-header-svc">
+        <div class="breadcrumb-area">
+            <div class="brand-breadcrumb">
+                <span>SYGACUT-BI</span>
+                <i class="fas fa-chevron-right separator"></i>
+                <span>Services Opérationnels</span>
+                <i class="fas fa-chevron-right separator"></i>
+                <span class="active-crumb">Gestion des Règlements & Paiements</span>
+            </div>
+            <h1 class="service-title">
+                Service des Règlements, Paiements & Imputations
+            </h1>
+            <p class="service-description">
+                Télétransmission des mandats, apurement des imputations provisoires (IP) et rapprochement bancaire ACCT-ACCD
+            </p>
+        </div>
 
-    <!-- Main KPI Cards -->
-    <div class="row g-4 mb-4">
-        @for (kpi of kpis; track kpi.titre) {
-        <div class="col-12 col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100 overflow-hidden bg-white rounded-3">
-                <div class="card-body p-4 position-relative">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="bg-{{kpi.type}}-soft p-2 rounded-3">
-                            <i class="fas" [ngClass]="{
-                                'fa-university': kpi.titre.includes('BCEAO') || kpi.titre.includes('Concordance'),
-                                'fa-money-bill-wave': kpi.titre.includes('Règlement'),
-                                'fa-sync-alt': kpi.titre.includes('Rapprochement'),
-                                'fa-file-invoice': kpi.titre.includes('Imputations')
-                            }" class="text-{{kpi.type}}"></i>
-                        </div>
-                        <span class="badge rounded-pill bg-{{kpi.type}}-soft text-{{kpi.type}} px-2 py-1 fs-9 fw-bold">
-                            {{ kpi.info }}
-                        </span>
-                    </div>
-                    <p class="text-secondary fs-8 fw-medium text-uppercase tracking-wider mb-1">{{ kpi.titre }}</p>
-                    <h3 class="fw-bold text-dark mb-0">{{ kpi.valeur }}</h3>
-                </div>
+        <div class="header-actions-area">
+            <button class="btn btn-outline-light-custom" (click)="refreshData()" title="Rafraîchir les flux bancaires">
+                <i class="fas fa-arrows-rotate"></i>
+            </button>
+            <div class="export-group">
+                <button class="btn btn-export excel" (click)="exportExcel()">
+                    <i class="far fa-file-excel"></i>
+                    <span>Export Excel</span>
+                </button>
+                <button class="btn btn-export pdf" (click)="exportPdf()">
+                    <i class="far fa-file-pdf"></i>
+                    <span>Export PDF</span>
+                </button>
             </div>
         </div>
-        }
-    </div>
+    </header>
 
-    <!-- Charts & Secondary KPIs -->
-    <div class="row g-4 mb-4">
-        <!-- Main Chart -->
-        <div class="col-12 col-lg-8">
-            <div class="card border-0 shadow-sm h-100 bg-white rounded-3">
-                <div class="card-header bg-transparent border-0 p-4 pb-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="fw-bold mb-0 text-dark">Flux de Règlements par Nature</h6>
-                        <div class="btn-group">
-                            <button class="btn btn-light btn-sm px-3 active border">Débit</button>
-                            <button class="btn btn-light btn-sm px-3 border">Crédit</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center justify-content-center bg-light border-dashed rounded-3 p-5" style="height: 320px;">
-                        <div class="text-center">
-                            <i class="fas fa-chart-bar fs-1 text-primary-200 mb-3"></i>
-                            <p class="text-secondary small">Graphique des Flux (Histogramme empilé)</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- 2. BANDEAU DE FILTRAGE RÉACTIF & SÉLECTEUR DE SOUS-DOMAINE -->
+    <section class="filter-strip-card">
+        <!-- Sub-Domain Navigation Pills -->
+        <div class="subdomain-tabs">
+            <button class="tab-pill" [class.active]="activeSubDomain === 'fournisseurs'" (click)="selectSubDomain('fournisseurs')">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Règlements Fournisseurs & Mandats</span>
+            </button>
+            <button class="tab-pill" [class.active]="activeSubDomain === 'imputations'" (click)="selectSubDomain('imputations')">
+                <i class="fas fa-clock-rotate-left"></i>
+                <span>Imputations Provisoires (IP)</span>
+            </button>
+            <button class="tab-pill" [class.active]="activeSubDomain === 'rapprochement'" (click)="selectSubDomain('rapprochement')">
+                <i class="fas fa-scale-balanced"></i>
+                <span>Rapprochement Bancaire ACCT-ACCD</span>
+            </button>
         </div>
 
-        <!-- Secondary KPIs -->
-        <div class="col-12 col-lg-4">
-            <div class="card border-0 shadow-sm h-100 bg-white rounded-3">
-                <div class="card-header bg-transparent border-0 p-4 pb-0">
-                    <h6 class="fw-bold mb-0 text-dark">Indicateurs de Performance</h6>
-                </div>
-                <div class="card-body p-4">
-                    <div class="vstack gap-4">
-                        @for (akpi of advancedKpis; track akpi.titre) {
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fs-8 fw-bold text-secondary text-uppercase">{{ akpi.titre }}</span>
-                                <span class="fs-8 fw-bold text-dark">{{ akpi.valeur }}</span>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-{{akpi.type}}" role="progressbar" 
-                                     [style.width]="akpi.valeur.replace('%', '') + '%'" 
-                                     aria-label="Progress"></div>
-                            </div>
-                            <div class="d-flex justify-content-between mt-1">
-                                <span class="fs-9 text-secondary fst-italic">{{ akpi.info }}</span>
-                                <i class="fas fa-check-circle text-success fs-9 ms-1" *ngIf="akpi.type === 'success'"></i>
-                                <i class="fas fa-exclamation-triangle text-warning fs-9 ms-1" *ngIf="akpi.type === 'warning'"></i>
-                            </div>
-                        </div>
+        <!-- Filter Controls Row -->
+        <div class="filter-controls-row">
+            <!-- Période Dropdown -->
+            <div class="dropdown-filter">
+                <label class="filter-label">
+                    <i class="far fa-calendar-alt"></i> Période :
+                </label>
+                <div class="custom-select-wrapper">
+                    <select [(ngModel)]="activePeriod" (change)="selectPeriod(activePeriod)">
+                        @for (p of periodsList; track p) {
+                            <option [value]="p">{{ p }}</option>
                         }
+                    </select>
+                    <i class="fas fa-chevron-down select-caret"></i>
+                </div>
+            </div>
+
+            <!-- Banque Dropdown -->
+            <div class="dropdown-filter">
+                <label class="filter-label">
+                    <i class="fas fa-building-columns"></i> Banque / Compte :
+                </label>
+                <div class="custom-select-wrapper">
+                    <select [(ngModel)]="activePerimetre" (change)="selectPerimetre(activePerimetre)">
+                        @for (perim of perimetresList; track perim) {
+                            <option [value]="perim">{{ perim }}</option>
+                        }
+                    </select>
+                    <i class="fas fa-chevron-down select-caret"></i>
+                </div>
+            </div>
+
+            <!-- Chips Interactifs (Alignés sur Cautionnement) -->
+            <div class="filter-chips">
+                @for (chip of filterChips; track chip) {
+                    <div class="filter-chip">
+                        <span>{{ chip }}</span>
+                        <i class="fas fa-xmark chip-close" (click)="removeChip(chip); $event.stopPropagation()" title="Retirer ce filtre"></i>
+                    </div>
+                }
+                <div class="dropdown" [class.show]="isFilterDropdownOpen">
+                    <button class="filter-chip text-primary border-primary bg-white dropdown-toggle" type="button" (click)="toggleFilterDropdown($event)" [attr.aria-expanded]="isFilterDropdownOpen" style="border-style: dashed !important; cursor: pointer;">
+                        <i class="fas fa-plus fs-9 me-1"></i> Ajouter un filtre
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 py-1 fs-8" [class.show]="isFilterDropdownOpen" style="min-width: 260px; z-index: 1050;">
+                        <li class="dropdown-header text-uppercase fw-bold text-muted fs-9 px-3 pb-1">
+                            <i class="fas fa-sliders me-1 text-primary"></i> Filtres Règlement
+                        </li>
+                        @for (c of allAvailableChips; track c) {
+                            @if (!filterChips.includes(c)) {
+                                <li>
+                                    <a class="dropdown-item py-1.5 px-3 cursor-pointer d-flex align-items-center" (click)="addChip(c)">
+                                        <i class="fas fa-plus text-primary fs-9 me-2"></i>{{ c }}
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Mode Switcher -->
+        <div class="view-mode-bar">
+            <button class="mode-tab-btn" [class.active]="viewMode === 'synthese'" (click)="viewMode = 'synthese'">
+                <i class="fas fa-table-cells-large"></i>
+                <span>Synthèse & Flux Opérationnels</span>
+            </button>
+            <button class="mode-tab-btn" [class.active]="viewMode === 'avancee'" (click)="viewMode = 'avancee'">
+                <i class="fas fa-chart-line"></i>
+                <span>Analyses Avancées</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 2b. ADVANCED MULTIDIMENSIONAL SELECTOR (WHEN IN 'AVANCEE' MODE) -->
+    @if (viewMode === 'avancee') {
+        <div class="advanced-selector-wrap animate-fadeIn">
+            <app-analyse-selector 
+                [title]="'Analyse Multidimensionnelle des Règlements: ' + (activeSubDomain === 'fournisseurs' ? 'Règlements Fournisseurs' : (activeSubDomain === 'imputations' ? 'Imputations Provisoires (IP)' : 'Rapprochement Bancaire ACCT-ACCD'))"
+                [isDragDropMode]="isDragDropMode"
+                [forceDragDrop]="true"
+                [periodsList]="periodsList"
+                [(selectedPeriod)]="activePeriod"
+                [(availableIndicators)]="currentAvailableIndicators"
+                [(selectedIndicators)]="currentSelectedIndicators"
+                [(availableAxes)]="currentAvailableAxes"
+                [(selectedAxes)]="currentSelectedAxes"
+                (modeChanged)="isDragDropMode = $event === 'dragdrop'"
+                (analysisTriggered)="generateAnalysis($event)">
+            </app-analyse-selector>
+        </div>
+    }
+
+    @if (viewMode === 'synthese') {
+    <!-- 3. KPI METRICS GRID (EXACT SAME FORMAT AS TRÉSORERIE) -->
+    <section class="kpi-grid">
+        @for (kpi of currentKpis; track kpi.titre) {
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-title">
+                        <i class="fas {{ kpi.icon }}"></i>
+                        {{ kpi.titre }}
+                    </span>
+                    <div class="kpi-icon-box" [class.orange]="kpi.colorTheme === 'orange'" [class.green]="kpi.colorTheme === 'green'" [class.blue]="kpi.colorTheme === 'blue'" [class.red]="kpi.colorTheme === 'red'">
+                        <i class="fas {{ kpi.icon }}"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-row">
+                    <span class="kpi-big-value">{{ kpi.valeur }}</span>
+                    <span class="kpi-unit">{{ kpi.unite }}</span>
+                </div>
+                <div class="mini-bar-track">
+                    <div class="mini-bar-fill fill-{{ kpi.progressColor }}" [style.width.%]="kpi.progress"></div>
+                </div>
+                <div class="kpi-footer">
+                    <span class="kpi-status-badge {{ kpi.badgeClass }}">
+                        <i class="fas {{ kpi.badgeIcon }}"></i>
+                        {{ kpi.badgeText }}
+                    </span>
+                    <span class="kpi-bench">{{ kpi.bench }}</span>
+                </div>
+            </div>
+        }
+    </section>
+
+    <!-- 4. MAIN ANALYTICS SECTION (2/3 FLOW CANVAS + 1/3 BREAKDOWN) -->
+    <section class="analytics-grid">
+        <!-- LEFT: PIPELINE D'EXÉCUTION DU RÈGLEMENT -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box orange">
+                        <i class="fas fa-money-check-dollar"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">
+                            {{ currentFlowData.title }}
+                        </h2>
+                        <div class="panel-subtitle">
+                            Traçabilité ACCT : De la validation du mandat à l'exécution bancaire et lettrage miroir
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-tabs">
+                    <button class="panel-tab" [class.active]="chartTab === 'flux'" (click)="setChartTab('flux')">
+                        Circuit Bancaire
+                    </button>
+                    <button class="panel-tab" [class.active]="chartTab === 'canaux'" (click)="setChartTab('canaux')">
+                        Par Canal
+                    </button>
+                    <button class="panel-tab" [class.active]="chartTab === 'banques'" (click)="setChartTab('banques')">
+                        Par Banque
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <!-- SVG Sankey Flow Pipeline -->
+                <div class="flow-canvas-container">
+                    <div class="flow-nodes-row">
+                        <!-- Step 1: Émission -->
+                        <div class="flow-column">
+                            <div class="flow-node-box source-node">
+                                <div class="flow-node-header">
+                                    <span>{{ currentFlowData.sourceTitle }}</span>
+                                    <i class="fas fa-circle-arrow-right text-primary"></i>
+                                </div>
+                                <div class="flow-node-amount">
+                                    {{ currentFlowData.totalAmount }}
+                                </div>
+                                <div class="flow-node-pct text-muted">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>{{ currentFlowData.mandatsCount }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Connector Streams -->
+                        <div class="flow-svg-connector">
+                            <svg width="100" height="140" viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M 0 35 C 50 35, 50 20, 100 20" stroke="#10b981" stroke-width="6" stroke-opacity="0.6" fill="none"/>
+                                <path d="M 0 55 C 50 55, 50 70, 100 70" stroke="#f59e0b" stroke-width="4" stroke-opacity="0.6" fill="none"/>
+                                <path d="M 0 75 C 50 75, 50 120, 100 120" stroke="#ef4444" stroke-width="3" stroke-opacity="0.6" fill="none"/>
+                            </svg>
+                        </div>
+
+                        <!-- Step 2: Distribution des Statuts -->
+                        <div class="flow-column">
+                            <!-- Validés -->
+                            <div class="flow-node-box reg-node">
+                                <div class="flow-node-header">
+                                    <span class="text-success-bold">Virements Confirmés ({{ currentFlowData.tauxValides }})</span>
+                                    <span class="kpi-status-badge badge-success">Conforme</span>
+                                </div>
+                                <div class="flow-node-amount text-success-bold">
+                                    {{ currentFlowData.validesAmount }}
+                                </div>
+                                <div class="flow-node-pct text-success">
+                                    <span>Télétransmissions acquittées BCEAO</span>
+                                </div>
+                            </div>
+
+                            <!-- En télé-transmission -->
+                            <div class="flow-node-box wait-node">
+                                <div class="flow-node-header">
+                                    <span class="text-amber-bold">En Télé-transmission ({{ currentFlowData.instructionPct }})</span>
+                                    <span class="kpi-status-badge badge-warning">En cours</span>
+                                </div>
+                                <div class="flow-node-amount text-amber-bold">
+                                    {{ currentFlowData.instructionAmount }}
+                                </div>
+                                <div class="flow-node-pct text-amber">
+                                    <span>Génération des fichiers de virement RTGS</span>
+                                </div>
+                            </div>
+
+                            <!-- Rejets / Anomalies -->
+                            <div class="flow-node-box warn-node">
+                                <div class="flow-node-header">
+                                    <span class="text-danger-bold">Rejets / À Régulariser ({{ currentFlowData.echuPct }})</span>
+                                    <span class="kpi-status-badge badge-danger">Critique</span>
+                                </div>
+                                <div class="flow-node-amount text-danger-bold">
+                                    {{ currentFlowData.echuAmount }}
+                                </div>
+                                <div class="flow-node-pct text-danger">
+                                    <span>Anomalies RIB ou pièces en attente</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Livrables Table -->
-    <div class="card border-0 shadow-sm bg-white rounded-3 overflow-hidden">
-        <div class="card-header bg-transparent border-0 p-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <h6 class="fw-bold mb-0 text-dark">Livrables et Documents de Règlement</h6>
-                <div class="input-group input-group-sm w-25">
-                    <span class="input-group-text bg-light border-end-0 border-secondary border-opacity-25 shadow-none">
-                        <i class="fas fa-search text-secondary"></i>
-                    </span>
-                    <input type="text" class="form-control bg-light border-start-0 border-secondary border-opacity-25 shadow-none" placeholder="Rechercher...">
+        <!-- RIGHT: CIRCULAR DISTRIBUTION & ALERTS -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box blue">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">{{ currentDonutData.title }}</h2>
+                        <div class="panel-subtitle">Répartition par canal de paiement</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-body d-flex flex-column justify-content-between">
+                <!-- Dynamic SVG Donut Chart -->
+                <div class="donut-chart-wrapper">
+                    <svg viewBox="0 0 36 36" class="donut-svg">
+                        <path class="donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3.6" />
+                        <!-- Valide Stream -->
+                        <path class="donut-segment segment-green"
+                              [attr.stroke-dasharray]="currentDonutData.pctValide + ', 100'"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none" stroke="#10b981" stroke-width="3.8" stroke-linecap="round" />
+                        <!-- En cours Stream -->
+                        <path class="donut-segment segment-amber"
+                              [attr.stroke-dasharray]="currentDonutData.pctEnCours + ', 100'"
+                              [attr.stroke-dashoffset]="-(currentDonutData.pctValide)"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none" stroke="#f59e0b" stroke-width="3.8" />
+                    </svg>
+                    <div class="donut-center-label">
+                        <div class="donut-center-val">{{ currentDonutData.pctValide }}%</div>
+                        <div class="donut-center-sub">Télétransmis</div>
+                    </div>
+                </div>
+
+                <!-- Donut Legend -->
+                <div class="donut-legend-list">
+                    <div class="legend-row">
+                        <div class="legend-dot bg-success"></div>
+                        <span class="legend-name">{{ currentDonutData.label1 }}</span>
+                        <span class="legend-amount text-success-bold">{{ currentDonutData.amount1 }}</span>
+                    </div>
+                    <div class="legend-row">
+                        <div class="legend-dot bg-warning"></div>
+                        <span class="legend-name">{{ currentDonutData.label2 }}</span>
+                        <span class="legend-amount text-amber-bold">{{ currentDonutData.amount2 }}</span>
+                    </div>
+                    <div class="legend-row">
+                        <div class="legend-dot bg-danger"></div>
+                        <span class="legend-name">{{ currentDonutData.label3 }}</span>
+                        <span class="legend-amount text-danger-bold">{{ currentDonutData.amount3 }}</span>
+                    </div>
+                </div>
+
+                <!-- Fast Alert Callout -->
+                <div class="fast-alert-callout">
+                    <i class="fas fa-shield-halved alert-callout-icon"></i>
+                    <div>
+                        <div class="alert-callout-title">Rapprochement Bancaire Automatisé</div>
+                        <div class="alert-callout-desc">
+                            94.2% des règlements sont lettrés de manière automatique avec les relevés télématiques BCEAO. 14 dossiers d'imputations provisoires sont en cours de régularisation.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light border-bottom border-top border-secondary border-opacity-10">
-                    <tr>
-                        <th class="ps-4 py-3 text-secondary text-uppercase fs-9 fw-bold">Type de Document</th>
-                        <th class="py-3 text-secondary text-uppercase fs-9 fw-bold">Dernière Génération</th>
-                        <th class="py-3 text-secondary text-uppercase fs-9 fw-bold">Statut de Concordance</th>
-                        <th class="text-end pe-4 py-3 text-secondary text-uppercase fs-9 fw-bold">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="border-top-0">
-                    <tr>
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-primary-soft p-2 rounded-2 me-3">
-                                    <i class="fas fa-file-invoice text-primary fs-8"></i>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0 fs-8 fw-bold">Certificat de Concordance Bancaire (CCB)</h6>
-                                    <span class="fs-9 text-secondary">Rapprochement BCEAO / ACCT</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="fs-8 fw-medium">12 Mars 2026, 09:45</span></td>
-                        <td><span class="badge bg-success-soft text-success px-3 fs-9">Équilibré (0.02%)</span></td>
-                        <td class="text-end pe-4">
-                            <button class="btn btn-link btn-sm text-primary p-0 me-3 shadow-none"><i class="fas fa-download"></i></button>
-                            <button class="btn btn-link btn-sm text-secondary p-0 shadow-none"><i class="fas fa-ellipsis-v"></i></button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-info-soft p-2 rounded-2 me-3">
-                                    <i class="fas fa-exchange-alt text-info fs-8"></i>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0 fs-8 fw-bold">Rapprochement ACCT-ACCD</h6>
-                                    <span class="fs-9 text-secondary">Réconciliation inter-agences</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="fs-8 fw-medium">11 Mars 2026, 16:20</span></td>
-                        <td><span class="badge bg-success-soft text-success px-3 fs-9">Concordant (96.5%)</span></td>
-                        <td class="text-end pe-4">
-                            <button class="btn btn-link btn-sm text-primary p-0 me-3 shadow-none"><i class="fas fa-download"></i></button>
-                            <button class="btn btn-link btn-sm text-secondary p-0 shadow-none"><i class="fas fa-ellipsis-v"></i></button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-warning-soft p-2 rounded-2 me-3">
-                                    <i class="fas fa-file-signature text-warning fs-8"></i>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0 fs-8 fw-bold">Compte d'Imputation Provisoire (CIP)</h6>
-                                    <span class="fs-9 text-secondary">Suivi des écritures en attente</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="fs-8 fw-medium">10 Mars 2026, 11:30</span></td>
-                        <td><span class="badge bg-warning-soft text-warning px-3 fs-9">Contrôle Requis (2.1%)</span></td>
-                        <td class="text-end pe-4">
-                            <button class="btn btn-link btn-sm text-primary p-0 me-3 shadow-none"><i class="fas fa-download"></i></button>
-                            <button class="btn btn-link btn-sm text-secondary p-0 shadow-none"><i class="fas fa-ellipsis-v"></i></button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    </section>
+
+    <!-- 5. LIVE TELEMETRY BAR -->
+    <section class="telemetry-bar">
+        <div class="telemetry-item">
+            <span class="telemetry-icon-dot bg-success"></span>
+            <span class="telemetry-label">Liaison Bancaire :</span>
+            <strong class="telemetry-val">{{ currentTelemetry.syncStatus }}</strong>
         </div>
-        <div class="card-footer bg-transparent border-0 p-4 text-center">
-            <button class="btn btn-outline-primary btn-sm px-4 shadow-sm border-2">Voir tous les documents</button>
+        <div class="telemetry-item">
+            <i class="fas fa-building-columns text-primary me-1"></i>
+            <span class="telemetry-label">Canaux Actifs :</span>
+            <strong class="telemetry-val">{{ currentTelemetry.regiesConnectees }}</strong>
         </div>
+        <div class="telemetry-item">
+            <i class="fas fa-check-double text-success me-1"></i>
+            <span class="telemetry-label">Concordance CUT :</span>
+            <strong class="telemetry-val text-success">{{ currentTelemetry.tauxConcordance }}</strong>
+        </div>
+        <div class="telemetry-item">
+            <i class="far fa-clock text-muted me-1"></i>
+            <span class="telemetry-label">Actualisation :</span>
+            <span class="telemetry-sub">{{ currentTelemetry.delaiActualisation }}</span>
+        </div>
+    </section>
+    }
+
+    <!-- 6. ANALYSES AVANCÉES MODE DWH (DUAL GRAPHS WHEN IN 'AVANCEE' MODE) -->
+    @if (viewMode === 'avancee') {
+    <section class="analytics-grid">
+        <div class="panel-card">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box orange">
+                        <i class="fas fa-chart-column"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">Volume des Règlements par Établissement Bancaire</h2>
+                        <div class="panel-subtitle">Comparatif - Exercice en cours</div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body" style="height: 320px;">
+                <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="'bar'"></canvas>
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <div class="panel-header">
+                <div class="panel-title-block">
+                    <div class="kpi-icon-box green">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">Évolution Rapprochement Auto & Délai de Paiement</h2>
+                        <div class="panel-subtitle">Suivi longitudinal sur 6 mois</div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body" style="height: 320px;">
+                <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
+            </div>
+        </div>
+    </section>
+    }
+
+    <!-- 7. TABLEAU DE BORD OPÉRATIONNEL DES RÈGLEMENTS -->
+    <section class="panel-card">
+        <div class="panel-header">
+            <div class="panel-title-block">
+                <div class="kpi-icon-box orange">
+                    <i class="fas fa-list-check"></i>
+                </div>
+                <div>
+                    <h2 class="panel-title">
+                        Situation des Règlements, Mandats & Imputations
+                    </h2>
+                    <div class="panel-subtitle">
+                        Registre officiel ACCT : État d'exécution des virements, lettrage automatique et apurement des suspensions
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body p-0">
+            <!-- Table Search & Quick Filter Bar -->
+            <div class="table-toolbar">
+                <div class="search-input-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Rechercher par référence, bénéficiaire, banque, objet..." [(ngModel)]="searchQuery" (input)="updateFilteredItems()" />
+                </div>
+
+                <div class="table-quick-filters">
+                    <span class="filter-caption">Afficher :</span>
+                    <button class="pill-filter" [class.active]="tableFilter === 'all'" (click)="setTableFilter('all')">
+                        Tous ({{ getCount('all') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'regle'" (click)="setTableFilter('regle')">
+                        Règlements Exécutés ({{ getCount('regle') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'en-cours'" (click)="setTableFilter('en-cours')">
+                        En télé-transmission ({{ getCount('en-cours') }})
+                    </button>
+                    <button class="pill-filter" [class.active]="tableFilter === 'bloque'" (click)="setTableFilter('bloque')">
+                        Rejets / Bloqués ({{ getCount('bloque') }})
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Responsive -->
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 13%;">RÉF MANDAT / RÈGLEMENT</th>
+                            <th style="width: 23%;">BÉNÉFICIAIRE & OBJET</th>
+                            <th style="width: 15%;">MINISTÈRE & BANQUE</th>
+                            <th style="width: 11%;">ÉCHÉANCE</th>
+                            <th style="width: 13%;">MONTANT RÈGLEMENT</th>
+                            <th style="width: 9%;">CONCORDANCE</th>
+                            <th style="width: 11%;">STATUT</th>
+                            <th class="text-center actions-col" style="width: 5%;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of filteredItems; track item.ref) {
+                            <tr>
+                                <td>
+                                    <span class="ref-code-cell">{{ item.ref }}</span>
+                                    <div class="fs-9 text-muted mt-1">{{ item.typeReglement }}</div>
+                                </td>
+                                <td>
+                                    <div class="ministry-cell">
+                                        <div class="ministry-badge-avatar {{ item.avatarClass }}">{{ item.avatarInitials }}</div>
+                                        <div>
+                                            <div class="ministry-name">{{ item.beneficiaire }}</div>
+                                            <div class="ministry-subtext">{{ item.objet }}</div>
+                                            <div class="fs-9 text-primary mt-0.5">
+                                                <i class="fas fa-building-columns me-1"></i>{{ item.banque }} &bull; {{ item.canalPaiement }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold fs-8 text-dark">{{ item.ministere }}</div>
+                                    <div class="fs-9 text-muted">{{ item.canalPaiement }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold fs-8 text-dark">{{ item.dateEcheance }}</div>
+                                    <div class="fs-9 text-muted">Émis le {{ item.dateEmission }}</div>
+                                </td>
+                                <td>
+                                    <span class="amount-cell text-primary">
+                                        {{ item.montant }}
+                                    </span>
+                                    <span class="amount-unit ms-1">FCFA</span>
+                                </td>
+                                <td>
+                                    <div class="progress-cell-box">
+                                        <div class="progress-cell-bar">
+                                            <div class="progress-cell-fill" [style.width.%]="item.concordancePct" [class.bg-success]="item.concordancePct >= 95" [class.bg-warning]="item.concordancePct >= 85 && item.concordancePct < 95" [class.bg-danger]="item.concordancePct < 85"></div>
+                                        </div>
+                                        <span class="progress-pct-label" [class.text-success]="item.concordancePct >= 95" [class.text-warning]="item.concordancePct >= 85 && item.concordancePct < 95" [class.text-danger]="item.concordancePct < 85">{{ item.concordancePct }}%</span>
+                                    </div>
+                                    <div class="fs-9 text-muted mt-0.5">{{ item.delaiJours }} jours délai</div>
+                                </td>
+                                <td>
+                                    <span class="status-tag" [class.regule]="item.statut === 'regle'" [class.en-cours]="item.statut === 'en-cours'" [class.retard]="item.statut === 'bloque'">
+                                        <i class="fas" [class.fa-circle-check]="item.statut === 'regle'" [class.fa-clock]="item.statut === 'en-cours'" [class.fa-triangle-exclamation]="item.statut === 'bloque'"></i>
+                                        {{ item.statutLabel }}
+                                    </span>
+                                </td>
+                                <td class="text-center actions-col">
+                                    <div class="table-actions-stack">
+                                        <button class="table-action-btn" title="Voir avis d'opéré" (click)="triggerToast('Avis d\'opéré ' + item.ref + ' consulté')">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                        <button class="table-action-btn" title="Télécharger bordereau de virement" (click)="triggerToast('Bordereau de virement ' + item.ref + ' téléchargé')">
+                                            <i class="fas fa-file-invoice"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (filteredItems.length === 0) {
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="fas fa-file-invoice-dollar fs-2 mb-3 d-block opacity-50"></i>
+                                    Aucun règlement ne correspond aux critères sélectionnés.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer -->
+            <div class="table-footer-pagination">
+                <div class="records-info">
+                    Affichage de <strong>{{ filteredItems.length }}</strong> sur <strong>{{ allReglementItems.length }}</strong> règlements enregistrés
+                </div>
+                <div class="pagination-buttons">
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FLOATING AI ASSISTANT FAB -->
+    <div class="floating-fab" title="Assistant Règlements IA" (click)="triggerToast('Assistant Règlements activé. Posez votre question.')">
+        <i class="fas fa-robot fs-5"></i>
     </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="export-toast" [class.show]="showToast">
+        <i class="fas fa-circle-check text-success fs-5"></i>
+        <span>{{ toastMessage }}</span>
+    </div>
+
 </div>

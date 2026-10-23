@@ -1025,27 +1025,31 @@ $bg-card: #ffffff;
     .table-responsive {
         width: 100%;
         overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #e2e8f0 transparent;
     }
 
     table.modern-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         text-align: left;
 
         th {
             background: #f8fafc;
-            padding: 11px 16px;
+            padding: 9px 8px;
             font-size: 0.72rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: $text-muted;
             border-bottom: 1px solid $border-color;
+            white-space: nowrap;
         }
 
         td {
-            padding: 12px 16px;
-            font-size: 0.82rem;
+            padding: 7px 8px;
+            font-size: 0.8rem;
             border-bottom: 1px solid $border-subtle;
             color: $text-main;
             vertical-align: middle;
@@ -1061,83 +1065,80 @@ $bg-card: #ffffff;
         font-weight: 700;
         color: $primary-orange;
         background: $primary-orange-light;
-        padding: 3px 8px;
-        border-radius: 6px;
+        padding: 2px 6px;
+        border-radius: 5px;
         display: inline-block;
-        font-size: 0.76rem;
+        font-size: 0.74rem;
         border: 1px solid $primary-orange-subtle;
+        white-space: nowrap;
     }
 
     .ministry-cell {
         display: flex;
         align-items: center;
-        gap: 10px;
-    }
+        gap: 8px;
+        min-width: 0;
 
-    .ministry-badge-avatar {
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
-        font-weight: 800;
+        .ministry-badge-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+            flex-shrink: 0;
 
-        &.avatar-blue {
-            background: #e0f2fe;
-            color: #0284c7;
+            &.avatar-blue { background: #e0f2fe; color: #0284c7; }
+            &.avatar-purple { background: #f3e8ff; color: #9333ea; }
+            &.avatar-amber { background: #fef3c7; color: #d97706; }
+            &.avatar-emerald { background: #d1fae5; color: #059669; }
+            &.avatar-indigo { background: #e0e7ff; color: #4f46e5; }
         }
-        &.avatar-purple {
-            background: #f3e8ff;
-            color: #9333ea;
-        }
-        &.avatar-amber {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        &.avatar-emerald {
-            background: #d1fae5;
-            color: #059669;
-        }
-        &.avatar-indigo {
-            background: #e0e7ff;
-            color: #4f46e5;
-        }
-    }
 
-    .ministry-name {
-        font-weight: 700;
-        color: $text-main;
-        font-size: 0.82rem;
-    }
+        .ministry-name {
+            font-weight: 700;
+            color: $text-main;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
 
-    .ministry-subtext {
-        font-size: 0.7rem;
-        color: $text-muted;
+        .ministry-subtext {
+            font-size: 0.7rem;
+            color: $text-muted;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
     }
 
     .amount-cell {
         font-family: 'JetBrains Mono', monospace;
         font-weight: 800;
         font-size: 0.85rem;
+        white-space: nowrap;
     }
 
     .amount-unit {
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         color: $text-muted;
     }
 
     .progress-cell-box {
         display: flex;
         align-items: center;
-        gap: 8px;
-        width: 120px;
+        gap: 6px;
+        width: 75px;
     }
 
     .progress-cell-bar {
         flex: 1;
-        height: 6px;
+        height: 5px;
         background: #e2e8f0;
         border-radius: 9999px;
         overflow: hidden;
@@ -1149,19 +1150,20 @@ $bg-card: #ffffff;
     }
 
     .progress-pct-label {
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         font-weight: 700;
-        width: 34px;
+        width: 30px;
     }
 
     .status-tag {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        padding: 3px 9px;
+        gap: 4px;
+        padding: 2px 7px;
         border-radius: 9999px;
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         font-weight: 700;
+        white-space: nowrap;
 
         &.regule {
             background: #ecfdf5;
@@ -1182,24 +1184,46 @@ $bg-card: #ffffff;
         }
     }
 
+    .actions-col {
+        width: 54px !important;
+        min-width: 54px !important;
+        max-width: 56px !important;
+        text-align: center !important;
+        padding: 3px 2px !important;
+    }
+
+    .table-actions-stack {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        margin: 0 auto;
+    }
+
     .table-action-btn {
-        background: transparent;
+        background: #ffffff;
         border: 1px solid $border-color;
-        width: 30px;
-        height: 30px;
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        min-height: 28px;
         border-radius: 6px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         color: $text-muted;
         cursor: pointer;
-        font-size: 0.8rem;
+        font-size: 0.76rem;
+        padding: 0;
+        margin: 0 !important;
         transition: all 0.15s;
 
         &:hover {
             background: $primary-orange-light;
             border-color: $primary-orange;
             color: $primary-orange;
+            transform: scale(1.05);
         }
     }
 
