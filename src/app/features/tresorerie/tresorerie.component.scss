@@ -1470,3 +1470,38 @@ $bg-card: #ffffff;
 .cursor-pointer {
     cursor: pointer;
 }
+
+:host-context([data-bs-theme="dark"]) {
+    .filter-dropdown .dropdown-menu {
+        background: #162032 !important;
+        border: 1px solid #283548 !important;
+
+        .dropdown-item {
+            color: #cbd5e1 !important;
+
+            span {
+                color: #cbd5e1 !important;
+            }
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.08) !important;
+                color: #ffffff !important;
+
+                span {
+                    color: #ffffff !important;
+                }
+            }
+
+            &.active {
+                background: rgba(247, 127, 0, 0.22) !important;
+                border-left: 3px solid #F77F00 !important;
+                color: #ffffff !important;
+
+                span {
+                    color: #ffffff !important;
+                    font-weight: 700 !important;
+                }
+            }
+        }
+    }
+}

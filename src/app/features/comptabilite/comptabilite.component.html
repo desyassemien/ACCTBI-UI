@@ -37,9 +37,13 @@
 
         <!-- Action Buttons -->
         <div class="action-group-right">
-            <button class="btn-svc-secondary" (click)="exportData('EXCEL')">
+            <button class="btn-svc-secondary" (click)="exportData('EXCEL')" title="Exporter en Excel">
                 <i class="far fa-file-excel text-success"></i>
-                <span>Exporter</span>
+                <span>Export Excel</span>
+            </button>
+            <button class="btn-svc-secondary" (click)="exportData('PDF')" title="Exporter en PDF">
+                <i class="fas fa-file-pdf text-danger"></i>
+                <span>Export PDF</span>
             </button>
             <button class="btn-svc-primary" (click)="refreshData()">
                 <i class="fas fa-arrows-rotate"></i>

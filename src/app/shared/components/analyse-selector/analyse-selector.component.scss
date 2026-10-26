@@ -160,3 +160,47 @@
         filter: brightness(1.08);
     }
 }
+
+:host-context([data-bs-theme="dark"]) {
+    .dropdown-menu {
+        background-color: #162032 !important;
+        border: 1px solid #283548 !important;
+
+        li:hover {
+            background-color: rgba(255, 255, 255, 0.08) !important;
+
+            .form-check-label {
+                color: #ffffff !important;
+            }
+        }
+
+        .form-check-label {
+            color: #cbd5e1 !important;
+        }
+    }
+
+    .form-select,
+    select {
+        background-color: #0f172a !important;
+        border-color: #283548 !important;
+        color: #f8fafc !important;
+    }
+
+    .drag-chip {
+        background: #1e293b !important;
+        border-color: #283548 !important;
+        color: #e2e8f0 !important;
+
+        &.active-chip {
+            background-color: rgba(247, 127, 0, 0.22) !important;
+            border-color: rgba(247, 127, 0, 0.5) !important;
+            color: #ffffff !important;
+        }
+
+        &.active-chip-axis {
+            background-color: rgba(16, 185, 129, 0.22) !important;
+            border-color: rgba(16, 185, 129, 0.5) !important;
+            color: #ffffff !important;
+        }
+    }
+}

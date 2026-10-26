@@ -1,285 +1,351 @@
-<div class="rapport-container">
+<div class="svc-page-container">
 
-    <!-- Page Header with Breadcrumb -->
-    <div class="mb-4">
-        <div class="d-flex align-items-center gap-2 mb-3">
-            <a routerLink="/statistiques" class="text-primary text-decoration-none">
-                <i class="fas fa-arrow-left me-2"></i>Retour à Statistiques
-            </a>
-        </div>
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-4 gap-3 gap-md-0">
-            <div>
-                <h4 class="fw-bold text-primary-900 mb-1">{{ rapport?.titre }}</h4>
-                <p class="text-secondary mb-0">{{ rapport?.description }}</p>
+    <!-- 1. EN-TÊTE OFFICIEL DE SERVICE (HARMONISÉ SYGACUT-BI) -->
+    <header class="page-header-svc">
+        <div class="breadcrumb-area">
+            <div class="brand-breadcrumb">
+                <a routerLink="/statistiques" class="back-link">
+                    <i class="fas fa-arrow-left me-1.5"></i>Retour au Catalogue
+                </a>
+                <span class="separator">/</span>
+                <span>Services Analytiques</span>
+                <span class="separator">/</span>
+                <span class="active-crumb">{{ rapport?.titre || 'Rapport Analytique' }}</span>
             </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm"
-                    (click)="exportData('excel')">
-                    <i class="far fa-file-excel me-2 text-success"></i> Excel
+            <h1 class="service-title">
+                {{ rapport?.titre }}
+            </h1>
+            <p class="service-description">
+                {{ rapport?.description }}
+            </p>
+        </div>
+
+        <div class="header-actions-area">
+            <div class="export-group">
+                <button class="btn btn-export excel" (click)="exportData('excel')" title="Exporter en Excel">
+                    <i class="far fa-file-excel text-success"></i>
+                    <span>Export Excel</span>
                 </button>
-                <button class="btn btn-outline-secondary d-flex align-items-center bg-white shadow-sm"
-                    (click)="exportData('pdf')">
-                    <i class="far fa-file-pdf me-2 text-danger"></i> PDF
+                <button class="btn btn-export pdf" (click)="exportData('pdf')" title="Exporter en PDF">
+                    <i class="far fa-file-pdf text-danger"></i>
+                    <span>Export PDF</span>
                 </button>
             </div>
         </div>
-    </div>
+    </header>
 
     @if (rapport) {
-    <!-- Filters Section -->
+    <!-- 2. BARRE DE FILTRES ET DE CONTRÔLE (HARMONISÉE) -->
     @if (rapport.filtres && rapport.filtres.length > 0) {
-    <div class="card border-0 shadow-sm bg-white rounded-3 mb-4">
-        <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
-            <h6 class="fw-bold mb-0">Filtres et Paramètres</h6>
-        </div>
-        <div class="card-body p-4">
-            <div class="d-flex align-items-flex-end gap-3 justify-content-between flex-wrap">
-                <!-- Left: Filters -->
-                <div class="d-flex align-items-flex-end gap-3">
-                    <!-- Filtre -->
-                    <div class="filter-group">
-                        <label class="form-label fw-semibold mb-2">Filtre</label>
-                        <select class="form-select" [(ngModel)]="selectedFilter">
+    <section class="filter-strip">
+        <div class="filter-controls-row">
+            <!-- Left: Filter & Period Selectors -->
+            <div class="filter-left-group">
+                <!-- Filtre Dimensionnel -->
+                <div class="filter-control-item">
+                    <label class="control-label">Filtre :</label>
+                    <div class="custom-select-wrapper">
+                        <select class="form-select-custom" [(ngModel)]="selectedFilter">
                             @for (filtre of rapport.filtres; track filtre) {
-                            <option [value]="filtre">{{ filtre }}</option>
+                                <option [value]="filtre">{{ filtre }}</option>
                             }
                         </select>
-                    </div>
-
-                    <!-- Période -->
-                    <div class="filter-group">
-                        <label class="form-label fw-semibold mb-2">Période</label>
-                        <select class="form-select" [(ngModel)]="selectedPeriod">
-                            @for (period of periodOptions; track period.value) {
-                            <option [value]="period.value">{{ period.label }}</option>
-                            }
-                        </select>
-                    </div>
-
-                    <!-- Custom Date Range (shown when "Personnalisé..." is selected) -->
-                    <div class="d-flex gap-2 align-items-center animate__animated animate__fadeIn" [class.d-none]="selectedPeriod !== 'Personnalisé...'">
-                        <div class="d-flex gap-2 align-items-center bg-white px-3 py-1 rounded-3 border border-secondary border-opacity-25" style="width: 320px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
-                            <i class="far fa-calendar-alt text-primary"></i>
-                            <input type="text"
-                                class="form-control form-control-sm text-dark fw-semibold fs-7 border-0 p-0 shadow-none bg-transparent flatpickr-range-input"
-                                placeholder="Choisir une plage..." 
-                                style="height: 24px; cursor: pointer;">
-                        </div>
+                        <i class="fas fa-chevron-down select-caret"></i>
                     </div>
                 </div>
 
-                <!-- Right: Chart Types -->
-                <div class="chart-buttons-group ms-auto">
-                    <div class="btn-group" role="group">
-                        <input type="radio" class="btn-check" name="chartType" id="chart_bar" value="bar"
-                            autocomplete="off" [(ngModel)]="chartType">
-                        <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="chart_bar"
-                            title="Histogramme"><i class="fas fa-chart-bar fs-9"></i></label>
-
-                        <input type="radio" class="btn-check" name="chartType" id="chart_line" value="line"
-                            autocomplete="off" [(ngModel)]="chartType">
-                        <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="chart_line"
-                            title="Courbe"><i class="fas fa-chart-line fs-9"></i></label>
-
-                        <input type="radio" class="btn-check" name="chartType" id="chart_area" value="area"
-                            autocomplete="off" [(ngModel)]="chartType">
-                        <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="chart_area"
-                            title="Zone"><i class="fas fa-chart-area fs-9"></i></label>
-
-                        <input type="radio" class="btn-check" name="chartType" id="chart_table" value="table"
-                            autocomplete="off" [(ngModel)]="chartType">
-                        <label class="btn btn-outline-secondary btn-sm px-2 pt-1 pb-1" for="chart_table"
-                            title="Tableau"><i class="fas fa-table fs-9"></i></label>
+                <!-- Période Selector -->
+                <div class="filter-control-item">
+                    <label class="control-label">Période :</label>
+                    <div class="custom-select-wrapper">
+                        <select class="form-select-custom" [(ngModel)]="selectedPeriod">
+                            @for (period of periodOptions; track period.value) {
+                                <option [value]="period.value">{{ period.label }}</option>
+                            }
+                        </select>
+                        <i class="fas fa-chevron-down select-caret"></i>
                     </div>
+                </div>
+
+                <!-- Custom Date Range (shown when "Personnalisé..." is selected) -->
+                @if (selectedPeriod === 'Personnalisé...') {
+                <div class="custom-date-box animate-fadeIn">
+                    <i class="far fa-calendar-days text-primary me-2"></i>
+                    <input type="text"
+                        class="flatpickr-range-input"
+                        placeholder="Choisir une plage..." 
+                        style="cursor: pointer;">
+                </div>
+                }
+            </div>
+
+            <!-- Right: Chart Types Selector -->
+            <div class="chart-buttons-group ms-auto">
+                <div class="btn-group chart-type-toggle-group" role="group">
+                    <input type="radio" class="btn-check" name="chartType" id="chart_bar" value="bar"
+                        autocomplete="off" [(ngModel)]="chartType">
+                    <label class="btn btn-chart-toggle btn-chart-bar" for="chart_bar"
+                        title="Histogramme"><i class="fas fa-chart-bar"></i></label>
+
+                    <input type="radio" class="btn-check" name="chartType" id="chart_line" value="line"
+                        autocomplete="off" [(ngModel)]="chartType">
+                    <label class="btn btn-chart-toggle btn-chart-line" for="chart_line"
+                        title="Courbe"><i class="fas fa-chart-line"></i></label>
+
+                    <input type="radio" class="btn-check" name="chartType" id="chart_area" value="area"
+                        autocomplete="off" [(ngModel)]="chartType">
+                    <label class="btn btn-chart-toggle btn-chart-area" for="chart_area"
+                        title="Zone"><i class="fas fa-chart-area"></i></label>
+
+                    <input type="radio" class="btn-check" name="chartType" id="chart_table" value="table"
+                        autocomplete="off" [(ngModel)]="chartType">
+                    <label class="btn btn-chart-toggle btn-chart-table" for="chart_table"
+                        title="Tableau"><i class="fas fa-table"></i></label>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
     }
 
-    <!-- Main Content Area -->
-    <div class="row g-4">
+    <!-- 3. MAIN ANALYTICS SECTION (CHARTS & KPI PANEL) -->
+    <div class="charts-grid-row">
 
         <!-- Chart Section -->
         @if (chartType !== 'table') {
-        <div [class]="chartType === 'table' ? 'col-12' : 'col-12 col-lg-8'">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div
-                    class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">{{ rapport?.titre }} - Visualisation</h6>
-                    <button class="btn btn-sm btn-outline-secondary" (click)="downloadChartImage()">
-                        <i class="fas fa-download me-2"></i> PNG
+        <div [class]="chartType === 'table' ? 'col-12' : 'chart-col-main'">
+            <div class="chart-box-card">
+                <div class="chart-box-header">
+                    <div class="title-wrap">
+                        <div class="chart-badge-icon primary">
+                            <i class="fas fa-chart-column"></i>
+                        </div>
+                        <div>
+                            <h3 class="chart-title">{{ rapport?.titre }} — Visualisation</h3>
+                            <p class="chart-subtitle">Représentation analytique et tendances</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-download-png" (click)="downloadChartImage()" title="Télécharger le graphique en PNG">
+                        <i class="fas fa-download me-1.5"></i> PNG
                     </button>
                 </div>
-                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center"
-                    style="min-height: 400px;">
 
+                <div class="chart-box-body">
                     @if (chartType === 'bar') {
-                    <!-- Bar Chart Mockup -->
-                    <div class="w-100 h-100 d-flex align-items-end justify-content-around gap-4 animate__animated animate__fadeIn"
-                        style="min-height: 300px; padding: 20px;">
-                        <div class="d-flex flex-column gap-2 align-items-center">
-                            <div class="bg-primary rounded-top" style="height: 250px; width: 50px;"></div>
-                            <small class="text-secondary">Catégorie 1</small>
-                        </div>
-                        <div class="d-flex flex-column gap-2 align-items-center">
-                            <div class="bg-success rounded-top" style="height: 200px; width: 50px;"></div>
-                            <small class="text-secondary">Catégorie 2</small>
-                        </div>
-                        <div class="d-flex flex-column gap-2 align-items-center">
-                            <div class="bg-warning rounded-top" style="height: 180px; width: 50px;"></div>
-                            <small class="text-secondary">Catégorie 3</small>
-                        </div>
-                        <div class="d-flex flex-column gap-2 align-items-center">
-                            <div class="bg-danger rounded-top" style="height: 220px; width: 50px;"></div>
-                            <small class="text-secondary">Catégorie 4</small>
+                    <!-- Bar Chart Mockup (Harmonisé Couleurs BI) -->
+                    <div class="macro-chart-mockup">
+                        <div class="chart-bars-container">
+                            <div class="bar-col">
+                                <div class="bar-stack">
+                                    <div class="bar-fill fill-orange" style="height: 80%;"></div>
+                                </div>
+                                <span class="bar-label">Catégorie 1</span>
+                                <span class="bar-val">48.7 Mds</span>
+                            </div>
+                            <div class="bar-col">
+                                <div class="bar-stack">
+                                    <div class="bar-fill fill-green" style="height: 65%;"></div>
+                                </div>
+                                <span class="bar-label">Catégorie 2</span>
+                                <span class="bar-val">32.4 Mds</span>
+                            </div>
+                            <div class="bar-col">
+                                <div class="bar-stack">
+                                    <div class="bar-fill fill-amber" style="height: 55%;"></div>
+                                </div>
+                                <span class="bar-label">Catégorie 3</span>
+                                <span class="bar-val">28.1 Mds</span>
+                            </div>
+                            <div class="bar-col">
+                                <div class="bar-stack">
+                                    <div class="bar-fill fill-red" style="height: 72%;"></div>
+                                </div>
+                                <span class="bar-label">Catégorie 4</span>
+                                <span class="bar-val">39.8 Mds</span>
+                            </div>
                         </div>
                     </div>
                     }
 
                     @if (chartType === 'area') {
-                    <!-- Area Chart Mockup -->
-                    <svg class="w-100" style="height: 300px;" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet">
-                        <!-- Grid -->
-                        <g stroke="#f1f5f9" stroke-width="1">
-                            <line x1="0" y1="50" x2="1000" y2="50" />
-                            <line x1="0" y1="100" x2="1000" y2="100" />
-                            <line x1="0" y1="150" x2="1000" y2="150" />
-                            <line x1="0" y1="200" x2="1000" y2="200" />
-                            <line x1="0" y1="250" x2="1000" y2="250" />
-                        </g>
-                        <!-- Area 1 -->
-                        <polygon points="50,200 200,150 350,120 500,140 650,100 800,130 950,90 950,300 50,300"
-                            fill="#2563eb" opacity="0.3" />
-                        <!-- Area 2 -->
-                        <polygon points="50,220 200,200 350,180 500,190 650,160 800,170 950,150 950,300 50,300"
-                            fill="#16a34a" opacity="0.3" />
-                        <!-- Lines -->
-                        <polyline points="50,200 200,150 350,120 500,140 650,100 800,130 950,90" fill="none"
-                            stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                        <polyline points="50,220 200,200 350,180 500,190 650,160 800,170 950,150" fill="none"
-                            stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                        <!-- Points -->
-                        <circle cx="950" cy="90" r="5" fill="white" stroke="#2563eb" stroke-width="2" />
-                        <circle cx="950" cy="150" r="5" fill="white" stroke="#16a34a" stroke-width="2" />
-                    </svg>
+                    <!-- Area Chart SVG Mockup -->
+                    <div class="svg-chart-container">
+                        <svg class="w-100" style="height: 280px;" viewBox="0 0 1000 280" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="areaGradPrimary" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#F77F00" stop-opacity="0.35" />
+                                    <stop offset="100%" stop-color="#F77F00" stop-opacity="0.02" />
+                                </linearGradient>
+                                <linearGradient id="areaGradEmerald" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.35" />
+                                    <stop offset="100%" stop-color="#10b981" stop-opacity="0.02" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Grid Lines -->
+                            <g stroke="rgba(255, 255, 255, 0.08)" stroke-width="1">
+                                <line x1="0" y1="50" x2="1000" y2="50" />
+                                <line x1="0" y1="110" x2="1000" y2="110" />
+                                <line x1="0" y1="170" x2="1000" y2="170" />
+                                <line x1="0" y1="230" x2="1000" y2="230" />
+                            </g>
+                            <!-- Area 1 -->
+                            <polygon points="50,180 200,130 350,100 500,120 650,80 800,110 950,70 950,270 50,270"
+                                fill="url(#areaGradPrimary)" />
+                            <!-- Area 2 -->
+                            <polygon points="50,200 200,180 350,160 500,170 650,140 800,150 950,130 950,270 50,270"
+                                fill="url(#areaGradEmerald)" />
+                            <!-- Lines -->
+                            <polyline points="50,180 200,130 350,100 500,120 650,80 800,110 950,70" fill="none"
+                                stroke="#F77F00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                            <polyline points="50,200 200,180 350,160 500,170 650,140 800,150 950,130" fill="none"
+                                stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                            <!-- End Points -->
+                            <circle cx="950" cy="70" r="5" fill="#ffffff" stroke="#F77F00" stroke-width="3" />
+                            <circle cx="950" cy="130" r="5" fill="#ffffff" stroke="#10b981" stroke-width="3" />
+                        </svg>
 
-                    <!-- Legend -->
-                    <div class="mt-3 text-center">
-                        <div class="d-flex justify-content-center gap-3 flex-wrap">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="bg-primary rounded-circle" style="width: 12px; height: 12px;"></span>
-                                <small class="text-secondary">Catégorie 1</small>
+                        <!-- Legend -->
+                        <div class="chart-legend-row">
+                            <div class="legend-badge">
+                                <span class="legend-dot orange"></span>
+                                <span class="legend-text">Volumétrie Principale</span>
                             </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="bg-success rounded-circle" style="width: 12px; height: 12px;"></span>
-                                <small class="text-secondary">Catégorie 2</small>
+                            <div class="legend-badge">
+                                <span class="legend-dot green"></span>
+                                <span class="legend-text">Taux de Recouvrement</span>
                             </div>
                         </div>
                     </div>
                     }
 
                     @if (chartType === 'line') {
-                    <!-- Line Chart Mockup -->
-                    <svg class="w-100" style="height: 300px;" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet">
-                        <!-- Grid -->
-                        <g stroke="#f1f5f9" stroke-width="1">
-                            <line x1="0" y1="50" x2="1000" y2="50" />
-                            <line x1="0" y1="100" x2="1000" y2="100" />
-                            <line x1="0" y1="150" x2="1000" y2="150" />
-                            <line x1="0" y1="200" x2="1000" y2="200" />
-                            <line x1="0" y1="250" x2="1000" y2="250" />
-                        </g>
-                        <!-- Lines -->
-                        <polyline points="50,200 200,150 350,120 500,140 650,100 800,130 950,90" fill="none"
-                            stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                        <polyline points="50,220 200,200 350,180 500,190 650,160 800,170 950,150" fill="none"
-                            stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                        <!-- Points -->
-                        <circle cx="950" cy="90" r="5" fill="white" stroke="#2563eb" stroke-width="2" />
-                        <circle cx="950" cy="150" r="5" fill="white" stroke="#16a34a" stroke-width="2" />
-                    </svg>
-                    }
+                    <!-- Line Chart SVG Mockup -->
+                    <div class="svg-chart-container">
+                        <svg class="w-100" style="height: 280px;" viewBox="0 0 1000 280" preserveAspectRatio="none">
+                            <g stroke="rgba(255, 255, 255, 0.08)" stroke-width="1">
+                                <line x1="0" y1="50" x2="1000" y2="50" />
+                                <line x1="0" y1="110" x2="1000" y2="110" />
+                                <line x1="0" y1="170" x2="1000" y2="170" />
+                                <line x1="0" y1="230" x2="1000" y2="230" />
+                            </g>
+                            <polyline points="50,180 200,130 350,100 500,120 650,80 800,110 950,70" fill="none"
+                                stroke="#F77F00" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <polyline points="50,200 200,180 350,160 500,170 650,140 800,150 950,130" fill="none"
+                                stroke="#0284c7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                            <circle cx="950" cy="70" r="5" fill="#ffffff" stroke="#F77F00" stroke-width="3" />
+                            <circle cx="950" cy="130" r="5" fill="#ffffff" stroke="#0284c7" stroke-width="3" />
+                        </svg>
 
+                        <div class="chart-legend-row">
+                            <div class="legend-badge">
+                                <span class="legend-dot orange"></span>
+                                <span class="legend-text">Exécution Réelle</span>
+                            </div>
+                            <div class="legend-badge">
+                                <span class="legend-dot blue"></span>
+                                <span class="legend-text">Cible Prévisionnelle</span>
+                            </div>
+                        </div>
+                    </div>
+                    }
                 </div>
             </div>
         </div>
         }
 
-        <!-- Summary Stats -->
-        <div [class]="chartType === 'table' ? 'col-12' : 'col-12 col-lg-4'">
-            <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
-                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
-                    <h6 class="fw-bold mb-0">Synthèse et KPI</h6>
-                </div>
-                <div class="card-body p-4">
-                    @for (stat of rapport.stats; track stat.label) {
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="text-secondary fw-semibold mb-0">{{ stat.label }}</h6>
-                            <h4 class="fw-bold text-dark mb-0">{{ stat.valeur }}</h4>
+        <!-- Summary Stats & KPI Panel -->
+        <div [class]="chartType === 'table' ? 'col-12' : 'chart-col-side'">
+            <div class="chart-box-card h-100 kpi-summary-panel">
+                <div class="chart-box-header">
+                    <div class="title-wrap">
+                        <div class="chart-badge-icon warning">
+                            <i class="fas fa-chart-pie"></i>
                         </div>
-                        @if (stat.tendance) {
-                        <small [class]="'fw-medium ' + (stat.tendance === 'up' ? 'text-success' : stat.tendance === 'down' ? 'text-danger' : 'text-secondary')">
-                            <i [class]="'fas fa-arrow-' + (stat.tendance === 'up' ? 'up' : stat.tendance === 'down' ? 'down' : 'right') + ' me-1'"></i>
-                            {{ stat.info }}
-                        </small>
-                        }
-                        @if (!stat.tendance) {
-                        <small class="text-secondary">{{ stat.info }}</small>
-                        }
+                        <div>
+                            <h3 class="chart-title">Synthèse & Indicateurs Clés</h3>
+                            <p class="chart-subtitle">Agrégats consolidés</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-items-list">
+                    @for (stat of rapport.stats; track stat.label) {
+                    <div class="kpi-stat-card-row">
+                        <div class="kpi-stat-top">
+                            <span class="kpi-stat-label">{{ stat.label }}</span>
+                            <span class="kpi-stat-val">{{ stat.valeur }}</span>
+                        </div>
+                        <div class="kpi-stat-bottom">
+                            @if (stat.tendance) {
+                            <span class="kpi-badge-trend" [class.badge-success]="stat.tendance === 'up'" [class.badge-danger]="stat.tendance === 'down'">
+                                <i [class]="'fas fa-arrow-' + (stat.tendance === 'up' ? 'trend-up' : stat.tendance === 'down' ? 'trend-down' : 'right') + ' me-1'"></i>
+                                {{ stat.info }}
+                            </span>
+                            } @else {
+                            <span class="kpi-info-muted">{{ stat.info }}</span>
+                            }
+                        </div>
                     </div>
                     }
+                </div>
 
-                    <hr class="my-4">
-
-                    <!-- Period Info -->
-                    <div class="bg-light rounded-2 p-3">
-                        <h6 class="fw-bold text-dark mb-2">Période Couverte</h6>
-                        <p class="text-secondary fs-9 mb-0">{{ rapport.periodeDebut }} - {{ rapport.periodeFin }}</p>
+                <!-- Période Couverte Box -->
+                <div class="period-covered-box">
+                    <div class="period-icon-wrap">
+                        <i class="far fa-calendar-check text-primary"></i>
+                    </div>
+                    <div class="period-info-wrap">
+                        <span class="period-title">Période Couverte</span>
+                        <span class="period-dates">{{ rapport.periodeDebut }} — {{ rapport.periodeFin }}</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Data Table -->
-    <div class="card border-0 shadow-sm bg-white rounded-3 mt-4">
-        <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-            <h6 class="fw-bold mb-0">Données Détaillées</h6>
-            <small class="text-secondary">{{ rapport.donnees?.length || 0 }} enregistrement(s)</small>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            @for (col of rapport.colonnes; track col) {
-                            <th class="fw-bold text-secondary px-4 py-3">{{ col }}</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (row of rapport.donnees; track $index; let last = $last) {
-                        <tr [class.border-bottom-0]="last">
-                            @for (col of rapport.colonnes; track col) {
-                            <td class="px-4 py-3">{{ getColumnValue(row, col) }}</td>
-                            }
-                        </tr>
-                        }
-                    </tbody>
-                </table>
+    <!-- 4. DONNÉES DÉTAILLÉES (TABLE CARD HARMONISÉE) -->
+    <div class="table-card">
+        <div class="table-toolbar">
+            <div class="toolbar-left">
+                <h3 class="table-title">Données Détaillées du Rapport</h3>
+                <p class="table-subtitle">Grand livre et données unitaires consolidées</p>
             </div>
+            <div class="toolbar-right">
+                <span class="records-badge">
+                    <i class="fas fa-database me-1.5 text-primary"></i>
+                    {{ rapport.donnees?.length || 0 }} enregistrement(s)
+                </span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table modern-table table-hover mb-0">
+                <thead>
+                    <tr>
+                        @for (col of rapport.colonnes; track col) {
+                        <th>{{ col }}</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of rapport.donnees; track $index; let last = $last) {
+                    <tr [class.border-bottom-0]="last">
+                        @for (col of rapport.colonnes; track col) {
+                        <td>{{ getColumnValue(row, col) }}</td>
+                        }
+                    </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 
     } @else {
     <!-- Not Found -->
-    <div class="card border-0 shadow-sm bg-white rounded-3 p-5 text-center">
-        <i class="fas fa-file-slash text-secondary mb-3" style="font-size: 3rem;"></i>
-        <h4 class="text-secondary fw-bold">Rapport non trouvé</h4>
-        <p class="text-secondary">Le rapport demandé n'existe pas ou n'est pas accessible.</p>
-        <a routerLink="/statistiques" class="btn btn-primary mt-3">
+    <div class="chart-box-card p-5 text-center">
+        <i class="fas fa-file-slash text-muted mb-3" style="font-size: 3rem;"></i>
+        <h3 class="chart-title">Rapport non trouvé</h3>
+        <p class="chart-subtitle">Le rapport demandé n'existe pas ou n'est pas accessible.</p>
+        <a routerLink="/statistiques" class="btn btn-export mt-3 d-inline-flex">
             <i class="fas fa-arrow-left me-2"></i>Retour aux Statistiques
         </a>
     </div>
