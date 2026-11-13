@@ -95,11 +95,20 @@
             font-size: 0.875rem;
             border-radius: 6px;
             margin: 0 6px;
+            color: var(--text-primary);
             transition: all 0.15s ease;
+
+            span {
+                color: inherit;
+            }
 
             &:hover {
                 background-color: var(--primary-100);
                 color: var(--primary-700);
+
+                span {
+                    color: var(--primary-700);
+                }
 
                 i {
                     color: var(--primary-700) !important;
@@ -110,6 +119,11 @@
                 background-color: var(--primary-100);
                 color: var(--primary-700);
                 font-weight: 600;
+
+                span {
+                    color: var(--primary-700);
+                    font-weight: 600;
+                }
 
                 i {
                     color: var(--primary-700) !important;
@@ -292,4 +306,53 @@
 
 .bg-opacity-10 {
     background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+:host-context([data-bs-theme="dark"]) {
+    .dropdown-menu-services,
+    .dropdown-menu {
+        background-color: #162032 !important;
+        border: 1px solid #283548 !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5) !important;
+
+        .dropdown-item {
+            color: #cbd5e1 !important;
+
+            span {
+                color: #cbd5e1 !important;
+            }
+
+            i {
+                color: #94a3b8 !important;
+            }
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.08) !important;
+                color: #ffffff !important;
+
+                span {
+                    color: #ffffff !important;
+                }
+
+                i {
+                    color: #F77F00 !important;
+                }
+            }
+
+            &.active-item {
+                background-color: rgba(247, 127, 0, 0.22) !important;
+                border: 1px solid rgba(247, 127, 0, 0.45) !important;
+                color: #ffffff !important;
+
+                span {
+                    color: #ffffff !important;
+                    font-weight: 700 !important;
+                }
+
+                i {
+                    color: #F77F00 !important;
+                }
+            }
+        }
+    }
 }

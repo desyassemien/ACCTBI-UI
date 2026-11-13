@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, NgZone, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone, ViewChildren, QueryList, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -85,6 +85,14 @@ export class ComptabiliteComponent implements OnInit {
     activePeriod: string = 'Ce mois-ci (Mars 2026)';
     activePoste: string = 'Tous les Postes & Banques';
     filterChips: string[] = ['Écarts non justifiés', 'Opérations > 50M'];
+    allAvailableChips: string[] = [
+        'Écarts non justifiés',
+        'Opérations > 50M',
+        'Suspends > 60 jours',
+        'Écritures Provisoires',
+        'BCEAO Direct',
+        'Postes Régionaux'
+    ];
 
     // Dropdown choices
     periodsList: string[] = [
@@ -588,7 +596,7 @@ export class ComptabiliteComponent implements OnInit {
         if (mode === 'synthese') {
             this.triggerToast('Affichage Synthèse Opérationnelle activé');
         } else {
-            this.triggerToast('Affichage Analyses Multidimensionnelles DWH activé');
+            this.triggerToast('Affichage Analyses Avancées activé');
         }
     }
 
@@ -608,9 +616,34 @@ export class ComptabiliteComponent implements OnInit {
         this.tableFilter = filter;
     }
 
+    isFilterDropdownOpen: boolean = false;
+
+    toggleFilterDropdown(event: Event) {
+        event.stopPropagation();
+        this.isFilterDropdownOpen = !this.isFilterDropdownOpen;
+    }
+
+    @HostListener('document:click')
+    closeFilterDropdown() {
+        this.isFilterDropdownOpen = false;
+    }
+
+    addChip(chip: string) {
+        this.isFilterDropdownOpen = false;
+        if (!this.filterChips.includes(chip)) {
+            this.filterChips.push(chip);
+            this.triggerToast(`Filtre activé : ${chip}`);
+        }
+    }
+
     removeChip(chip: string) {
         this.filterChips = this.filterChips.filter(c => c !== chip);
-        this.triggerToast(`Filtre "${chip}" supprimé`);
+        if (this.allAvailableChips.includes(chip)) {
+            this.allAvailableChips = [chip, ...this.allAvailableChips.filter(c => c !== chip)];
+        } else {
+            this.allAvailableChips.unshift(chip);
+        }
+        this.triggerToast(`Filtre "${chip}" replacé dans la liste d'ajout`);
     }
 
     // --- Filtered Getters with Period & Poste ---

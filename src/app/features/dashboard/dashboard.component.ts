@@ -187,6 +187,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     getServiceColor(service: string): string {
+        const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        if (isDark) {
+            const DARK_COLORS: { [k: string]: string } = {
+                'Douanes': '#38bdf8', 'DGI - Impôts': '#fb923c', 'Trésor Public': '#34d399',
+                'SODECI': '#cbd5e1', 'SIR': '#f87171', 'CIE': '#facc15', 'DMO - Dette': '#c084fc', 'DGBudget': '#60a5fa'
+            };
+            return DARK_COLORS[service] || '#38bdf8';
+        }
         return this.SERVICES_COLORS[service] || '#64748b';
     }
 
