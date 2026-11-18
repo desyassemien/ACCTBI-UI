@@ -40,6 +40,11 @@ export class HeaderComponent implements OnInit {
         return this.serviceItems.some(item => url.startsWith(item.path));
     }
 
+    /** Check if any Pilotage & Surveillance route is currently active */
+    get isPilotageActive(): boolean {
+        const url = this.router.url;
+        return this.pilotageItems.some(item => url.startsWith(item.path));
+    }
 
     // Navigation items
     readonly serviceItems = [
@@ -50,6 +55,14 @@ export class HeaderComponent implements OnInit {
         { path: '/reglement', icon: 'fas fa-hand-holding-usd', label: 'Règlement' },
         { path: '/statistiques', icon: 'fas fa-chart-bar', label: 'Statistiques' },
         { path: '/compte-gestion', icon: 'fas fa-clipboard-list', label: 'Compte de Gestion' }
+    ];
+
+    // Pilotage & Surveillance dropdown items
+    readonly pilotageItems: { path: string; icon: string; label: string; isNotif: boolean }[] = [
+        { path: '/synthese-decisionnelle', icon: 'fas fa-shield-alt', label: 'Synthèse Décisionnelle', isNotif: false },
+        { path: '/analyse-comparative', icon: 'fas fa-balance-scale', label: 'Analyse Comparative', isNotif: false },
+        { path: '/decision-ia', icon: 'fas fa-brain', label: 'Décision & Prospective IA', isNotif: false },
+        { path: '/notifications', icon: 'fas fa-bell', label: 'Notifications', isNotif: true }
     ];
 
     /** Helper to get service clean name without slash */

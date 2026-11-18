@@ -71,6 +71,23 @@ export const routes: Routes = [
                 path: 'reglement', 
                 loadComponent: () => import('./features/reglement/reglement.component').then(m => m.ReglementComponent) 
             },
+            // Pilotage & Surveillance
+            {
+                path: 'synthese-decisionnelle',
+                loadComponent: () => import('./features/pilotage/synthese-decisionnelle/synthese-decisionnelle.component').then(m => m.SyntheseDecisionnelleComponent)
+            },
+            {
+                path: 'analyse-comparative',
+                loadComponent: () => import('./features/pilotage/analyse-comparative/analyse-comparative.component').then(m => m.AnalyseComparativeComponent)
+            },
+            {
+                path: 'decision-ia',
+                loadComponent: () => import('./features/pilotage/decision-ia/decision-ia.component').then(m => m.DecisionIaComponent)
+            },
+            {
+                path: 'notifications',
+                loadComponent: () => import('./features/pilotage/notifications/notifications.component').then(m => m.NotificationsPilotageComponent)
+            },
             { 
                 path: 'admin', 
                 loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) 

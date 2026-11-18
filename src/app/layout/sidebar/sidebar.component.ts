@@ -31,6 +31,15 @@ export class SidebarComponent {
             ]
         },
         {
+            title: 'PILOTAGE & SURVEILLANCE',
+            items: [
+                { path: '/synthese-decisionnelle', icon: 'fas fa-shield-alt', label: 'Synthèse Décisionnelle' },
+                { path: '/analyse-comparative', icon: 'fas fa-balance-scale', label: 'Analyse Comparative' },
+                { path: '/decision-ia', icon: 'fas fa-brain', label: 'Décision & Prospective IA' },
+                { path: '/notifications', icon: 'fas fa-bell', label: 'Notifications' }
+            ]
+        },
+        {
             title: 'SYSTÈME',
             items: [
                 { path: '/admin', icon: 'fas fa-cog', label: 'Administration' }

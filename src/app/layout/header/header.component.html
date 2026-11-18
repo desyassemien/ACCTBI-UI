@@ -45,6 +45,35 @@
                             }
                         </div>
                     </li>
+
+                    <!-- Pilotage & Surveillance Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle px-3 py-2 rounded-2" href="#" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" [class.active]="isPilotageActive">
+                            <i class="fas fa-compass me-2"></i>Pilotage &amp; Surveillance
+                            @if (notificationService.unreadCount() > 0) {
+                            <span class="badge rounded-pill bg-danger ms-1" style="font-size: 0.65rem;">
+                                {{ notificationService.unreadCount() }}
+                            </span>
+                            }
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-services border-0 shadow-lg mt-1 rounded-3 py-2">
+                            @for (item of pilotageItems; track item.path) {
+                            <a class="dropdown-item d-flex align-items-center justify-content-between px-3 py-2" [routerLink]="item.path"
+                                routerLinkActive="active-item">
+                                <div class="d-flex align-items-center">
+                                    <i [class]="item.icon + ' me-3 text-secondary'" style="width: 18px; text-align: center;"></i>
+                                    <span class="fw-medium">{{ item.label }}</span>
+                                </div>
+                                @if (item.isNotif && notificationService.unreadCount() > 0) {
+                                <span class="badge rounded-pill bg-danger ms-2">
+                                    {{ notificationService.unreadCount() }}
+                                </span>
+                                }
+                            </a>
+                            }
+                        </div>
+                    </li>
                 </ul>
             </div>
 
@@ -156,7 +185,7 @@
                         </div>
                         
                         <div class="p-2 border-top text-center bg-light rounded-bottom-3">
-                            <a href="#" class="text-decoration-none fs-8 fw-bold">Voir toutes les notifications</a>
+                            <a routerLink="/notifications" class="text-decoration-none fs-8 fw-bold">Voir toutes les notifications</a>
                         </div>
                     </div>
                 </div>
