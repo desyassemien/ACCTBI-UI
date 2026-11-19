@@ -7,7 +7,7 @@
 }
 
 .topbar {
-    background: var(--sidebar-bg); // Reuse the existing sidebar gradient
+    background: linear-gradient(160deg, #fbaf5d 0%, #e67500 100%) !important;
     position: relative;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
     min-height: 60px;
@@ -309,11 +309,16 @@
 }
 
 :host-context([data-bs-theme="dark"]) {
+    .topbar {
+        background: linear-gradient(160deg, #fbaf5d 0%, #e67500 100%) !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+
     .dropdown-menu-services,
     .dropdown-menu {
-        background-color: #162032 !important;
-        border: 1px solid #283548 !important;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5) !important;
+        background-color: #202127 !important;
+        border: 1px solid #2e2f38 !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6) !important;
 
         .dropdown-item {
             color: #cbd5e1 !important;

@@ -17,7 +17,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private cdr = inject(ChangeDetectorRef);
 
     isLoading: boolean = true;
-    selectedPeriod: string = 'MOIS';
+    selectedPeriod: string = (() => {
+        const d = new Date();
+        const m = d.toLocaleDateString('fr-FR', { month: 'long' });
+        const cap = m.charAt(0).toUpperCase() + m.slice(1);
+        return `Ce mois-ci (${cap} ${d.getFullYear()})`;
+    })();
     chartTypes: { [key: string]: string } = {
         tresLiquidite: 'line',
         comptaSolde: 'bar',
@@ -250,27 +255,40 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     onRefresh() {
         this.isLoading = true;
+        this.cdr.detectChanges();
         setTimeout(() => {
             this.generateData();
             this.isLoading = false;
             this.cdr.detectChanges();
-        }, 30);
+        }, 80);
     }
 
     // Deterministic random generator based on selected period
     generateData() {
         let seed = 1;
-        if(this.selectedPeriod === 'JOUR') seed = 0.5;
-        if(this.selectedPeriod === 'MOIS') seed = 1;
-        if(this.selectedPeriod === 'ANNEE') seed = 12;
+        const p = (this.selectedPeriod || '').toLowerCase();
+        if (p.includes('jour') || p.includes("aujourd'hui")) {
+            seed = 0.22;
+        } else if (p.includes('semaine')) {
+            seed = 0.52;
+        } else if (p.includes('trimestre')) {
+            seed = 2.85;
+        } else if (p.includes('2025')) {
+            seed = 10.4;
+        } else if (p.includes('2026') || p.includes('exercice') || p.includes('annee')) {
+            seed = 12.1;
+        } else {
+            // "Ce mois-ci" or default
+            seed = 1.0;
+        }
 
         // ==========================================
         // 1. TRÉSORERIE
         // ==========================================
-        this.soldeBancaireTotal = 15423 * seed;
-        this.laEnCoursTotal = 45.8 * seed;
-        this.laTotalRegul = 85.2 * seed;
-        this.liquiditeNetteTotal = 15423 * seed;
+        this.soldeBancaireTotal = Math.round(15423 * seed);
+        this.laEnCoursTotal = Number((45.8 * seed).toFixed(1));
+        this.laTotalRegul = Math.min(99.2, Number((85.2 + (seed > 1 ? 3.5 : (seed < 1 ? -2.4 : 0))).toFixed(1)));
+        this.liquiditeNetteTotal = Math.round(15423 * seed);
 
         // Col 1: Solde Consolidé
         this.soldeBancaireEvolution = [

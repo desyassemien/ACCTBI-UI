@@ -1,8 +1,8 @@
-import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID, Inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, PLATFORM_ID, Inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData } from 'chart.js';
+import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import {
   PilotageAiService,
   AiSummaryResult,
@@ -90,145 +90,43 @@ import {
   <!-- ======================================================== -->
   @if (currentSummary) {
     <div class="mb-3">
-      <!-- Ligne 1 : Indicateurs Clés Métier & Prudentiels -->
+      <!-- Ligne 1 : Indicateurs Clés Métier & Prudentiels (adaptés au Service sélectionné) -->
       <div class="row g-2 mb-2">
-        <!-- 1. Score Conformité DGTCP -->
-        <div class="col-xl-3 col-md-6">
-          <div class="card kpi-spark-card kpi-spark-navy shadow-sm border-0 h-100">
-            <div class="card-body p-3 d-flex flex-column justify-content-between">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="kpi-spark-title text-navy">
-                  <i class="fas fa-tachometer-alt me-1 text-primary"></i> Score Conformité
-                </span>
-                <span class="pulse-dot bg-success" title="Conformité ACCT"></span>
-              </div>
-              <div class="d-flex align-items-center justify-content-between my-1">
-                <div>
-                  <div class="kpi-spark-value text-navy">{{ currentSummary.globalScore }}<small class="text-muted fs-6">/100</small></div>
-                  <span class="kpi-spark-unit text-muted">Statut {{ currentSummary.globalStatus }}</span>
+        @for (card of serviceKpiCards; track card.title) {
+          <div class="col-xl-3 col-md-6">
+            <div class="card kpi-spark-card shadow-sm border-0 h-100" [ngClass]="card.cardClass">
+              <div class="card-body p-3 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="kpi-spark-title" [ngClass]="card.titleClass">
+                    <i [class]="card.icon + ' me-1'"></i> {{ card.title }}
+                  </span>
+                  <span class="pulse-dot" [ngClass]="card.dotClass" [title]="card.dotTitle"></span>
                 </div>
-                <svg class="kpi-sparkline" viewBox="0 0 85 36" aria-hidden="true">
-                  <polyline fill="none" stroke="#1A365D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-                            points="4,28 22,22 42,18 62,12 80,6"/>
-                  <circle cx="80" cy="6" r="3.2" fill="#1A365D"/>
-                </svg>
-              </div>
-              <div class="kpi-spark-footer d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
-                <span class="text-muted very-small" title="Méthode d'évaluation basée sur les normes prudentielles DGTCP et les ratios UEMOA" style="cursor: help;">
-                  Évaluation
-                </span>
-                <span class="badge bg-primary-subtle text-primary border" title="Conformité certifiée aux exigences de l'Agence Comptable Centrale du Trésor" style="cursor: help;">
-                  Normes ACCT/UEMOA
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. Recettes & Mobilisation -->
-        <div class="col-xl-3 col-md-6">
-          <div class="card kpi-spark-card kpi-spark-green shadow-sm border-0 h-100">
-            <div class="card-body p-3 d-flex flex-column justify-content-between">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="kpi-spark-title text-success">
-                  <i class="fas fa-coins me-1"></i> Recettes & Régies
-                </span>
-                <span class="pulse-dot bg-success" title="Mobilisation conforme"></span>
-              </div>
-              <div class="d-flex align-items-center justify-content-between my-1">
-                <div>
-                  <div class="kpi-spark-value text-success">
-                    {{ (realMetrics?.totalRecettesMilliards || 1254.0) | number:'1.1-1' }}
+                <div class="d-flex align-items-center justify-content-between my-1">
+                  <div>
+                    <div class="kpi-spark-value" [ngClass]="card.valueClass">
+                      {{ card.value }}@if (card.suffix) {<small class="text-muted fs-6">{{ card.suffix }}</small>}
+                    </div>
+                    <span class="kpi-spark-unit text-muted">{{ card.unit }}</span>
                   </div>
-                  <span class="kpi-spark-unit text-muted">Mds FCFA Mobilisés</span>
+                  <svg class="kpi-sparkline" viewBox="0 0 85 36" aria-hidden="true">
+                    <polyline fill="none" [attr.stroke]="card.stroke" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                              [attr.points]="card.points"/>
+                    <circle cx="80" [attr.cy]="card.cy" r="3.2" [attr.fill]="card.stroke"/>
+                  </svg>
                 </div>
-                <svg class="kpi-sparkline" viewBox="0 0 85 36" aria-hidden="true">
-                  <polyline fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-                            points="4,30 22,24 42,26 62,14 80,6"/>
-                  <circle cx="80" cy="6" r="3.2" fill="#16a34a"/>
-                </svg>
-              </div>
-              <div class="kpi-spark-footer d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
-                <span class="text-muted very-small" title="Période annuelle d’imputation budgétaire sous revue" style="cursor: help;">
-                  Exercice {{ selectedAnnee }}
-                </span>
-                <span class="text-muted very-small" title="Taux d’exécution des recettes collectées par rapport à la Loi de Finances votée" style="cursor: help; text-decoration: underline dotted #94a3b8;">
-                  Exéc. : <strong class="text-success">{{ realMetrics?.tauxExecutionLoiFinances }}%</strong>
-                </span>
+                <div class="kpi-spark-footer d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
+                  <span class="text-muted very-small" [title]="card.footLeftTip" style="cursor: help;">
+                    {{ card.footLeft }}
+                  </span>
+                  <span class="text-muted very-small fw-semibold" [title]="card.footRightTip" style="cursor: help; text-decoration: underline dotted #94a3b8;">
+                    {{ card.footRight }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- 3. Concordance BCEAO / ACCT -->
-        <div class="col-xl-3 col-md-6">
-          <div class="card kpi-spark-card kpi-spark-sky shadow-sm border-0 h-100">
-            <div class="card-body p-3 d-flex flex-column justify-content-between">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="kpi-spark-title text-info-emphasis">
-                  <i class="fas fa-check-double me-1"></i> Concordance BCEAO
-                </span>
-                <span class="pulse-dot bg-info" title="Lettrage automatique"></span>
-              </div>
-              <div class="d-flex align-items-center justify-content-between my-1">
-                <div>
-                  <div class="kpi-spark-value text-info-emphasis">
-                    {{ (realMetrics?.tauxRapprochementAuto || 94.8) | number:'1.1-1' }}%
-                  </div>
-                  <span class="kpi-spark-unit text-muted">Lettré Auto (Norme ≥ 90%)</span>
-                </div>
-                <svg class="kpi-sparkline" viewBox="0 0 85 36" aria-hidden="true">
-                  <polyline fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-                            points="4,22 22,18 42,14 62,10 80,4"/>
-                  <circle cx="80" cy="4" r="3.2" fill="#0284c7"/>
-                </svg>
-              </div>
-              <div class="kpi-spark-footer d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
-                <span class="text-muted very-small" title="Taux de régularisation comptable des Lettres d'Avance (Norme ACCT ≥ 90%)" style="cursor: help; text-decoration: underline dotted #94a3b8;">
-                  Régul. LA
-                </span>
-                <span class="text-muted very-small" title="Part des avances déjà justifiées par les ordonnateurs" style="cursor: help;">
-                  <strong>{{ realMetrics?.tauxRegularisationLA }}%</strong>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. Liquidité Nette CUT -->
-        <div class="col-xl-3 col-md-6">
-          <div class="card kpi-spark-card kpi-spark-amber shadow-sm border-0 h-100">
-            <div class="card-body p-3 d-flex flex-column justify-content-between">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="kpi-spark-title text-warning-emphasis">
-                  <i class="fas fa-university me-1"></i> Liquidité Nette CUT
-                </span>
-                <span class="pulse-dot bg-warning" title="CUT Centralisé"></span>
-              </div>
-              <div class="d-flex align-items-center justify-content-between my-1">
-                <div>
-                  <div class="kpi-spark-value text-dark">
-                    {{ (realMetrics?.liquiditeNetteCutMilliards || 1542.3) | number:'1.1-1' }}
-                  </div>
-                  <span class="kpi-spark-unit text-muted">Mds FCFA Disponibles</span>
-                </div>
-                <svg class="kpi-sparkline" viewBox="0 0 85 36" aria-hidden="true">
-                  <polyline fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-                            points="4,26 22,20 42,22 62,14 80,8"/>
-                  <circle cx="80" cy="8" r="3.2" fill="#f59e0b"/>
-                </svg>
-              </div>
-              <div class="kpi-spark-footer d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
-                <span class="text-muted very-small" title="Postes comptables assignataires et régies raccordés en temps réel au CUT" style="cursor: help;">
-                  Postes/Régies
-                </span>
-                <span class="text-muted very-small" title="Réseau d'unités de paiement actives connectées au système" style="cursor: help; text-decoration: underline dotted #94a3b8;">
-                  <strong>{{ realMetrics?.postesEtRegiesActifs }}</strong> connectés
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        }
       </div>
 
       <!-- Ligne 2 : Projections & Modélisations Prédictives IA -->
@@ -276,8 +174,8 @@ import {
                 </div>
 
                 <div class="kpi-spark-footer d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
-                  <span class="text-muted very-small" title="Projection statistique calculée par régression linéaire OLS (Ordinary Least Squares)" style="cursor: help;">
-                    Estimation IA OLS
+                  <span class="text-muted very-small" title="Projection statistique calculée à partir des tendances des exercices précédents" style="cursor: help;">
+                    Tendance prévue
                   </span>
                   <span class="fw-semibold text-dark very-small" title="Écart ou variation attendue selon les algorithmes prédictifs" style="cursor: help; text-decoration: underline dotted #94a3b8;">
                     {{ insight.subValue }}
@@ -416,15 +314,9 @@ import {
               <h5 class="m-0 fw-bold text-navy">Assistant Décisionnel</h5>
             </div>
             <div class="d-flex align-items-center gap-2">
-              <select class="form-select form-select-sm py-0 px-2 very-small fw-semibold" style="width: auto;"
-                      [(ngModel)]="aiResponseMode" title="Style de réponse de l'IA">
-                <option value="synthese">Synthèse Direction</option>
-                <option value="technique">Analyse Technique</option>
-                <option value="action">Plan d'Action</option>
-              </select>
-              <button type="button" class="btn btn-sm btn-light border py-0 px-2 very-small"
+              <button type="button" class="btn btn-sm btn-light border py-1 px-2 very-small"
                       (click)="resetChat()" title="Nouvelle discussion">
-                <i class="fas fa-redo"></i>
+                <i class="fas fa-redo me-1"></i> Réinitialiser
               </button>
             </div>
           </div>
@@ -440,7 +332,7 @@ import {
                 </div>
                 <div class="message-content small" [innerHTML]="msg.text"></div>
                 @if (msg.actions && msg.actions.length > 0) {
-                  <div class="d-flex flex-wrap gap-1.5 mt-2 pt-2 border-top">
+                  <div class="d-flex flex-wrap mt-2 pt-2 border-top" style="gap: 8px;">
                     @for (act of msg.actions; track act.label) {
                       <button type="button"
                               class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 very-small fw-semibold"
@@ -457,7 +349,7 @@ import {
           @if (isGeneratingAnswer) {
             <div class="text-center my-3 text-muted">
               <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
-              <p class="small mt-1 mb-0">Analyse multidimensionnelle DWH en cours...</p>
+              <p class="small mt-1 mb-0">Analyse en cours...</p>
             </div>
           }
         </div>
@@ -499,7 +391,7 @@ import {
   <!-- ======================================================== -->
   <!-- 4. COURBE DE TRAJECTOIRE PRÉDICTIVE IA                   -->
   <!-- ======================================================== -->
-  <div class="card shadow-sm border-0 chart-card">
+  <div class="card shadow-sm border-0 chart-card" #predictiveChartCard>
     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
       <div>
         <h5 class="m-0 fw-bold text-navy">
@@ -514,18 +406,18 @@ import {
           Historique certifié (2019-{{ selectedAnnee }}) et Modélisations IA OLS (2027-2031) en {{ selectedIndicator ? selectedIndicator.unite : 'Milliards FCFA' }}
         </p>
       </div>
-      <div class="d-flex flex-wrap align-items-center gap-2">
-        <button type="button" class="btn btn-sm rounded-pill fw-semibold px-3"
+      <div class="d-flex flex-wrap align-items-center" style="gap: 6px;">
+        <button type="button" class="btn btn-sm rounded-pill fw-semibold py-1 px-2" style="font-size: 0.78rem;"
                 [ngClass]="activeScenario === 'OPTIMISTE' ? 'btn-success text-white' : 'btn-outline-success'"
                 (click)="applyScenarioPreset('OPTIMISTE')">
           <i class="fas fa-arrow-up me-1"></i> Si réformes appliquées
         </button>
-        <button type="button" class="btn btn-sm rounded-pill fw-semibold px-3"
+        <button type="button" class="btn btn-sm rounded-pill fw-semibold py-1 px-2" style="font-size: 0.78rem;"
                 [ngClass]="activeScenario === 'BASE' ? 'btn-navy text-white' : 'btn-outline-secondary'"
                 (click)="applyScenarioPreset('BASE')">
           <i class="fas fa-minus me-1"></i> Si rythme actuel maintenu
         </button>
-        <button type="button" class="btn btn-sm rounded-pill fw-semibold px-3"
+        <button type="button" class="btn btn-sm rounded-pill fw-semibold py-1 px-2" style="font-size: 0.78rem;"
                 [ngClass]="activeScenario === 'STRESS' ? 'btn-danger text-white' : 'btn-outline-danger'"
                 (click)="applyScenarioPreset('STRESS')">
           <i class="fas fa-arrow-down me-1"></i> Si ralentissement (-5%)
@@ -536,7 +428,10 @@ import {
     <!-- Explication explicite Cause -> Effet du scénario choisi -->
     <div class="px-4 py-2 bg-light border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2 small">
       <div class="text-dark">
-        @if (activeScenario === 'OPTIMISTE') {
+        @if (customSimulationNote) {
+          <strong [ngClass]="activeScenario === 'STRESS' ? 'text-danger' : 'text-success'">Recommandation simulée :</strong>
+          {{ customSimulationNote }}
+        } @else if (activeScenario === 'OPTIMISTE') {
           <strong class="text-success">Effet des réformes :</strong>
           Si l'on apure <strong>35%</strong> des RAP/LA et renforce le contrôle des régies &rarr; gain estimé de <strong>+6%</strong> sur les recettes d'ici 2031.
         } @else if (activeScenario === 'STRESS') {
@@ -576,6 +471,7 @@ import {
   styles: [`
     .decision-ia-container { max-width: 1600px; margin: 0 auto; }
     .text-navy { color: #1A365D !important; }
+    .btn-navy { background-color: #1A365D !important; border-color: #1A365D !important; color: #fff !important; }
     .very-small { font-size: 0.72rem; }
 
     .decision-header-card {
@@ -707,26 +603,74 @@ import {
     .chat-message.user-msg { justify-content: flex-end; }
     .chat-message.user-msg .message-bubble { background-color: #1A365D; color: #fff; }
     .chat-message.ai-msg { justify-content: flex-start; }
-    .chat-message.ai-msg .message-bubble { background-color: #fff; color: #1e293b; border: 1px solid #e2e8f0; }
+    .chat-message.ai-msg .message-bubble { 
+      background-color: #fff; 
+      color: #111827; 
+      border: 1px solid #e2e8f0; 
+      p, div, li, span:not(.text-success):not(.text-danger):not(.badge) { color: #111827; }
+      strong, b, .fw-bold { font-weight: 700 !important; color: #000000; }
+      .text-success, .text-success.fw-bold { color: #15803d !important; font-weight: 700 !important; }
+      .text-danger, .text-danger.fw-bold { color: #dc2626 !important; font-weight: 700 !important; }
+      li { margin-bottom: 0.35rem; }
+    }
     .message-bubble { max-width: 92%; }
 
     :host-context([data-bs-theme="dark"]) {
-      .title-text, .text-navy { color: #38bdf8 !important; }
-      .kpi-card-v2 { background: #162032; }
-      .chat-body { background-color: #0f172a; }
-      .chat-message.ai-msg .message-bubble { background-color: #1e293b; color: #f8fafc; border-color: #283548; }
-      .executive-lead { background: #0f172a; }
+      .title-text, .text-navy { color: #ffffff !important; }
+      .text-muted, small.text-muted, span.text-muted, p.text-muted { color: #ffffff !important; }
+      .filter-item-container label, .form-label { color: #ffffff !important; }
+      .kpi-spark-title { color: #ffffff !important; }
+      .kpi-card-v2 { background: #202127 !important; border: 1px solid #2e2f38 !important; }
+      .chat-card { background: #202127 !important; border: 1px solid #2e2f38 !important; }
+      .card-header { background: #202127 !important; border-color: #2e2f38 !important; }
+      .card-footer { background: #202127 !important; border-color: #2e2f38 !important; }
+      .chat-body { background-color: #16171d !important; }
+
+      .form-control,
+      input.form-control {
+        background-color: #16171d !important;
+        border: 1px solid #2e2f38 !important;
+        color: #ffffff !important;
+
+        &::placeholder,
+        &::-webkit-input-placeholder,
+        &::-moz-placeholder,
+        &:-ms-input-placeholder {
+          color: rgba(255, 255, 255, 0.65) !important;
+          opacity: 1 !important;
+        }
+
+        &:focus {
+          background-color: #202127 !important;
+          border-color: #3b82f6 !important;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+          color: #ffffff !important;
+        }
+      }
+      .chat-message.ai-msg .message-bubble { 
+        background-color: #282932 !important; 
+        color: #ffffff !important; 
+        border: 1px solid #2e2f38 !important;
+        p, div, li, span:not(.text-success):not(.text-danger):not(.badge) { color: #ffffff !important; }
+        strong, b, .fw-bold { font-weight: 700 !important; color: #ffffff !important; }
+        .text-dark { color: #ffffff !important; }
+        .text-muted { color: #ffffff !important; }
+      }
+      .chat-message.user-msg .message-bubble { background-color: #ea580c !important; color: #ffffff !important; }
+      .executive-lead { background: #18191f !important; border-color: #2e2f38 !important; }
     }
   `]
 })
-export class DecisionIaComponent implements OnInit {
+export class DecisionIaComponent implements OnInit, OnDestroy {
   @ViewChild('chatBody') chatBodyRef?: ElementRef<HTMLDivElement>;
+  @ViewChild('predictiveChartCard') predictiveChartCardRef?: ElementRef<HTMLDivElement>;
 
   private aiService = inject(PilotageAiService);
   private realDataService = inject(PilotageRealDataService);
   private benchmarkService = inject(PilotageBenchmarkService);
   private cdr = inject(ChangeDetectorRef);
   private platformId = inject(PLATFORM_ID);
+  private themeObserver?: MutationObserver;
 
   isBrowser = isPlatformBrowser(this.platformId);
   selectedPerimetre = this.realDataService.perimetresList[0];
@@ -763,6 +707,7 @@ export class DecisionIaComponent implements OnInit {
   userQuestion = '';
   aiResponseMode: 'synthese' | 'technique' | 'action' = 'synthese';
   activeScenario: 'OPTIMISTE' | 'BASE' | 'STRESS' | 'CUSTOM' = 'BASE';
+  customSimulationNote = '';
   simDeltaPct = 0;
   simApurementPct = 0;
   projected2031Value = 0;
@@ -772,7 +717,7 @@ export class DecisionIaComponent implements OnInit {
     sender: 'user' | 'ai';
     text: string;
     time: string;
-    actions?: { label: string; icon: string; type: 'question' | 'scenario' | 'pdf'; payload?: any }[];
+    actions?: { label: string; icon: string; type: 'question' | 'scenario' | 'pdf' | 'download'; payload?: any }[];
   }[] = [];
   isGeneratingAnswer = false;
   isCopied = false;
@@ -784,11 +729,60 @@ export class DecisionIaComponent implements OnInit {
     'Analyse les Statistiques (RAP, Subventions, Dette) et le Compte de Gestion.'
   ];
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit(): void {
+    if (this.isBrowser) {
+      this.updateChartTheme();
+      this.themeObserver = new MutationObserver(() => {
+        this.updateChartTheme();
+        this.buildPredictiveChart();
+        this.cdr.detectChanges();
+      });
+      this.themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-bs-theme']
+      });
+    }
     this.loadAnalysis();
     this.resetChat();
+  }
+
+  ngOnDestroy(): void {
+    if (this.themeObserver) this.themeObserver.disconnect();
+  }
+
+  updateChartTheme(): void {
+    const isDark = typeof document !== 'undefined' && document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const textColor = isDark ? '#ffffff' : '#334155';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(0, 0, 0, 0.08)';
+
+    Chart.defaults.color = textColor;
+    Chart.defaults.borderColor = gridColor;
+
+    this.predictiveChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: textColor,
+            font: { size: 11, weight: 'bold' }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: textColor, font: { weight: 'bold' } },
+          grid: { color: gridColor }
+        },
+        y: {
+          ticks: { color: textColor, font: { weight: 'bold' } },
+          grid: { color: gridColor }
+        }
+      }
+    };
   }
 
   get selectedServiceLabel(): string {
@@ -804,6 +798,253 @@ export class DecisionIaComponent implements OnInit {
   get selectedIndicator(): ComparativeIndicator | null {
     if (this.selectedIndicatorCode === 'TOUS') return null;
     return this.indicatorsForService.find(ind => ind.code === this.selectedIndicatorCode) ?? null;
+  }
+
+  get serviceKpiCards(): {
+    title: string; icon: string; cardClass: string; titleClass: string; valueClass: string;
+    dotClass: string; dotTitle: string; value: string; suffix?: string; unit: string;
+    stroke: string; points: string; cy: number;
+    footLeft: string; footLeftTip: string; footRight: string; footRightTip: string;
+  }[] {
+    const m = this.realMetrics;
+    const score = this.currentSummary?.globalScore ?? 92;
+    const status = this.currentSummary?.globalStatus ?? 'CONFORME';
+    const scoreCard = {
+      title: this.selectedDomain === 'tous' ? 'Score Conformité' : `Score ${this.selectedServiceLabel}`,
+      icon: 'fas fa-tachometer-alt text-primary', cardClass: 'kpi-spark-navy', titleClass: 'text-navy', valueClass: 'text-navy',
+      dotClass: 'bg-success', dotTitle: 'Conformité ACCT',
+      value: `${score}`, suffix: '/100', unit: `Statut ${status}`,
+      stroke: '#1A365D', points: '4,28 22,22 42,18 62,12 80,6', cy: 6,
+      footLeft: 'Évaluation', footLeftTip: 'Méthode basée sur les normes prudentielles DGTCP / UEMOA',
+      footRight: 'Normes ACCT/UEMOA', footRightTip: 'Conformité certifiée ACCT'
+    };
+
+    switch (this.selectedDomain) {
+      case 'comptabilite':
+        return [
+          scoreCard,
+          {
+            title: 'Balance Générale', icon: 'fas fa-book', cardClass: 'kpi-spark-green', titleClass: 'text-success', valueClass: 'text-success',
+            dotClass: 'bg-success', dotTitle: 'Journaux équilibrés',
+            value: (m?.comptaVolumeMouvementsMilliards ?? 348.5).toFixed(1), unit: 'Mds FCFA Mouvements',
+            stroke: '#16a34a', points: '4,28 22,24 42,20 62,12 80,6', cy: 6,
+            footLeft: `Exercice ${this.selectedAnnee}`, footLeftTip: 'Période comptable sous revue',
+            footRight: `Délai : ${m?.delaiMoyenApurementComptaJours ?? 1.1} j`, footRightTip: 'Délai moyen d’apurement comptable'
+          },
+          {
+            title: 'Concordance BCEAO', icon: 'fas fa-check-double', cardClass: 'kpi-spark-sky', titleClass: 'text-info-emphasis', valueClass: 'text-info-emphasis',
+            dotClass: 'bg-info', dotTitle: 'Lettrage automatique',
+            value: `${(m?.tauxRapprochementAuto ?? 94.8).toFixed(1)}%`, unit: 'Rapprochement Auto (Norme ≥ 90%)',
+            stroke: '#0284c7', points: '4,22 22,18 42,14 62,10 80,4', cy: 4,
+            footLeft: 'Écart sas', footLeftTip: 'Divergence résiduelle relevé BCEAO / Grand Livre',
+            footRight: `${m?.ecartConcordanceMilliards ?? 1.2} Mds`, footRightTip: 'Montant en attente de rapprochement'
+          },
+          {
+            title: 'Opérations en Attente', icon: 'fas fa-exclamation-circle', cardClass: 'kpi-spark-amber', titleClass: 'text-warning-emphasis', valueClass: 'text-dark',
+            dotClass: 'bg-warning', dotTitle: 'Compte 47 à apurer',
+            value: (m?.suspensComptablesMilliards ?? 45.8).toFixed(1), unit: 'Mds FCFA en Attente',
+            stroke: '#f59e0b', points: '4,10 22,14 42,18 62,22 80,26', cy: 26,
+            footLeft: 'Dossiers actifs', footLeftTip: 'Dossiers comptables en attente de régularisation',
+            footRight: `${m?.suspensionsActivesDossiers ?? 18} dossiers`, footRightTip: 'Nombre de dossiers en attente'
+          }
+        ];
+      case 'tresorerie':
+        return [
+          scoreCard,
+          {
+            title: 'Liquidité Nette CUT', icon: 'fas fa-university', cardClass: 'kpi-spark-green', titleClass: 'text-success', valueClass: 'text-success',
+            dotClass: 'bg-success', dotTitle: 'CUT Centralisé',
+            value: (m?.liquiditeNetteCutMilliards ?? 1542.3).toFixed(1), unit: 'Mds FCFA Disponibles',
+            stroke: '#16a34a', points: '4,26 22,20 42,22 62,14 80,8', cy: 8,
+            footLeft: 'BCEAO', footLeftTip: 'Disponibilités centralisées à la BCEAO',
+            footRight: `${(m?.soldeBceaoMilliards ?? 848).toFixed(1)} Mds`, footRightTip: 'Solde BCEAO'
+          },
+          {
+            title: 'Régularisation LA', icon: 'fas fa-file-invoice-dollar', cardClass: 'kpi-spark-sky', titleClass: 'text-info-emphasis', valueClass: 'text-info-emphasis',
+            dotClass: 'bg-info', dotTitle: 'Norme ≥ 90%',
+            value: `${(m?.tauxRegularisationLA ?? 88.5).toFixed(1)}%`, unit: 'LA Apurées (Norme ≥ 90%)',
+            stroke: '#0284c7', points: '4,24 22,20 42,16 62,12 80,8', cy: 8,
+            footLeft: 'LA en cours', footLeftTip: 'Encours des Lettres d’Avance non régularisées',
+            footRight: `${m?.laEnCoursMilliards ?? 45.8} Mds`, footRightTip: 'Montant à justifier par les ordonnateurs'
+          },
+          {
+            title: 'Comptes Spéciaux', icon: 'fas fa-piggy-bank', cardClass: 'kpi-spark-amber', titleClass: 'text-warning-emphasis', valueClass: 'text-dark',
+            dotClass: 'bg-warning', dotTitle: 'CST & Bons de Caisse',
+            value: (m?.soldeComptesSpeciauxMilliards ?? 42.85).toFixed(1), unit: 'Mds FCFA Disponibles',
+            stroke: '#f59e0b', points: '4,24 22,22 42,18 62,14 80,10', cy: 10,
+            footLeft: `${m?.comptesSpeciauxActifs ?? 84} CST actifs`, footLeftTip: 'Nombre de Comptes Spéciaux du Trésor',
+            footRight: `${m?.bonsCaisseCirculationCount ?? 458} Bons`, footRightTip: 'Bons de Caisse en circulation'
+          }
+        ];
+      case 'cautionnement':
+        return [
+          scoreCard,
+          {
+            title: 'Volume des Garanties', icon: 'fas fa-shield-alt', cardClass: 'kpi-spark-green', titleClass: 'text-success', valueClass: 'text-success',
+            dotClass: 'bg-success', dotTitle: 'Garanties validées',
+            value: (m?.cautionnementsVolumeMilliards ?? 15.0).toFixed(1), unit: 'Mds FCFA Garantis',
+            stroke: '#16a34a', points: '4,26 22,22 42,18 62,14 80,8', cy: 8,
+            footLeft: 'Dossiers actifs', footLeftTip: 'Attestations et marchés publics actifs',
+            footRight: `${m?.cautionnementsActifsCount ?? 1450} dossiers`, footRightTip: 'Portefeuille cautionné'
+          },
+          {
+            title: 'Taux de Couverture', icon: 'fas fa-check-circle', cardClass: 'kpi-spark-sky', titleClass: 'text-info-emphasis', valueClass: 'text-info-emphasis',
+            dotClass: 'bg-info', dotTitle: 'Norme DGTCP',
+            value: `${(m?.tauxCouvertureCautionnement ?? 96.8).toFixed(1)}%`, unit: 'Postes & Marchés Couverts',
+            stroke: '#0284c7', points: '4,22 22,18 42,14 62,10 80,6', cy: 6,
+            footLeft: `Exercice ${this.selectedAnnee}`, footLeftTip: 'Année de suivi',
+            footRight: 'Objectif 100%', footRightTip: 'Cible réglementaire DGTCP'
+          },
+          {
+            title: 'Cautionnements Échus', icon: 'fas fa-hourglass-end', cardClass: 'kpi-spark-amber', titleClass: 'text-warning-emphasis', valueClass: 'text-dark',
+            dotClass: 'bg-warning', dotTitle: 'Mainlevées en attente',
+            value: (m?.cautionnementsEchusMilliards ?? 2.3).toFixed(1), unit: 'Mds FCFA Non Levés',
+            stroke: '#f59e0b', points: '4,12 22,16 42,20 62,22 80,24', cy: 24,
+            footLeft: 'Contentieux', footLeftTip: 'Dossiers en litige / recouvrement',
+            footRight: `${m?.cautionnementsContentieuxCount ?? 45} dossiers`, footRightTip: 'Nombre de dossiers en contentieux'
+          }
+        ];
+      case 'regies':
+        return [
+          scoreCard,
+          {
+            title: 'Recettes & Régies', icon: 'fas fa-coins', cardClass: 'kpi-spark-green', titleClass: 'text-success', valueClass: 'text-success',
+            dotClass: 'bg-success', dotTitle: 'Collecte conforme',
+            value: (m?.totalRecettesMilliards ?? 1254.0).toFixed(1), unit: 'Mds FCFA Mobilisés',
+            stroke: '#16a34a', points: '4,30 22,24 42,20 62,12 80,6', cy: 6,
+            footLeft: 'En régie', footLeftTip: 'Recettes perçues directement en régie',
+            footRight: `${m?.regiesRecettesPercuesMilliards ?? 14.3} Mds`, footRightTip: 'Encaissements des régies'
+          },
+          {
+            title: 'Pièces Conformes', icon: 'fas fa-file-check', cardClass: 'kpi-spark-sky', titleClass: 'text-info-emphasis', valueClass: 'text-info-emphasis',
+            dotClass: 'bg-info', dotTitle: 'Audit documentaire',
+            value: `${(m?.regiesTauxPiecesConformes ?? 96.4).toFixed(1)}%`, unit: 'Justificatifs Validés',
+            stroke: '#0284c7', points: '4,22 22,18 42,14 62,10 80,6', cy: 6,
+            footLeft: 'Avances en cours', footLeftTip: 'Fonds mis à disposition des régies d’avances',
+            footRight: `${m?.regiesAvancesEnCoursMilliards ?? 4.85} Mds`, footRightTip: 'Encours des avances'
+          },
+          {
+            title: 'Rotation des Fonds', icon: 'fas fa-sync-alt', cardClass: 'kpi-spark-amber', titleClass: 'text-warning-emphasis', valueClass: 'text-dark',
+            dotClass: 'bg-warning', dotTitle: 'Cible < 15 jours',
+            value: `${m?.regiesDelaiMoyenRotationJours ?? 12.5} j`, unit: 'Délai Moyen (Cible < 15j)',
+            stroke: '#f59e0b', points: '4,14 22,16 42,18 62,20 80,22', cy: 22,
+            footLeft: 'Dépassements', footLeftTip: 'Régies au-delà du plafond ou délai',
+            footRight: `${m?.regiesEnDepassementCount ?? 7} régies`, footRightTip: 'Régies à contrôler en priorité'
+          }
+        ];
+      case 'reglement':
+        return [
+          scoreCard,
+          {
+            title: 'Règlements Exécutés', icon: 'fas fa-hand-holding-usd', cardClass: 'kpi-spark-green', titleClass: 'text-success', valueClass: 'text-success',
+            dotClass: 'bg-success', dotTitle: 'Paiements liquidés',
+            value: (m?.totalReglementsMilliards ?? 1138.2).toFixed(1), unit: 'Mds FCFA Payés',
+            stroke: '#16a34a', points: '4,28 22,22 42,18 62,12 80,8', cy: 8,
+            footLeft: 'En cours', footLeftTip: 'Règlements fournisseurs en cours de décaissement',
+            footRight: `${m?.reglementsEnCoursMilliards ?? 18.25} Mds`, footRightTip: 'Mandats en instance de virement'
+          },
+          {
+            title: 'Délai de Règlement', icon: 'fas fa-clock', cardClass: 'kpi-spark-sky', titleClass: 'text-info-emphasis', valueClass: 'text-info-emphasis',
+            dotClass: 'bg-info', dotTitle: 'Norme < 30 jours',
+            value: `${m?.delaiMoyenReglementJours ?? 21.4} j`, unit: 'Délai Moyen (Cible < 30j)',
+            stroke: '#0284c7', points: '4,12 22,16 42,18 62,22 80,24', cy: 24,
+            footLeft: 'Virements RTGS', footLeftTip: 'Part des règlements dématérialisés via RTGS/SICA',
+            footRight: `${m?.partVirementsRtgsPct ?? 68}%`, footRightTip: 'Taux de dématérialisation'
+          },
+          {
+            title: 'Imputations Provisoires', icon: 'fas fa-exclamation-triangle', cardClass: 'kpi-spark-amber', titleClass: 'text-warning-emphasis', valueClass: 'text-dark',
+            dotClass: 'bg-warning', dotTitle: 'À régulariser',
+            value: (m?.imputationsProvisoiresMilliards ?? 1.85).toFixed(2), unit: 'Mds FCFA en IP',
+            stroke: '#f59e0b', points: '4,14 22,18 42,20 62,24 80,26', cy: 26,
+            footLeft: 'Anomalies', footLeftTip: 'Dossiers bloqués pour erreur de RIB/pièce',
+            footRight: `${m?.anomaliesReglementDossiers ?? 14} dossiers`, footRightTip: 'Rejets à corriger'
+          }
+        ];
+      case 'statistiques':
+        return [
+          scoreCard,
+          {
+            title: 'Encours Restes à Payer', icon: 'fas fa-chart-bar', cardClass: 'kpi-spark-green', titleClass: 'text-success', valueClass: 'text-success',
+            dotClass: 'bg-warning', dotTitle: 'Suivi RAP',
+            value: (m?.encoursRapMilliards ?? 124.5).toFixed(1), unit: 'Mds FCFA RAP Total',
+            stroke: '#16a34a', points: '4,16 22,18 42,20 62,18 80,14', cy: 14,
+            footLeft: 'RAP > 90 jours', footLeftTip: 'Tranche critique des Restes à Payer > 90 jours',
+            footRight: `${m?.rapCritiquePlus90jMilliards ?? 34.9} Mds`, footRightTip: 'Montant critique à apurer'
+          },
+          {
+            title: 'Subventions & OC', icon: 'fas fa-landmark', cardClass: 'kpi-spark-sky', titleClass: 'text-info-emphasis', valueClass: 'text-info-emphasis',
+            dotClass: 'bg-info', dotTitle: 'Dotations & LC',
+            value: (m?.statSubventionsMilliards ?? 66.82).toFixed(1), unit: 'Mds FCFA Subventions',
+            stroke: '#0284c7', points: '4,24 22,20 42,16 62,14 80,10', cy: 10,
+            footLeft: 'Obligations (OC)', footLeftTip: 'Volume des obligations cautionnées suivies',
+            footRight: `${m?.statObligationsCautionneesMilliards ?? 48.7} Mds`, footRightTip: 'Montant OC/LC'
+          },
+          {
+            title: 'Service de la Dette', icon: 'fas fa-balance-scale', cardClass: 'kpi-spark-amber', titleClass: 'text-warning-emphasis', valueClass: 'text-dark',
+            dotClass: 'bg-warning', dotTitle: 'Échéances réglées',
+            value: (m?.serviceDetteMilliards ?? 75.4).toFixed(1), unit: 'Mds FCFA Annuels',
+            stroke: '#f59e0b', points: '4,22 22,20 42,18 62,14 80,12', cy: 12,
+            footLeft: 'Réalisation prév.', footLeftTip: 'Adéquation réalisations / prévisions statistiques',
+            footRight: `${m?.tauxRealisationPrevisionsStat ?? 93.8}%`, footRightTip: 'Taux de réalisation'
+          }
+        ];
+      case 'compte_gestion':
+        return [
+          scoreCard,
+          {
+            title: 'Conformité Reddition', icon: 'fas fa-gavel', cardClass: 'kpi-spark-green', titleClass: 'text-success', valueClass: 'text-success',
+            dotClass: 'bg-success', dotTitle: 'Norme Cour des Comptes',
+            value: `${(m?.tauxConformiteCompteGestion ?? 96.4).toFixed(1)}%`, unit: 'Liasses Conformes',
+            stroke: '#16a34a', points: '4,26 22,20 42,16 62,10 80,6', cy: 6,
+            footLeft: 'Exécution crédits', footLeftTip: 'Taux d’exécution des crédits assignés',
+            footRight: `${m?.tauxExecutionCreditsCG ?? 91.6}%`, footRightTip: 'Absorption budgétaire'
+          },
+          {
+            title: 'Volume Audité', icon: 'fas fa-clipboard-check', cardClass: 'kpi-spark-sky', titleClass: 'text-info-emphasis', valueClass: 'text-info-emphasis',
+            dotClass: 'bg-info', dotTitle: 'TGE, PGT, RGF, PGA',
+            value: (m?.cgVolumeAuditeMilliards ?? 482.5).toFixed(1), unit: 'Mds FCFA Audités',
+            stroke: '#0284c7', points: '4,24 22,20 42,16 62,12 80,8', cy: 8,
+            footLeft: 'Quitus transmis', footLeftTip: 'Part des comptables ayant transmis leur quitus',
+            footRight: `${m?.quitusTransmisPct ?? 95.2}%`, footRightTip: 'Taux de quitus'
+          },
+          {
+            title: 'Restes en Instance', icon: 'fas fa-folder-open', cardClass: 'kpi-spark-amber', titleClass: 'text-warning-emphasis', valueClass: 'text-dark',
+            dotClass: 'bg-warning', dotTitle: 'Apurement en cours',
+            value: (m?.restesEnInstanceCGMilliards ?? 11.26).toFixed(2), unit: 'Mds FCFA à Apurer',
+            stroke: '#f59e0b', points: '4,12 22,16 42,20 62,22 80,26', cy: 26,
+            footLeft: `Exercice ${this.selectedAnnee}`, footLeftTip: 'Exercice de reddition',
+            footRight: 'Cour des Comptes', footRightTip: 'Destinataire légal de la liasse'
+          }
+        ];
+      default:
+        return [
+          scoreCard,
+          {
+            title: 'Recettes & Régies', icon: 'fas fa-coins', cardClass: 'kpi-spark-green', titleClass: 'text-success', valueClass: 'text-success',
+            dotClass: 'bg-success', dotTitle: 'Mobilisation conforme',
+            value: (m?.totalRecettesMilliards ?? 1254.0).toFixed(1), unit: 'Mds FCFA Mobilisés',
+            stroke: '#16a34a', points: '4,30 22,24 42,26 62,14 80,6', cy: 6,
+            footLeft: `Exercice ${this.selectedAnnee}`, footLeftTip: 'Période annuelle sous revue',
+            footRight: `Exéc. : ${m?.tauxExecutionLoiFinances ?? 94.8}%`, footRightTip: 'Taux d’exécution Loi de Finances'
+          },
+          {
+            title: 'Concordance BCEAO', icon: 'fas fa-check-double', cardClass: 'kpi-spark-sky', titleClass: 'text-info-emphasis', valueClass: 'text-info-emphasis',
+            dotClass: 'bg-info', dotTitle: 'Lettrage automatique',
+            value: `${(m?.tauxRapprochementAuto ?? 94.8).toFixed(1)}%`, unit: 'Rapprochement Auto (Norme ≥ 90%)',
+            stroke: '#0284c7', points: '4,22 22,18 42,14 62,10 80,4', cy: 4,
+            footLeft: 'Régul. LA', footLeftTip: 'Taux de régularisation des Lettres d’Avance',
+            footRight: `${m?.tauxRegularisationLA ?? 88.5}%`, footRightTip: 'Part déjà justifiée'
+          },
+          {
+            title: 'Liquidité Nette CUT', icon: 'fas fa-university', cardClass: 'kpi-spark-amber', titleClass: 'text-warning-emphasis', valueClass: 'text-dark',
+            dotClass: 'bg-warning', dotTitle: 'CUT Centralisé',
+            value: (m?.liquiditeNetteCutMilliards ?? 1542.3).toFixed(1), unit: 'Mds FCFA Disponibles',
+            stroke: '#f59e0b', points: '4,26 22,20 42,22 62,14 80,8', cy: 8,
+            footLeft: 'Postes/Régies', footLeftTip: 'Unités connectées au CUT',
+            footRight: `${m?.postesEtRegiesActifs ?? 142} connectés`, footRightTip: 'Réseau actif'
+          }
+        ];
+    }
   }
 
   onServiceChange(domain: string): void {
@@ -884,7 +1125,14 @@ export class DecisionIaComponent implements OnInit {
     });
   }
 
-  private buildPredictiveChart(data: PredictiveProjection[]): void {
+  private buildPredictiveChart(data: PredictiveProjection[] = this.predictiveData): void {
+    if (!data || data.length === 0) return;
+    const isDark = typeof document !== 'undefined' && document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const blueLine = isDark ? '#60a5fa' : '#1A365D';
+    const blueFill = isDark ? 'rgba(96, 165, 250, 0.15)' : 'rgba(26, 54, 93, 0.12)';
+    const orangeLine = isDark ? '#fb923c' : '#F77F00';
+    const greenLine = isDark ? '#4ade80' : '#16a34a';
+
     const labels = data.map(d => d.isHistorical ? `${d.year}` : `${d.year} (IA)`);
     const lastHistIndex = data.map(d => d.isHistorical).lastIndexOf(true);
     const ind = this.selectedIndicator;
@@ -907,7 +1155,8 @@ export class DecisionIaComponent implements OnInit {
         return v;
       });
 
-      const factorSim = 1 + (this.simDeltaPct / 100) + (this.simApurementPct / 400);
+      const sens = ind.sensFavorable === 'BAISSE' ? -1 : 1;
+      const factorSim = 1 + sens * ((this.simDeltaPct / 100) + (this.simApurementPct / 400));
       const serieSim = serieBase.map((v, idx) => {
         if (idx < lastHistIndex) return null;
         if (idx === lastHistIndex) return v;
@@ -928,15 +1177,15 @@ export class DecisionIaComponent implements OnInit {
         {
           label: `${ind.nom} (Constaté)`,
           data: histSerie,
-          borderColor: '#1A365D',
-          backgroundColor: 'rgba(26, 54, 93, 0.12)',
+          borderColor: blueLine,
+          backgroundColor: blueFill,
           tension: 0.35,
           pointRadius: 4
         },
         {
           label: `${ind.nom} (Tendanciel IA)`,
           data: foreSerie,
-          borderColor: '#F77F00',
+          borderColor: orangeLine,
           borderDash: [6, 4],
           tension: 0.35,
           pointRadius: 4
@@ -946,7 +1195,7 @@ export class DecisionIaComponent implements OnInit {
         datasets.push({
           label: `${ind.nom} (Scénario Simulé)`,
           data: serieSim,
-          borderColor: '#16a34a',
+          borderColor: greenLine,
           borderWidth: 2.5,
           tension: 0.35,
           pointRadius: 4
@@ -979,15 +1228,15 @@ export class DecisionIaComponent implements OnInit {
       {
         label: 'Recettes Mobilisées (Constaté)',
         data: recHist,
-        borderColor: '#1A365D',
-        backgroundColor: 'rgba(26, 54, 93, 0.1)',
+        borderColor: blueLine,
+        backgroundColor: blueFill,
         tension: 0.35,
         pointRadius: 4
       },
       {
         label: 'Recettes (Tendanciel IA)',
         data: recForecast,
-        borderColor: '#1A365D',
+        borderColor: blueLine,
         borderDash: [6, 4],
         tension: 0.35,
         pointRadius: 4
@@ -995,14 +1244,14 @@ export class DecisionIaComponent implements OnInit {
       {
         label: 'Règlements Exécutés (Constaté)',
         data: regHist,
-        borderColor: '#F77F00',
+        borderColor: orangeLine,
         tension: 0.35,
         pointRadius: 4
       },
       {
         label: 'Règlements (Tendanciel IA)',
         data: regForecast,
-        borderColor: '#F77F00',
+        borderColor: orangeLine,
         borderDash: [6, 4],
         tension: 0.35,
         pointRadius: 4
@@ -1013,7 +1262,7 @@ export class DecisionIaComponent implements OnInit {
       datasets.push({
         label: 'Recettes (Scénario Simulé IA)',
         data: recSim,
-        borderColor: '#16a34a',
+        borderColor: greenLine,
         borderWidth: 2.5,
         tension: 0.35,
         pointRadius: 4
@@ -1023,8 +1272,9 @@ export class DecisionIaComponent implements OnInit {
     this.predictiveChartData = { labels, datasets };
   }
 
-  applyScenarioPreset(preset: 'OPTIMISTE' | 'BASE' | 'STRESS'): void {
+  applyScenarioPreset(preset: 'OPTIMISTE' | 'BASE' | 'STRESS', keepCustomNote = false): void {
     this.activeScenario = preset;
+    if (!keepCustomNote) this.customSimulationNote = '';
     if (preset === 'OPTIMISTE') {
       this.simDeltaPct = 6;
       this.simApurementPct = 35;
@@ -1058,13 +1308,30 @@ export class DecisionIaComponent implements OnInit {
     this.aiResponseMode = prevMode;
   }
 
-  executeChatAction(act: { label: string; icon: string; type: 'question' | 'scenario' | 'pdf'; payload?: any }): void {
+  executeChatAction(act: { label: string; icon: string; type: 'question' | 'scenario' | 'pdf' | 'download'; payload?: any }): void {
     if (act.type === 'question' && act.payload) {
       this.askQuestion(act.payload);
     } else if (act.type === 'scenario' && act.payload) {
-      this.applyScenarioPreset(act.payload);
+      if (typeof act.payload === 'string') {
+        this.applyScenarioPreset(act.payload as 'OPTIMISTE' | 'BASE' | 'STRESS');
+      } else {
+        if (act.payload.domain && act.payload.domain !== this.selectedDomain) {
+          this.selectedDomain = act.payload.domain;
+          this.loadAnalysis();
+        }
+        if (act.payload.indicatorCode) {
+          this.selectedIndicatorCode = act.payload.indicatorCode;
+        }
+        this.customSimulationNote = act.payload.note || '';
+        this.applyScenarioPreset(act.payload.preset, true);
+      }
+      setTimeout(() => {
+        this.predictiveChartCardRef?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 80);
     } else if (act.type === 'pdf') {
       this.exportDecisionPdf();
+    } else if (act.type === 'download' && act.payload) {
+      this.exportChatMessagePdf(act.payload);
     }
   }
 
@@ -1072,12 +1339,7 @@ export class DecisionIaComponent implements OnInit {
     this.chatHistory = [{
       sender: 'ai',
       text: 'Bonjour ! Je suis votre Assistant Décisionnel et Prospectif (DGTCP / ACCT). Cliquez sur <strong>Analyser</strong> ou <strong>Plan d\'action</strong> dans la note à gauche, ou posez-moi directement une question.',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      actions: [
-        { label: 'Simuler Scénario Optimiste', icon: 'fas fa-rocket', type: 'scenario', payload: 'OPTIMISTE' },
-        { label: 'Stress Test Trésorerie', icon: 'fas fa-shield-alt', type: 'scenario', payload: 'STRESS' },
-        { label: 'Exporter en PDF', icon: 'fas fa-file-pdf', type: 'pdf' }
-      ]
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }];
   }
 
@@ -1108,122 +1370,304 @@ export class DecisionIaComponent implements OnInit {
       const ind = this.selectedIndicator;
       const modeBadge = this.aiResponseMode === 'action' ? 'Plan d’Action IA' : (this.aiResponseMode === 'technique' ? 'Analyse Technique' : 'Synthèse Direction');
       let answer = '';
+      let matchedFromData: ComparativeIndicator | null = null;
       if (q.includes('plan d\'action') || this.aiResponseMode === 'action') {
         const cible = ind ? `${ind.nom} (${ind.valeurA} ${ind.unite})` : this.selectedServiceLabel;
         answer = `
-          <div class="p-1">
-            <div class="fw-bold text-success mb-2 border-bottom pb-1"><i class="fas fa-tasks me-1"></i> ${modeBadge} — ${cible}</div>
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1"><i class="fas fa-tasks me-1"></i> ${modeBadge} — ${cible}</div>
             <ul class="list-unstyled mb-2">
-              <li>• <strong>Phase 1 (J+7) :</strong> Audit ciblé des dossiers en écart et gel des engagements non justifiés.</li>
-              <li>• <strong>Phase 2 (J+30) :</strong> Apurement prioritaire (+${Math.max(15, this.simApurementPct || 25)}%) et relance des postes comptables.</li>
-              <li>• <strong>Phase 3 (J+60) :</strong> Validation ACCT / PGT et suivi mensuel automatique.</li>
+              <li><strong>• Phase 1 (J+7) :</strong> Audit ciblé des dossiers en écart et gel des engagements non justifiés.</li>
+              <li><strong>• Phase 2 (J+30) :</strong> Apurement prioritaire (<strong>+${Math.max(15, this.simApurementPct || 25)}%</strong>) et relance des postes comptables.</li>
+              <li><strong>• Phase 3 (J+60) :</strong> Validation ACCT / PGT et suivi mensuel automatique.</li>
             </ul>
-            <div class="very-small text-muted"><strong>Impact estimé :</strong> Amélioration de +3 à +5 pts sur le score de conformité ${this.selectedServiceLabel}.</div>
+            <div class="very-small text-muted"><strong>Impact estimé :</strong> Amélioration de <strong>+3</strong> à <strong>+5 pts</strong> sur le score de conformité ${this.selectedServiceLabel}.</div>
           </div>`;
       } else if (ind && (q.includes(ind.nom.toLowerCase().slice(0, 10)) || q.includes('indicateur'))) {
         answer = `
-          <div class="p-1">
-            <div class="fw-bold text-primary mb-2 border-bottom pb-1"><i class="fas fa-chart-line me-1"></i> ${modeBadge} — ${ind.nom}</div>
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1"><i class="fas fa-chart-line me-1"></i> ${modeBadge} — ${ind.nom}</div>
             <ul class="list-unstyled mb-2">
-              <li>• <strong>Valeur actuelle (${this.selectedAnnee}) :</strong> <span class="text-navy fw-bold">${ind.valeurA} ${ind.unite}</span></li>
-              <li>• <strong>Exercice précédent (${this.selectedAnnee - 1}) :</strong> ${ind.valeurB} ${ind.unite} (Écart : <strong>${ind.deltaPct >= 0 ? '+' : ''}${ind.deltaPct}%</strong>)</li>
-              <li>• <strong>Projection 2031 :</strong> <span class="text-success fw-bold">${this.projected2031Value} ${ind.unite}</span></li>
+              <li><strong>• Valeur actuelle (${this.selectedAnnee}) :</strong> <span class="text-navy fw-bold">${ind.valeurA} ${ind.unite}</span></li>
+              <li><strong>• Exercice précédent (${this.selectedAnnee - 1}) :</strong> <strong>${ind.valeurB} ${ind.unite}</strong> (Écart : <strong>${ind.deltaPct >= 0 ? '+' : ''}${ind.deltaPct}%</strong>)</li>
+              <li><strong>• Projection 2031 :</strong> <span class="text-success fw-bold">${this.projected2031Value} ${ind.unite}</span></li>
             </ul>
             <div class="very-small text-muted">${ind.description}</div>
           </div>`;
       } else if (q.includes('caution')) {
         answer = `
-          <div class="p-1">
-            <div class="fw-bold text-primary mb-2 border-bottom pb-1">🛡️ Diagnostic Cautionnement & Garanties des Comptables Publics</div>
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1">🛡️ Diagnostic Cautionnement & Garanties des Comptables Publics</div>
             <ul class="list-unstyled mb-2">
-              <li>• <strong>Taux de couverture des cautionnements :</strong> <span class="text-success fw-bold">${this.realMetrics?.tauxCouvertureCautionnement || 91.5}%</span> (Norme DGTCP = 100%)</li>
-              <li>• <strong>Montant total des garanties :</strong> <strong>${this.realMetrics?.cautionnementsVolumeMilliards || 15.0} Mds FCFA</strong></li>
-              <li>• <strong>Dossiers de cautionnement actifs :</strong> <strong>${this.realMetrics?.cautionnementsActifsCount || 1450} dossiers</strong></li>
+              <li><strong>• Taux de couverture des cautionnements :</strong> <span class="text-success fw-bold">${this.realMetrics?.tauxCouvertureCautionnement || 91.5}%</span> (Norme DGTCP = <strong>100%</strong>)</li>
+              <li><strong>• Montant total des garanties :</strong> <strong>${this.realMetrics?.cautionnementsVolumeMilliards || 15.0} Mds FCFA</strong></li>
+              <li><strong>• Dossiers de cautionnement actifs :</strong> <strong>${this.realMetrics?.cautionnementsActifsCount || 1450} dossiers</strong></li>
             </ul>
             <div class="very-small text-muted"><strong>Action recommandée :</strong> Régulariser les arrêtés de nomination et mainlevées de quitus en attente.</div>
           </div>`;
       } else if (q.includes('régie') || q.includes('regie')) {
         answer = `
-          <div class="p-1">
-            <div class="fw-bold text-warning mb-2 border-bottom pb-1">🏢 Diagnostic Régies d'Avances & de Recettes</div>
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1">🏢 Diagnostic Régies d'Avances & de Recettes</div>
             <ul class="list-unstyled mb-2">
-              <li>• <strong>Postes & Régies connectés :</strong> <strong>${this.realMetrics?.postesEtRegiesActifs || 142} unités</strong> (Avances : ${this.realMetrics?.regiesAvancesEnCoursMilliards || 4.85} Mds FCFA)</li>
-              <li>• <strong>Taux de conformité des pièces :</strong> <span class="text-success fw-bold">${this.realMetrics?.regiesTauxPiecesConformes || 96.4}%</span> (Seuil ≥ 95%)</li>
-              <li>• <strong>Régies en dépassement de délai/plafond :</strong> <span class="text-danger fw-bold">${this.realMetrics?.regiesEnDepassementCount || 7} régies</span></li>
+              <li><strong>• Postes & Régies connectés :</strong> <strong>${this.realMetrics?.postesEtRegiesActifs || 142} unités</strong> (Avances : <strong>${this.realMetrics?.regiesAvancesEnCoursMilliards || 4.85} Mds FCFA</strong>)</li>
+              <li><strong>• Taux de conformité des pièces :</strong> <span class="text-success fw-bold">${this.realMetrics?.regiesTauxPiecesConformes || 96.4}%</span> (Seuil ≥ <strong>95%</strong>)</li>
+              <li><strong>• Régies en dépassement de délai/plafond :</strong> <span class="text-danger fw-bold">${this.realMetrics?.regiesEnDepassementCount || 7} régies</span></li>
             </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Suspendre les réapprovisionnements pour les ${this.realMetrics?.regiesEnDepassementCount || 7} régisseurs en dépassement.</div>
+            <div class="very-small text-muted"><strong>Action recommandée :</strong> Suspendre les réapprovisionnements pour les <strong>${this.realMetrics?.regiesEnDepassementCount || 7}</strong> régisseurs en dépassement.</div>
           </div>`;
       } else if (q.includes('compte de gestion') || q.includes('cour des comptes') || q.includes('reddition')) {
         answer = `
-          <div class="p-1">
-            <div class="fw-bold text-success mb-2 border-bottom pb-1">📑 Reddition des Comptes de Gestion (Cour des Comptes)</div>
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1">📑 Reddition des Comptes de Gestion (Cour des Comptes)</div>
             <ul class="list-unstyled mb-2">
-              <li>• <strong>Conformité des liasses :</strong> <span class="text-success fw-bold">${this.realMetrics?.tauxConformiteCompteGestion || 96.4}%</span> (Seuil ≥ 90%)</li>
-              <li>• <strong>Volume audité (TGE, PGT, RGF, PGA) :</strong> <strong>${this.realMetrics?.cgVolumeAuditeMilliards || 482.5} Mds FCFA</strong></li>
-              <li>• <strong>Taux de quitus transmis :</strong> <span class="text-success fw-bold">${this.realMetrics?.quitusTransmisPct || 95.2}%</span> (Restes en instance : ${this.realMetrics?.restesEnInstanceCGMilliards || 11.26} Mds)</li>
+              <li><strong>• Conformité des liasses :</strong> <span class="text-success fw-bold">${this.realMetrics?.tauxConformiteCompteGestion || 96.4}%</span> (Seuil ≥ <strong>90%</strong>)</li>
+              <li><strong>• Volume audité (TGE, PGT, RGF, PGA) :</strong> <strong>${this.realMetrics?.cgVolumeAuditeMilliards || 482.5} Mds FCFA</strong></li>
+              <li><strong>• Taux de quitus transmis :</strong> <span class="text-success fw-bold">${this.realMetrics?.quitusTransmisPct || 95.2}%</span> (Restes en instance : <strong>${this.realMetrics?.restesEnInstanceCGMilliards || 11.26} Mds</strong>)</li>
             </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Apurer les ${this.realMetrics?.restesEnInstanceCGMilliards || 11.26} Mds FCFA en instance avant transmission définitive à la Cour des Comptes.</div>
+            <div class="very-small text-muted"><strong>Action recommandée :</strong> Apurer les <strong>${this.realMetrics?.restesEnInstanceCGMilliards || 11.26} Mds FCFA</strong> en instance avant transmission définitive à la Cour des Comptes.</div>
           </div>`;
       } else if (q.includes('cut') || q.includes('trésor') || q.includes('tresor') || q.includes('liquidit') || q.includes('avance')) {
         answer = `
-          <div class="p-1">
-            <div class="fw-bold text-primary mb-2 border-bottom pb-1">📊 Diagnostic Trésorerie & Compte Unique (CUT)</div>
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1">📊 Diagnostic Trésorerie & Compte Unique (CUT)</div>
             <ul class="list-unstyled mb-2">
-              <li>• <strong>Liquidité Nette CUT :</strong> <span class="text-success fw-bold">${liq} Mds FCFA</span> (dont 55% centralisés à la BCEAO)</li>
-              <li>• <strong>Lettres d'Avance non régularisées :</strong> <span class="text-danger fw-bold">${laEnc} Mds FCFA</span></li>
-              <li>• <strong>Taux de régularisation LA :</strong> <strong>${laReg}%</strong> (Norme ACCT ≥ 90%)</li>
+              <li><strong>• Liquidité Nette CUT :</strong> <span class="text-success fw-bold">${liq} Mds FCFA</span> (dont <strong>55%</strong> centralisés à la BCEAO)</li>
+              <li><strong>• Lettres d'Avance non régularisées :</strong> <span class="text-danger fw-bold">${laEnc} Mds FCFA</span></li>
+              <li><strong>• Taux de régularisation LA :</strong> <strong>${laReg}%</strong> (Norme ACCT ≥ <strong>90%</strong>)</li>
             </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Suspendre toute nouvelle LA sur les ordonnateurs présentant un retard &gt; 45 jours.</div>
+            <div class="very-small text-muted"><strong>Action recommandée :</strong> Suspendre toute nouvelle LA sur les ordonnateurs présentant un retard &gt; <strong>45 jours</strong>.</div>
           </div>`;
       } else if (q.includes('rap') || q.includes('reste') || q.includes('règle') || q.includes('regle')) {
         answer = `
-          <div class="p-1">
-            <div class="fw-bold text-danger mb-2 border-bottom pb-1">⏳ Analyse des Restes à Payer (RAP) & Règlements</div>
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1">⏳ Analyse des Restes à Payer (RAP) & Règlements</div>
             <ul class="list-unstyled mb-2">
-              <li>• <strong>Encours total RAP :</strong> <strong>${rap} Mds FCFA</strong></li>
-              <li>• <strong>Tranche critique (&gt; 90 jours) :</strong> <span class="text-danger fw-bold">${rap90} Mds FCFA</span></li>
-              <li>• <strong>Délai moyen de règlement :</strong> <span class="text-success fw-bold">${this.realMetrics?.delaiMoyenReglementJours || 21.4} jours</span> (Cible &lt; 30j)</li>
+              <li><strong>• Encours total RAP :</strong> <strong>${rap} Mds FCFA</strong></li>
+              <li><strong>• Tranche critique (&gt; 90 jours) :</strong> <span class="text-danger fw-bold">${rap90} Mds FCFA</span></li>
+              <li><strong>• Délai moyen de règlement :</strong> <span class="text-success fw-bold">${this.realMetrics?.delaiMoyenReglementJours || 21.4} jours</span> (Cible &lt; <strong>30j</strong>)</li>
             </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Prioriser l'apurement FIFO des décomptes BTP et fournitures médicales de plus de 90 jours.</div>
+            <div class="very-small text-muted"><strong>Action recommandée :</strong> Prioriser l'apurement FIFO des décomptes BTP et fournitures médicales de plus de <strong>90 jours</strong>.</div>
           </div>`;
       } else if (q.includes('bceao') || q.includes('rapprochement') || q.includes('concordance') || q.includes('compta')) {
         answer = `
-          <div class="p-1">
-            <div class="fw-bold text-success mb-2 border-bottom pb-1">⚖️ Concordance Bancaire BCEAO / ACCT (Comptabilité)</div>
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1">⚖️ Concordance Bancaire BCEAO / ACCT (Comptabilité)</div>
             <ul class="list-unstyled mb-2">
-              <li>• <strong>Taux de rapprochement auto :</strong> <span class="text-success fw-bold">${conc}%</span> (Seuil DGTCP ≥ 90%)</li>
-              <li>• <strong>Écart résiduel en sas :</strong> <strong>${this.realMetrics?.ecartConcordanceMilliards || 1.2} Mds FCFA</strong></li>
-              <li>• <strong>Volume mouvements comptabilisés :</strong> <strong>${this.realMetrics?.comptaVolumeMouvementsMilliards || 348.52} Mds FCFA</strong></li>
+              <li><strong>• Taux de rapprochement auto :</strong> <span class="text-success fw-bold">${conc}%</span> (Seuil DGTCP ≥ <strong>90%</strong>)</li>
+              <li><strong>• Écart résiduel en sas :</strong> <strong>${this.realMetrics?.ecartConcordanceMilliards || 1.2} Mds FCFA</strong></li>
+              <li><strong>• Volume mouvements comptabilisés :</strong> <strong>${this.realMetrics?.comptaVolumeMouvementsMilliards || 348.52} Mds FCFA</strong></li>
             </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Apurer les comptes transitoires 4711 et 4712 avant l'arrêté mensuel.</div>
+            <div class="very-small text-muted"><strong>Action recommandée :</strong> Apurer les comptes transitoires <strong>4711</strong> et <strong>4712</strong> avant l'arrêté mensuel.</div>
+          </div>`;
+      } else if (q.includes('bilan') || q.includes('synthétique') || q.includes('global')) {
+        const m = this.realMetrics;
+        answer = `
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1">Bilan Synthétique Consolidé — Exercice ${this.selectedAnnee}</div>
+            <ul class="list-unstyled mb-2">
+              <li><strong>• Comptabilité :</strong> Rapprochement auto BCEAO à <span class="text-success fw-bold">${conc}%</span>, opérations en attente à <strong>${m?.suspensComptablesMilliards || 45.8} Mds FCFA</strong> (<strong>${m?.suspensionsActivesDossiers || 18}</strong> dossiers).</li>
+              <li><strong>• Trésorerie :</strong> Liquidité nette CUT à <span class="text-success fw-bold">${liq} Mds FCFA</span> ; régularisation des Lettres d'Avance à <strong>${laReg}%</strong> (<strong>${laEnc} Mds</strong> en cours).</li>
+              <li><strong>• Cautionnement :</strong> <strong>${m?.cautionnementsActifsCount || 1450} dossiers actifs</strong> (<strong>${m?.cautionnementsVolumeMilliards || 15.0} Mds FCFA</strong>), échus non levés : <strong>${m?.cautionnementsEchusMilliards || 2.3} Mds</strong>.</li>
+              <li><strong>• Régies & Règlement :</strong> <strong>${rec} Mds FCFA</strong> de recettes mobilisées (<strong>${m?.regiesTauxPiecesConformes || 96.4}%</strong> pièces conformes) face à <strong>${m?.totalReglementsMilliards || 1138.2} Mds FCFA</strong> de paiements (délai moyen : <strong>${m?.delaiMoyenReglementJours || 21.4} j</strong>).</li>
+              <li><strong>• Statistiques & Compte de Gestion :</strong> Encours RAP à <strong>${rap} Mds FCFA</strong> (dont <strong>${rap90} Mds &gt; 90j</strong>) ; conformité Cour des Comptes à <span class="text-success fw-bold">${m?.tauxConformiteCompteGestion || 96.4}%</span>.</li>
+            </ul>
+            <div class="very-small text-muted"><strong>Priorité DGTCP :</strong> Apurer les RAP &gt; <strong>90 jours</strong> (<strong>${rap90} Mds</strong>) et porter la régularisation des LA au-dessus de <strong>90%</strong>.</div>
+          </div>`;
+      } else if (q.includes('vigilance') || q.includes('risque') || q.includes('point d')) {
+        const risques = this.currentSummary?.risksAndGaps || [];
+        const recs = this.currentSummary?.recommendations || [];
+        answer = `
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1">Points de Vigilance & Mesures — ${this.selectedServiceLabel}</div>
+            <ul class="list-unstyled mb-2">
+              ${risques.map(r => `<li><strong>•</strong> <span class="text-danger fw-semibold">Risque :</span> ${r}</li>`).join('')}
+              ${recs.slice(0, 2).map(rc => `<li><strong>•</strong> <span class="text-success fw-semibold">Action :</span> ${rc}</li>`).join('')}
+            </ul>
+            <div class="very-small text-muted">Score actuel du service : <strong>${this.currentSummary?.globalScore ?? 92}/100</strong> (${this.currentSummary?.globalStatus ?? 'CONFORME'}).</div>
           </div>`;
       } else {
-        answer = `
-          <div class="p-1">
-            <div class="fw-bold text-primary mb-2 border-bottom pb-1">📈 Statistiques & Projection Macro-Budgétaire (${this.selectedPerimetre})</div>
-            <ul class="list-unstyled mb-2">
-              <li>• <strong>Recettes mobilisées (${this.selectedAnnee}) :</strong> <strong>${rec} Mds FCFA</strong> (Taux prévision : ${this.realMetrics?.tauxRealisationPrevisionsStat || 93.8}%)</li>
-              <li>• <strong>Projection OLS 2027 :</strong> <span class="text-success fw-bold">${prev27} Mds FCFA</span> (+5,4%/an)</li>
-              <li>• <strong>Règlements consolidés exécutés :</strong> <strong>${this.realMetrics?.totalReglementsMilliards || 1138.2} Mds FCFA</strong></li>
-            </ul>
-            <div class="very-small text-muted">La trajectoire statistique couvre les 7 services ACCT et garantit le financement des dépenses prioritaires.</div>
-          </div>`;
+        const dataResult = this.searchApplicationData(question);
+        if (dataResult) {
+          answer = dataResult.html;
+          if (dataResult.matchedIndicator) {
+            matchedFromData = dataResult.matchedIndicator;
+          }
+        } else {
+          const m = this.realMetrics;
+          answer = `
+            <div class="p-1 text-dark">
+              <div class="fw-bold text-dark mb-2 border-bottom pb-1">Statistiques & Projection Macro-Budgétaire — Exercice ${this.selectedAnnee}</div>
+              <ul class="list-unstyled mb-2">
+                <li><strong>• Recettes mobilisées :</strong> <strong>${rec} Mds FCFA</strong> (Exécution Loi de Finances : <strong>${m?.tauxExecutionLoiFinances || 94.8}%</strong>)</li>
+                <li><strong>• Règlements exécutés :</strong> <strong>${m?.totalReglementsMilliards || 1138.2} Mds FCFA</strong> (Délai moyen : <strong>${m?.delaiMoyenReglementJours || 21.4} j</strong>)</li>
+                <li><strong>• Subventions & Obligations Cautionnées :</strong> <strong>${m?.statSubventionsMilliards || 66.8} Mds</strong> / <strong>${m?.statObligationsCautionneesMilliards || 48.7} Mds FCFA</strong></li>
+                <li><strong>• Encours Restes à Payer (RAP) :</strong> <strong>${rap} Mds FCFA</strong> dont <span class="text-danger fw-bold">${rap90} Mds FCFA &gt; 90 jours</span></li>
+                <li><strong>• Projection OLS 2027 :</strong> <span class="text-success fw-bold">${prev27} Mds FCFA</span> (<strong>+5,4%/an</strong>) — Horizon 2031 : <strong>${this.projected2031Value} Mds FCFA</strong></li>
+              </ul>
+              <div class="very-small text-muted"><strong>Synthèse :</strong> Solde net du CUT préservé à <strong>${liq} Mds FCFA</strong> sous réserve de maîtrise des RAP critiques.</div>
+            </div>`;
+        }
+      }
+
+      // Actions de simulation adaptées aux suggestions de la réponse
+      const isAction = q.includes('plan d\'action') || this.aiResponseMode === 'action';
+      const actions: { label: string; icon: string; type: 'question' | 'scenario' | 'pdf' | 'download'; payload?: any }[] = [];
+
+      if (isAction) {
+        actions.push({
+          label: 'Voir l’impact sur le graphique (+6%)',
+          icon: 'fas fa-chart-line',
+          type: 'scenario',
+          payload: {
+            preset: 'OPTIMISTE',
+            domain: this.selectedDomain,
+            indicatorCode: ind?.code,
+            note: `Application du plan d’action recommandé sur ${ind?.nom || this.selectedServiceLabel}.`
+          }
+        });
+        actions.push({ label: 'Télécharger PDF', icon: 'fas fa-download', type: 'download', payload: answer });
+      } else {
+        let simLabel = 'Simuler ces mesures sur le graphe (+6%)';
+        let simDomain = this.selectedDomain;
+        let simInd = matchedFromData?.code || ind?.code;
+        let simNote = `Application des mesures recommandées sur ${matchedFromData?.nom || ind?.nom || this.selectedServiceLabel}.`;
+
+        if (matchedFromData) {
+          simLabel = `Simuler "${matchedFromData.nom}" sur le graphe`;
+        } else if (q.includes('rap') || q.includes('reste') || q.includes('règle') || q.includes('regle')) {
+          simLabel = 'Simuler l’apurement des RAP sur le graphe';
+          simDomain = 'statistiques';
+          simInd = 'STA_RAP';
+          simNote = 'Apurement prioritaire FIFO des décomptes > 90 jours → baisse progressive de l’encours RAP d’ici 2031.';
+        } else if (q.includes('cut') || q.includes('trésor') || q.includes('tresor') || q.includes('avance')) {
+          simLabel = 'Simuler la régularisation des LA sur le graphe';
+          simDomain = 'tresorerie';
+          simInd = 'TRS_LA_REG';
+          simNote = 'Suspension des nouvelles LA sur les ordonnateurs en retard > 45j → remontée du taux de régularisation au-dessus de 90%.';
+        } else if (q.includes('bceao') || q.includes('rapprochement') || q.includes('compta')) {
+          simLabel = 'Simuler l’apurement comptable sur le graphe';
+          simDomain = 'comptabilite';
+          simInd = 'CPT_RAPP';
+          simNote = 'Apurement des comptes transitoires 4711/4712 → amélioration du taux de rapprochement automatique BCEAO/ACCT.';
+        } else if (q.includes('régie') || q.includes('regie')) {
+          simLabel = 'Simuler le contrôle des régies sur le graphe';
+          simDomain = 'regies';
+          simInd = 'REG_TOT';
+          simNote = 'Suspension des réapprovisionnements en dépassement → hausse de la collecte nette des régies.';
+        } else if (q.includes('caution')) {
+          simLabel = 'Simuler les mainlevées sur le graphe';
+          simDomain = 'cautionnement';
+          simInd = 'CAU_ECH';
+          simNote = 'Régularisation des arrêtés et mainlevées de quitus → réduction des cautionnements échus non levés.';
+        } else if (q.includes('compte de gestion') || q.includes('cour des comptes')) {
+          simLabel = 'Simuler l’apurement CG sur le graphe';
+          simDomain = 'compte_gestion';
+          simInd = 'CG_CONF';
+          simNote = 'Apurement des restes en instance avant transmission → hausse de la conformité Cour des Comptes.';
+        }
+
+        actions.push({ label: simLabel, icon: 'fas fa-arrow-up', type: 'scenario', payload: { preset: 'OPTIMISTE', domain: simDomain, indicatorCode: simInd, note: simNote } });
+        actions.push({ label: 'Simuler ralentissement (-5%)', icon: 'fas fa-arrow-down', type: 'scenario', payload: { preset: 'STRESS', domain: simDomain, indicatorCode: simInd, note: 'Hypothèse de dégradation (-5%) en l’absence de mesures correctives.' } });
+        actions.push({ label: 'Plan d’action détaillé', icon: 'fas fa-tasks', type: 'question', payload: `Génère un plan d'action pour ${ind?.nom || this.selectedServiceLabel}` });
+        actions.push({ label: 'Télécharger PDF', icon: 'fas fa-download', type: 'download', payload: answer });
       }
 
       this.chatHistory.push({
         sender: 'ai',
         text: answer,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        actions: [
-          { label: 'Plan d’action', icon: 'fas fa-tasks', type: 'question', payload: `Génère un plan d'action pour ${this.selectedIndicator?.nom || this.selectedServiceLabel}` },
-          { label: 'Simuler Optimiste', icon: 'fas fa-rocket', type: 'scenario', payload: 'OPTIMISTE' },
-          { label: 'Export PDF', icon: 'fas fa-file-pdf', type: 'pdf' }
-        ]
+        actions
       });
       this.isGeneratingAnswer = false;
       this.cdr.detectChanges();
       this.scrollToBottom();
     }, 500);
+  }
+
+  /** Recherche dans l'ensemble des données de l'application (45 indicateurs, ministères, historique 2019-2031). */
+  private searchApplicationData(question: string): { html: string; matchedIndicator?: ComparativeIndicator } | null {
+    const norm = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const qNorm = norm(question);
+    const m = this.realMetrics;
+
+    // 1. Recherche sur une année précise (2019 - 2031)
+    const yearMatch = qNorm.match(/\b(2019|202[0-9]|203[01])\b/);
+    if (yearMatch) {
+      const targetYear = Number(yearMatch[1]);
+      const proj = this.predictiveData.find(p => p.year === targetYear);
+      const hist = m?.historiqueFlux.find(h => h.annee === targetYear);
+      if (proj || hist) {
+        const recVal = hist ? hist.recettesMilliards : proj!.recettes;
+        const regVal = hist ? hist.reglementsMilliards : proj!.reglements;
+        const solde = proj ? proj.soldeCut : Number((recVal - regVal).toFixed(1));
+        const nature = hist ? 'Données historiques certifiées' : 'Projection statistique';
+        return {
+          html: `
+            <div class="p-1 text-dark">
+              <div class="fw-bold text-dark mb-2 border-bottom pb-1">Données Exercice ${targetYear} (${nature})</div>
+              <ul class="list-unstyled mb-2">
+                <li><strong>• Recettes mobilisées :</strong> <strong>${recVal} Mds FCFA</strong></li>
+                <li><strong>• Règlements exécutés :</strong> <strong>${regVal} Mds FCFA</strong></li>
+                <li><strong>• Solde / Excédent :</strong> <span class="fw-bold ${solde >= 0 ? 'text-success' : 'text-danger'}">${solde >= 0 ? '+' : ''}${solde} Mds FCFA</span></li>
+                ${hist ? `<li><strong>• Liquidité CUT :</strong> <strong>${hist.liquiditeMilliards} Mds FCFA</strong> (Concordance : <strong>${hist.tauxConcordance}%</strong>)</li>` : ''}
+              </ul>
+              <div class="very-small text-muted">Données extraites de la série chronologique consolidée 2019–2031.</div>
+            </div>`
+        };
+      }
+    }
+
+    // 2. Recherche sur les ministères / dépenses sectorielles
+    if ((qNorm.includes('ministere') || qNorm.includes('secteur') || qNorm.includes('repartition') || qNorm.includes('depense')) && m?.repartitionMinisteresDepenses?.length) {
+      const items = m.repartitionMinisteresDepenses
+        .map(d => `<li><strong>• ${d.name} :</strong> <strong>${d.value} Mds FCFA</strong></li>`)
+        .join('');
+      return {
+        html: `
+          <div class="p-1 text-dark">
+            <div class="fw-bold text-dark mb-2 border-bottom pb-1">Répartition des Dépenses par Ministère (${this.selectedAnnee})</div>
+            <ul class="list-unstyled mb-2">${items}</ul>
+            <div class="very-small text-muted">Total des règlements consolidés : <strong>${m.totalReglementsMilliards} Mds FCFA</strong>.</div>
+          </div>`
+      };
+    }
+
+    // 3. Recherche multi-mots-clés dans les 45 indicateurs des 7 services
+    const stopWords = new Set(['quel', 'quelle', 'quels', 'quelles', 'est', 'sont', 'les', 'des', 'une', 'sur', 'pour', 'dans', 'avec', 'par', 'que', 'qui', 'comment', 'combien', 'etat', 'situation', 'donne', 'moi', 'analyse', 'voir', 'plus', 'tout', 'tous']);
+    const tokens = qNorm.split(/[^a-z0-9]+/).filter(t => t.length >= 3 && !stopWords.has(t));
+    if (tokens.length === 0 || this.allIndicators.length === 0) return null;
+
+    const scored = this.allIndicators
+      .map(ind => {
+        const hay = norm(`${ind.nom} ${ind.domaineLabel} ${ind.description}`);
+        let score = 0;
+        for (const tok of tokens) {
+          if (hay.includes(tok)) score += norm(ind.nom).includes(tok) ? 3 : 1;
+        }
+        return { ind, score };
+      })
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+
+    if (scored.length === 0) return null;
+
+    const rows = scored.map(({ ind }) => {
+      const cls = ind.statut === 'PROGRESSION' ? 'text-success' : (ind.statut === 'REGRESSION' ? 'text-danger' : 'text-secondary');
+      return `<li><strong>• [${ind.domaineLabel}] ${ind.nom} :</strong> <strong>${ind.valeurA} ${ind.unite}</strong> <span class="${cls} fw-bold">(${ind.deltaPct >= 0 ? '+' : ''}${ind.deltaPct}% vs ${this.selectedAnnee - 1})</span></li>`;
+    }).join('');
+
+    const best = scored[0].ind;
+    return {
+      matchedIndicator: best,
+      html: `
+        <div class="p-1 text-dark">
+          <div class="fw-bold text-dark mb-2 border-bottom pb-1">Données extraites de l'application (${scored.length} indicateur(s))</div>
+          <ul class="list-unstyled mb-2">${rows}</ul>
+          <div class="very-small text-muted">${best.description}</div>
+        </div>`
+    };
   }
 
   private scrollToBottom(): void {
@@ -1232,6 +1676,92 @@ export class DecisionIaComponent implements OnInit {
         this.chatBodyRef.nativeElement.scrollTop = this.chatBodyRef.nativeElement.scrollHeight;
       }
     }, 80);
+  }
+
+  async exportChatMessagePdf(htmlText: string): Promise<void> {
+    if (!this.isBrowser) return;
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF({ orientation: 'portrait' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    let y = 16;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.setTextColor(26, 54, 93);
+    doc.text('DGTCP — Analyse Assistant Décisionnel IA', 14, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(100);
+    doc.text(`Service : ${this.selectedServiceLabel}   |   Exercice : ${this.selectedAnnee}`, 14, y);
+    y += 3;
+    doc.setDrawColor(210, 220, 235);
+    doc.line(14, y, pageW - 14, y);
+    y += 7;
+
+    // Extraction structurée du contenu HTML de la bulle
+    const container = document.createElement('div');
+    container.innerHTML = htmlText;
+    const rawLines = (container.innerText || container.textContent || '')
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l.length > 0);
+
+    rawLines.forEach((line, idx) => {
+      if (idx === 0) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11.5);
+        doc.setTextColor(26, 54, 93);
+        const wrapped = doc.splitTextToSize(line, pageW - 28);
+        if (y + wrapped.length * 5 > pageH - 14) { doc.addPage(); y = 16; }
+        doc.text(wrapped, 14, y);
+        y += wrapped.length * 5 + 4;
+        return;
+      }
+
+      doc.setFontSize(9.5);
+      doc.setTextColor(40);
+      const colonIdx = line.indexOf(':');
+      // Mettre le titre/libellé du point en gras avant ":"
+      if (colonIdx > 0 && colonIdx < 45) {
+        const prefix = line.slice(0, colonIdx + 1) + ' ';
+        const rest = line.slice(colonIdx + 1).trim();
+        doc.setFont('helvetica', 'bold');
+        const prefixW = doc.getTextWidth(prefix);
+        const restLines = doc.splitTextToSize(rest, pageW - 28 - prefixW);
+        if (y + restLines.length * 4.8 > pageH - 14) { doc.addPage(); y = 16; }
+        doc.text(prefix, 14, y);
+        doc.setFont('helvetica', 'normal');
+        if (restLines.length > 0) {
+          doc.text(restLines[0], 14 + prefixW, y);
+          for (let li = 1; li < restLines.length; li++) {
+            y += 4.8;
+            doc.text(restLines[li], 18, y);
+          }
+        }
+        y += 6.2;
+      } else {
+        doc.setFont('helvetica', 'normal');
+        const wrapped = doc.splitTextToSize(line, pageW - 28);
+        if (y + wrapped.length * 4.8 > pageH - 14) { doc.addPage(); y = 16; }
+        doc.text(wrapped, 14, y);
+        y += wrapped.length * 4.8 + 2;
+      }
+    });
+
+    const maintenant = new Date();
+    const dateImp = maintenant.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const heureImp = maintenant.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const nbPages = doc.getNumberOfPages();
+    for (let p = 1; p <= nbPages; p++) {
+      doc.setPage(p);
+      doc.setFontSize(8);
+      doc.setTextColor(120);
+      doc.text(`Imprimé le ${dateImp} à ${heureImp}`, pageW - 14, pageH - 6, { align: 'right' });
+    }
+
+    doc.save(`Analyse_IA_DGTCP_${this.selectedAnnee}.pdf`);
   }
 
   async exportDecisionPdf(): Promise<void> {
@@ -1246,21 +1776,28 @@ export class DecisionIaComponent implements OnInit {
       if (y + h > pageH - 14) { doc.addPage(); y = 16; }
     };
 
-    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
     doc.setTextColor(26, 54, 93);
     doc.text('DGTCP — Note Stratégique & Prospective IA', 14, y);
     y += 6;
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(9.5);
     doc.setTextColor(100);
     doc.text(`Service : ${this.selectedServiceLabel}   |   Exercice : ${this.selectedAnnee}   |   Score : ${this.currentSummary.globalScore}/100`, 14, y);
-    y += 8;
+    y += 3;
+    doc.setDrawColor(210, 220, 235);
+    doc.line(14, y, pageW - 14, y);
+    y += 7;
 
     if (this.selectedIndicator) {
       const ind = this.selectedIndicator;
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(10.5);
       doc.setTextColor(26, 54, 93);
       doc.text(`Focus Indicateur : ${ind.nom}`, 14, y);
       y += 5;
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(40);
       doc.text(`Valeur ${this.selectedAnnee} : ${ind.valeurA} ${ind.unite}   |   Ex. ${this.selectedAnnee - 1} : ${ind.valeurB} ${ind.unite}   |   Écart : ${ind.deltaPct >= 0 ? '+' : ''}${ind.deltaPct}%`, 14, y);
@@ -1269,6 +1806,7 @@ export class DecisionIaComponent implements OnInit {
 
     const ecrireSection = (titre: string, items: string[], couleur: [number, number, number]) => {
       assurerEspace(18);
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(...couleur);
       doc.text(titre, 14, y);
@@ -1276,10 +1814,32 @@ export class DecisionIaComponent implements OnInit {
       doc.setFontSize(9);
       doc.setTextColor(40);
       items.forEach(txt => {
-        const l = doc.splitTextToSize(`• ${txt}`, pageW - 32);
-        assurerEspace(l.length * 4.2);
-        doc.text(l, 18, y);
-        y += l.length * 4.2 + 1;
+        const line = `• ${txt}`;
+        const colonIdx = line.indexOf(':');
+        if (colonIdx > 0 && colonIdx < 45) {
+          const prefix = line.slice(0, colonIdx + 1) + ' ';
+          const rest = line.slice(colonIdx + 1).trim();
+          doc.setFont('helvetica', 'bold');
+          const prefixW = doc.getTextWidth(prefix);
+          const restLines = doc.splitTextToSize(rest, pageW - 32 - prefixW);
+          assurerEspace(restLines.length * 4.4);
+          doc.text(prefix, 18, y);
+          doc.setFont('helvetica', 'normal');
+          if (restLines.length > 0) {
+            doc.text(restLines[0], 18 + prefixW, y);
+            for (let li = 1; li < restLines.length; li++) {
+              y += 4.4;
+              doc.text(restLines[li], 22, y);
+            }
+          }
+          y += 5.4;
+        } else {
+          doc.setFont('helvetica', 'normal');
+          const l = doc.splitTextToSize(line, pageW - 32);
+          assurerEspace(l.length * 4.4);
+          doc.text(l, 18, y);
+          y += l.length * 4.4 + 1;
+        }
       });
       y += 4;
     };

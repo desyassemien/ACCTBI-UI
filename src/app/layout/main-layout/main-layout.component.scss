@@ -12,3 +12,10 @@
     box-sizing: border-box;
     padding-top: 1rem !important;
 }
+
+:host-context([data-bs-theme="dark"]) {
+    .app-wrapper,
+    .page-content {
+        background-color: #111114 !important;
+    }
+}

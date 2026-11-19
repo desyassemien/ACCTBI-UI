@@ -71,7 +71,7 @@ export class PilotageAiService {
         risksAndGaps: [
           `Encours des Restes à Payer à ${rapMds.toFixed(1)} Mds FCFA dont ${rap90.toFixed(1)} Mds FCFA > 90 jours.`,
           `Taux de régularisation des Lettres d'Avance à ${laReg.toFixed(1)}% (${laEnc.toFixed(1)} Mds FCFA en cours).`,
-          `Suspens comptables de ${metrics?.suspensComptablesMilliards || 45.8} Mds FCFA à apurer avant clôture.`
+          `Opérations en attente de ${metrics?.suspensComptablesMilliards || 45.8} Mds FCFA à apurer avant clôture.`
         ],
         recommendations: [
           `Prioriser l'apurement des Restes à Payer critiques (> 90j) et des comptes transitoires 47.`,

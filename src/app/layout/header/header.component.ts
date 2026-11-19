@@ -23,6 +23,10 @@ export class HeaderComponent implements OnInit {
     notificationCount = 3;
     isDarkMode = false;
     user = this.authService.currentUser;
+    readonly currentMonthLabel: string = (() => {
+        const s = new Date().toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }).replace('.', '');
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    })();
 
     async ngOnInit() {
         try {

@@ -3,7 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData } from 'chart.js';
+import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import {
   PilotageRealDataService,
   RealDataPilotageMetrics,
@@ -126,7 +126,56 @@ export interface PilotageRiskAlert {
     </div>
   </div>
 
-  <!-- 3. BANDEAU DE 4 MACRO-KPIS RÉELS SYGACUT-BI (OPTION 3 : COCKPIT SPARKLINE) -->
+  <!-- 3. BANDEAU DE 4 MACRO-KPIS RÉELS (OPTION 3 : COCKPIT SPARKLINE) -->
+  @if (selectedServiceFilter !== 'TOUS' && indicatorsForService.length > 0) {
+    <div class="row g-3 mb-4">
+      @for (ind of indicatorsForService.slice(0, 4); track ind.code; let idx = $index) {
+        <div class="col-xl-3 col-md-6">
+          <div class="card kpi-spark-card shadow-sm border-0 h-100"
+               [ngClass]="idx === 0 ? 'kpi-spark-blue' : (idx === 1 ? 'kpi-spark-green' : (idx === 2 ? 'kpi-spark-orange' : 'kpi-spark-amber'))">
+            <div class="card-body p-3 d-flex flex-column justify-content-between">
+              <div class="d-flex justify-content-between align-items-center mb-2 gap-1">
+                <span class="kpi-spark-title text-truncate"
+                      [ngClass]="idx === 0 ? 'text-navy' : (idx === 1 ? 'text-success' : (idx === 2 ? 'text-orange-acct' : 'text-warning-emphasis'))"
+                      [title]="ind.nom">
+                  {{ ind.nom }}
+                </span>
+                <span class="pulse-dot"
+                      [ngClass]="ind.statut === 'REGRESSION' ? 'bg-danger' : (ind.statut === 'PROGRESSION' ? 'bg-success' : 'bg-info')"
+                      [title]="ind.description"></span>
+              </div>
+
+              <div class="d-flex align-items-center justify-content-between my-1">
+                <div>
+                  <div class="kpi-spark-value text-dark">{{ ind.valeurA | number:'1.0-2' }}</div>
+                  <span class="kpi-spark-unit text-muted">{{ ind.unite }} ({{ selectedExercice }})</span>
+                </div>
+                <svg class="kpi-sparkline" viewBox="0 0 85 36" aria-hidden="true">
+                  <polyline fill="none"
+                            [attr.stroke]="idx === 0 ? '#2563eb' : (idx === 1 ? '#16a34a' : (idx === 2 ? '#f97316' : '#eab308'))"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                            points="4,28 22,22 42,24 62,14 80,8"/>
+                  <circle cx="80" cy="8" r="3.2"
+                          [attr.fill]="idx === 0 ? '#2563eb' : (idx === 1 ? '#16a34a' : (idx === 2 ? '#f97316' : '#eab308'))"/>
+                </svg>
+              </div>
+
+              <div class="kpi-spark-footer d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
+                <span class="text-muted very-small" [title]="ind.description" style="cursor: help;">
+                  Ex. {{ selectedExercice - 1 }} : <strong>{{ ind.valeurB | number:'1.0-2' }}</strong>
+                </span>
+                <span class="text-muted very-small fw-semibold"
+                      [class.text-success]="ind.statut === 'PROGRESSION'"
+                      [class.text-danger]="ind.statut === 'REGRESSION'">
+                  {{ ind.deltaPct >= 0 ? '+' : '' }}{{ ind.deltaPct }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
   <div class="row g-3 mb-4">
     <!-- KPI 1 : Régies & Recettes -->
     <div class="col-xl-3 col-md-6">
@@ -280,6 +329,7 @@ export interface PilotageRiskAlert {
       </div>
     </div>
   </div>
+  }
 
   <!-- 4. NAVIGATION PAR ONGLETS -->
   <div class="nav-tabs-card card shadow-sm border-0 mb-4">
@@ -878,10 +928,88 @@ export interface PilotageRiskAlert {
     .gauge-sub-text { font-size: 10px; font-weight: 700; fill: #2E7D32; }
 
     :host-context([data-bs-theme="dark"]) {
-      .title-text, .text-navy { color: #38bdf8 !important; }
-      .gauge-val-text { fill: #f8fafc; }
-      .prediction-highlight-box { background: #0f172a; border-color: #283548; }
-      .custom-nav-pills .nav-link:not(.active) { background: #0f172a; border-color: #283548; color: #cbd5e1; }
+      .title-text, .text-navy { color: #ffffff !important; }
+      .text-muted, small.text-muted, span.text-muted, p.text-muted, div.text-muted { color: #ffffff !important; }
+      .box-label { color: #ffffff !important; opacity: 1 !important; font-weight: 700; }
+      .interval-chip { color: #ffffff !important; }
+      .interval-chip strong { color: #ffffff !important; }
+      .filter-item-container label { color: #ffffff !important; }
+      .tag-blue { background: rgba(56, 189, 248, 0.15) !important; color: #ffffff !important; }
+      .projection-card { background: #202127 !important; border-color: #2e2f38 !important; }
+      .projection-card h5, .projection-card .text-dark { color: #ffffff !important; }
+      .gauge-val-text { fill: #ffffff; }
+      .prediction-highlight-box { background: #18191f; border-color: #2e2f38; }
+      .prediction-highlight-box * { color: #ffffff !important; }
+      .prediction-highlight-box .projection-value.text-success { color: #4ade80 !important; }
+      .prediction-highlight-box .projection-value.text-orange-acct { color: #fb923c !important; }
+      .custom-nav-pills .nav-link:not(.active) { background: #18191f; border-color: #2e2f38; color: #ffffff; }
+      .kpi-card-v2 { background: #202127 !important; border: 1px solid #2e2f38 !important; }
+
+      .timeline-btn:not(.timeline-btn-active),
+      .timeline-btn.btn-outline-secondary {
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.35) !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.18) !important;
+          color: #ffffff !important;
+          border-color: #ffffff !important;
+        }
+      }
+
+      .timeline-btn-active {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border-color: #2563eb !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45) !important;
+      }
+
+      /* Modern Badge Pills in Dark Mode */
+      .badge.bg-success-subtle,
+      .badge.text-success,
+      .badge.border-success-subtle {
+        background-color: rgba(34, 197, 94, 0.16) !important;
+        color: #4ade80 !important;
+        border: 1px solid rgba(74, 222, 128, 0.4) !important;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+      .badge.bg-info-subtle,
+      .badge.text-info-emphasis {
+        background-color: rgba(56, 189, 248, 0.16) !important;
+        color: #38bdf8 !important;
+        border: 1px solid rgba(56, 189, 248, 0.4) !important;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+      .badge.bg-warning-subtle,
+      .badge.text-warning-emphasis {
+        background-color: rgba(245, 158, 11, 0.16) !important;
+        color: #fbbf24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.4) !important;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+      .badge.bg-primary-subtle {
+        background-color: rgba(247, 127, 0, 0.18) !important;
+        color: #fb923c !important;
+        border: 1px solid rgba(247, 127, 0, 0.4) !important;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+      .badge.bg-danger-subtle {
+        background-color: rgba(239, 68, 68, 0.16) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.4) !important;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
     }
   `]
 })
@@ -922,6 +1050,7 @@ export class SyntheseDecisionnelleComponent implements OnInit, OnDestroy {
   timelineCurrentIndex = 7;
   isReplayPlaying = false;
   private replayTimer: any = null;
+  private themeObserver?: MutationObserver;
 
   simDeltaRecettes = 0;
   simDeltaApurement = 0;
@@ -1105,6 +1234,19 @@ export class SyntheseDecisionnelleComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (this.isBrowser) {
+      this.updateChartTheme();
+      this.themeObserver = new MutationObserver(() => {
+        this.updateChartTheme();
+        this.buildCharts();
+        this.cdr.detectChanges();
+      });
+      this.themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-bs-theme']
+      });
+    }
+
     this.route.queryParams.subscribe(params => {
       if (params['exercice']) {
         const ex = Number(params['exercice']);
@@ -1123,6 +1265,7 @@ export class SyntheseDecisionnelleComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.replayTimer) clearInterval(this.replayTimer);
+    if (this.themeObserver) this.themeObserver.disconnect();
   }
 
   setTab(tab: 'previsions' | 'simulateur' | 'alertes'): void {
@@ -1219,7 +1362,85 @@ export class SyntheseDecisionnelleComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  updateChartTheme(): void {
+    const isDark = typeof document !== 'undefined' && document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const textColor = isDark ? '#ffffff' : '#334155';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(0, 0, 0, 0.08)';
+
+    Chart.defaults.color = textColor;
+    Chart.defaults.borderColor = gridColor;
+
+    this.trajectoryChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: textColor,
+            font: { size: 11, weight: 'bold' }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: textColor, font: { weight: 'bold' } },
+          grid: { color: gridColor }
+        },
+        y: {
+          ticks: { color: textColor, font: { weight: 'bold' } },
+          grid: { color: gridColor }
+        }
+      }
+    };
+
+    this.breakdownChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            boxWidth: 10,
+            font: { size: 10, weight: 'bold' },
+            color: textColor
+          }
+        }
+      }
+    };
+
+    this.simulationChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            color: textColor,
+            font: { weight: 'bold' }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: textColor, font: { weight: 'bold' } },
+          grid: { color: gridColor }
+        },
+        y: {
+          ticks: { color: textColor, font: { weight: 'bold' } },
+          grid: { color: gridColor }
+        }
+      }
+    };
+  }
+
   private buildCharts(): void {
+    const isDark = typeof document !== 'undefined' && document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const blueLine = isDark ? '#60a5fa' : '#1A365D';
+    const blueFill = isDark ? 'rgba(96, 165, 250, 0.18)' : 'rgba(26, 54, 93, 0.12)';
+    const greenLine = isDark ? '#4ade80' : '#2E7D32';
+    const orangeLine = isDark ? '#fb923c' : '#F77F00';
+
     const hist = this.realMetrics.historiqueFlux;
     const histLabels = hist.map(h => `${h.annee}`);
     const projLabels = this.realMetrics.anneesProjections.map(y => `${y} (P)`);
@@ -1246,8 +1467,8 @@ export class SyntheseDecisionnelleComponent implements OnInit, OnDestroy {
         {
           label: 'Recettes Mobilisées Réelles (Mds)',
           data: recRealSeries,
-          borderColor: '#1A365D',
-          backgroundColor: 'rgba(26, 54, 93, 0.12)',
+          borderColor: blueLine,
+          backgroundColor: blueFill,
           fill: true,
           tension: 0.35,
           pointRadius: 4
@@ -1255,7 +1476,7 @@ export class SyntheseDecisionnelleComponent implements OnInit, OnDestroy {
         {
           label: 'Recettes Projetées OLS (2027-2031)',
           data: recProjSeries,
-          borderColor: '#F77F00',
+          borderColor: orangeLine,
           borderDash: [6, 4],
           backgroundColor: 'rgba(247, 127, 0, 0.08)',
           fill: false,
@@ -1265,7 +1486,7 @@ export class SyntheseDecisionnelleComponent implements OnInit, OnDestroy {
         {
           label: 'Liquidité Nette CUT (Mds)',
           data: liqSeries,
-          borderColor: '#2E7D32',
+          borderColor: greenLine,
           backgroundColor: 'transparent',
           tension: 0.35,
           pointRadius: 3
@@ -1273,12 +1494,16 @@ export class SyntheseDecisionnelleComponent implements OnInit, OnDestroy {
       ]
     };
 
+    const doughnutColors = isDark
+      ? ['#60a5fa', '#4ade80', '#fb923c', '#38bdf8', '#a78bfa', '#f59e0b', '#2dd4bf']
+      : ['#1A365D', '#2E7D32', '#F77F00', '#0284c7', '#8b5cf6', '#d97706', '#0d9488'];
+
     this.breakdownChartData = {
       labels: ['Comptabilité', 'Trésorerie', 'Cautionnement', 'Régies', 'Règlement', 'Statistiques', 'Cpte Gestion'],
       datasets: [
         {
           data: this.realMetrics.syntheseSeptServices.map(s => s.volumeMilliards),
-          backgroundColor: ['#1A365D', '#2E7D32', '#F77F00', '#0284c7', '#8b5cf6', '#d97706', '#0d9488']
+          backgroundColor: doughnutColors
         }
       ]
     };

@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData } from 'chart.js';
+import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import {
   PilotageBenchmarkService,
   YearComparisonAnalysis,
@@ -53,7 +53,8 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
               <i class="fas fa-chart-line text-primary me-1"></i> Indicateur
             </label>
             <select class="form-select form-select-sm fw-semibold"
-                    [(ngModel)]="selectedIndicatorCode">
+                    [ngModel]="selectedIndicatorCode"
+                    (ngModelChange)="onIndicatorChange($event)">
               <option value="TOUS">Tous les indicateurs</option>
               @for (ind of indicatorsForService; track ind.code) {
                 <option [value]="ind.code">{{ ind.nom }}</option>
@@ -106,6 +107,55 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
 
   @if (analysis) {
     <!-- 2. CARTES MACRO-KPIS DIFFÉRENTIELLES (OPTION 3 : COCKPIT SPARKLINE) -->
+    @if (selectedDomainFilter !== 'TOUS') {
+      <div class="row g-3 mb-3">
+        @for (ind of indicatorsForService.slice(0, 4); track ind.code; let idx = $index) {
+          <div class="col-xl-3 col-md-6">
+            <div class="card kpi-spark-card shadow-sm border-0 h-100"
+                 [ngClass]="idx === 0 ? 'kpi-spark-blue' : (idx === 1 ? 'kpi-spark-green' : (idx === 2 ? 'kpi-spark-orange' : 'kpi-spark-sky'))">
+              <div class="card-body p-3 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-center mb-2 gap-1">
+                  <span class="kpi-spark-title text-truncate"
+                        [ngClass]="idx === 0 ? 'text-navy' : (idx === 1 ? 'text-success' : (idx === 2 ? 'text-orange-acct' : 'text-info-emphasis'))"
+                        [title]="ind.nom">
+                    {{ ind.nom }}
+                  </span>
+                  <span class="kpi-delta-pill text-nowrap" [class.neg]="ind.statut === 'REGRESSION'">
+                    {{ ind.deltaPct >= 0 ? '+' : '' }}{{ ind.deltaPct }}%
+                  </span>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between my-1">
+                  <div>
+                    <div class="kpi-spark-value text-dark">
+                      {{ ind.valeurA | number:'1.0-2' }}
+                    </div>
+                    <span class="kpi-spark-unit text-muted">{{ ind.unite }} ({{ analysis.anneeRef }})</span>
+                  </div>
+                  <svg class="kpi-sparkline" viewBox="0 0 85 36" aria-hidden="true">
+                    <polyline fill="none"
+                              [attr.stroke]="idx === 0 ? '#2563eb' : (idx === 1 ? '#16a34a' : (idx === 2 ? '#f97316' : '#0284c7'))"
+                              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                              points="4,28 22,22 42,24 62,14 80,8"/>
+                    <circle cx="80" cy="8" r="3.2"
+                            [attr.fill]="idx === 0 ? '#2563eb' : (idx === 1 ? '#16a34a' : (idx === 2 ? '#f97316' : '#0284c7'))"/>
+                  </svg>
+                </div>
+
+                <div class="kpi-spark-footer d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
+                  <span class="text-muted very-small" [title]="ind.description" style="cursor: help;">
+                    Ex. {{ analysis.anneeComp }} : <strong>{{ ind.valeurB | number:'1.0-2' }}</strong>
+                  </span>
+                  <span class="text-muted very-small fw-semibold">
+                    Δ {{ ind.deltaBrut >= 0 ? '+' : '' }}{{ ind.deltaBrut | number:'1.0-2' }} {{ ind.unite }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
     <div class="row g-3 mb-3">
       <!-- KPI 1 : Régies & Recettes -->
       <div class="col-xl-3 col-md-6">
@@ -165,7 +215,7 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
                 <div class="kpi-spark-value text-success">
                   {{ analysis.metricsA.tauxRapprochementAuto }}%
                 </div>
-                <span class="kpi-spark-unit text-muted">Lettré Auto ({{ analysis.anneeRef }})</span>
+                <span class="kpi-spark-unit text-muted">Rapprochement Auto ({{ analysis.anneeRef }})</span>
               </div>
               <!-- Sparkline SVG Concordance -->
               <svg class="kpi-sparkline" viewBox="0 0 85 36" aria-hidden="true">
@@ -267,6 +317,44 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
         </div>
       </div>
     </div>
+    }
+
+    @if (selectedIndicator; as ind) {
+      <div class="card shadow-sm border-0 mb-3 px-4 py-3 bg-white">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">
+              {{ ind.domaineLabel }} — Focus Indicateur
+            </span>
+            <h5 class="m-0 fw-bold text-navy">{{ ind.nom }}</h5>
+            <small class="text-muted">{{ ind.description }}</small>
+          </div>
+          <div class="d-flex align-items-center gap-4 flex-wrap">
+            <div class="text-end">
+              <span class="very-small text-muted d-block text-uppercase fw-bold">Exercice {{ analysis.anneeRef }}</span>
+              <strong class="fs-5 text-navy">{{ ind.valeurA | number:'1.0-2' }} <small class="text-muted fs-6">{{ ind.unite }}</small></strong>
+            </div>
+            <div class="text-end">
+              <span class="very-small text-muted d-block text-uppercase fw-bold">Exercice {{ analysis.anneeComp }}</span>
+              <strong class="fs-5 text-dark">{{ ind.valeurB | number:'1.0-2' }} <small class="text-muted fs-6">{{ ind.unite }}</small></strong>
+            </div>
+            <div class="text-end">
+              <span class="very-small text-muted d-block text-uppercase fw-bold">Écart (Δ)</span>
+              <strong class="fs-6" [ngClass]="ind.statut === 'PROGRESSION' ? 'text-success' : (ind.statut === 'REGRESSION' ? 'text-danger' : 'text-secondary')">
+                {{ ind.deltaBrut >= 0 ? '+' : '' }}{{ ind.deltaBrut | number:'1.0-2' }} {{ ind.unite }}
+              </strong>
+            </div>
+            <span class="badge px-3 py-2 fs-6" [ngClass]="{
+              'bg-success text-white': ind.statut === 'PROGRESSION',
+              'bg-danger text-white': ind.statut === 'REGRESSION',
+              'bg-secondary text-white': ind.statut === 'STABLE'
+            }">
+              {{ ind.deltaPct >= 0 ? '+' : '' }}{{ ind.deltaPct }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    }
 
     <!-- 3. DEUX VISUALISATIONS COMPLÉMENTAIRES (SCORES PAR SERVICE & VOLUMES Mds FCFA) -->
     <div class="row g-3 mb-3">
@@ -297,8 +385,16 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
         <div class="card shadow-sm border-0 p-3 h-100">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div>
-              <h5 class="m-0 fw-bold text-navy">Volumes Comparés par Service (Mds FCFA)</h5>
-              <small class="text-muted">Comptabilité, Trésorerie, Cautionnement, Régies, Règlement, Statistiques, Compte de Gestion</small>
+              @if (selectedIndicator; as ind) {
+                <h5 class="m-0 fw-bold text-navy">{{ ind.nom }} ({{ ind.unite }})</h5>
+                <small class="text-muted">{{ ind.domaineLabel }} — Comparaison directe {{ analysis.anneeRef }} vs {{ analysis.anneeComp }}</small>
+              } @else if (selectedDomainFilter !== 'TOUS') {
+                <h5 class="m-0 fw-bold text-navy">Indicateurs Comparés — {{ selectedServiceLabel }}</h5>
+                <small class="text-muted">Tous les indicateurs du service {{ selectedServiceLabel }} ({{ analysis.anneeRef }} vs {{ analysis.anneeComp }})</small>
+              } @else {
+                <h5 class="m-0 fw-bold text-navy">Montants Financiers Comparés par Service (Mds FCFA)</h5>
+                <small class="text-muted">Comptabilité, Trésorerie, Cautionnement, Régies, Règlement, Statistiques, Compte de Gestion</small>
+              }
             </div>
             <span class="badge bg-light text-muted border">Exercice {{ analysis.anneeRef }} vs {{ analysis.anneeComp }}</span>
           </div>
@@ -311,6 +407,18 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
               </canvas>
             }
           </div>
+          @if (selectedDomainFilter === 'TOUS' && !selectedIndicator) {
+            <div class="border-top pt-2 mt-2 very-small text-muted">
+              <strong>Note de lecture :</strong>
+              Comptabilité = mouvements comptables (Balance Générale) •
+              Trésorerie = solde net CUT •
+              Cautionnement = garanties &amp; consignations •
+              Régies = avances en cours + recettes en régie •
+              Règlement = paiements exécutés •
+              Statistiques = subventions + OC + encours RAP •
+              Compte de Gestion = montant audité (TGE, PGT, RGF, PGA).
+            </div>
+          }
         </div>
       </div>
     </div>
@@ -559,20 +667,23 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
     .text-orange-acct { color: #F77F00 !important; }
 
     :host-context([data-bs-theme="dark"]) {
-      .title-text, .text-navy { color: #38bdf8 !important; }
-      .kpi-card { background: #162032; }
-      .kpi-value strong { color: #f8fafc !important; }
-      .kpi-foot { border-top-color: #283548; }
+      .title-text, .text-navy { color: #ffffff !important; }
+      .text-muted, small.text-muted, span.text-muted { color: #f8fafc !important; }
+      .kpi-card { background: #202127 !important; border: 1px solid #2e2f38 !important; }
+      .kpi-value strong { color: #ffffff !important; }
+      .kpi-foot { border-top-color: #2e2f38 !important; }
+      .table-custom { color: #ffffff !important; }
     }
   `]
 })
-export class AnalyseComparativeComponent implements OnInit {
+export class AnalyseComparativeComponent implements OnInit, OnDestroy {
   private benchmarkService = inject(PilotageBenchmarkService);
   private realDataService = inject(PilotageRealDataService);
   private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private themeObserver?: MutationObserver;
 
   isBrowser = isPlatformBrowser(this.platformId);
 
@@ -605,11 +716,67 @@ export class AnalyseComparativeComponent implements OnInit {
     plugins: { legend: { position: 'bottom' } }
   };
 
+  private readonly serviceNatureMap: Record<string, string> = {
+    'Comptabilité': 'Montant des mouvements comptables (Balance Générale)',
+    'Trésorerie': 'Solde net de liquidité du Compte Unique du Trésor (CUT)',
+    'Cautionnement': 'Montant cumulé des garanties et consignations',
+    'Régies': 'Avances en cours + recettes encaissées en régie',
+    'Règlement': 'Montant total des paiements exécutés',
+    'Statistiques': 'Subventions + obligations cautionnées + encours RAP',
+    'Compte de Gestion': 'Montant financier audité (TGE, PGT, RGF, PGA)'
+  };
+
+  private wrapTooltipText(text: string, maxLen = 48): string[] {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let current = '';
+    for (const w of words) {
+      if ((current + ' ' + w).trim().length > maxLen) {
+        if (current) lines.push(current.trim());
+        current = w;
+      } else {
+        current = current ? `${current} ${w}` : w;
+      }
+    }
+    if (current) lines.push(current.trim());
+    return lines;
+  }
+
   structureChartData: ChartData<'bar'> = { labels: [], datasets: [] };
   structureChartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: 'top' } }
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: {
+        callbacks: {
+          title: (items) => {
+            if (!items.length) return '';
+            const idx = items[0].dataIndex;
+            const ind = this.selectedIndicator ?? (this.selectedDomainFilter !== 'TOUS' ? this.indicatorsForService[idx] : null);
+            return ind ? ind.nom : (items[0].label || '');
+          },
+          label: (ctx) => {
+            const ind = this.selectedIndicator ?? (this.selectedDomainFilter !== 'TOUS' ? this.indicatorsForService[ctx.dataIndex] : null);
+            const unite = ind ? ind.unite : 'Mds FCFA';
+            return ` ${ctx.dataset.label} : ${ctx.raw} ${unite}`;
+          },
+          afterLabel: (ctx) => {
+            let nature = '';
+            if (this.selectedIndicator) {
+              nature = `Nature : ${this.selectedIndicator.description}`;
+            } else if (this.selectedDomainFilter !== 'TOUS') {
+              const ind = this.indicatorsForService[ctx.dataIndex];
+              nature = ind ? `Nature : ${ind.description}` : '';
+            } else {
+              const srv = ctx.label || '';
+              nature = this.serviceNatureMap[srv] ? `Nature : ${this.serviceNatureMap[srv]}` : '';
+            }
+            return nature ? this.wrapTooltipText(nature) : [];
+          }
+        }
+      }
+    }
   };
 
   secteursChartData: ChartData<'bar'> = { labels: [], datasets: [] };
@@ -626,19 +793,50 @@ export class AnalyseComparativeComponent implements OnInit {
     return this.analysis.indicateurs.filter(ind => ind.domaine === this.selectedDomainFilter);
   }
 
+  get selectedServiceLabel(): string {
+    return this.serviceFilterButtons.find(f => f.id === this.selectedDomainFilter)?.label ?? 'Tous les Services';
+  }
+
+  get selectedIndicator(): ComparativeIndicator | null {
+    if (this.selectedIndicatorCode === 'TOUS') return null;
+    return this.indicatorsForService.find(ind => ind.code === this.selectedIndicatorCode) ?? null;
+  }
+
   get filteredIndicators(): ComparativeIndicator[] {
     const liste = this.indicatorsForService;
     if (this.selectedIndicatorCode === 'TOUS') return liste;
     return liste.filter(ind => ind.code === this.selectedIndicatorCode);
   }
 
-  /** Changement de service : on réinitialise l'indicateur (la liste dépend du service). */
+  /** Changement de service : on réinitialise l'indicateur et on met à jour les graphiques. */
   onServiceChange(service: ServiceDomainFilter): void {
     this.selectedDomainFilter = service;
     this.selectedIndicatorCode = 'TOUS';
+    this.buildCharts();
+    this.cdr.detectChanges();
+  }
+
+  /** Changement d'indicateur : on met à jour les graphiques et le bandeau focus. */
+  onIndicatorChange(code: string): void {
+    this.selectedIndicatorCode = code;
+    this.buildCharts();
+    this.cdr.detectChanges();
   }
 
   ngOnInit(): void {
+    if (this.isBrowser) {
+      this.updateChartTheme();
+      this.themeObserver = new MutationObserver(() => {
+        this.updateChartTheme();
+        this.buildCharts();
+        this.cdr.detectChanges();
+      });
+      this.themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-bs-theme']
+      });
+    }
+
     const stored = this.benchmarkService.getSelectedYears();
     this.selectedAnneeA = stored.anneeA;
     this.selectedAnneeB = stored.anneeB;
@@ -654,6 +852,100 @@ export class AnalyseComparativeComponent implements OnInit {
       this.benchmarkService.setSelectedYears(this.selectedAnneeA, this.selectedAnneeB, this.selectedPerimetre);
       this.refreshComparison();
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.themeObserver) this.themeObserver.disconnect();
+  }
+
+  updateChartTheme(): void {
+    const isDark = typeof document !== 'undefined' && document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const textColor = isDark ? '#ffffff' : '#334155';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(0, 0, 0, 0.08)';
+
+    Chart.defaults.color = textColor;
+    Chart.defaults.borderColor = gridColor;
+
+    this.radarChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 70,
+          max: 100,
+          ticks: {
+            stepSize: 10,
+            color: textColor,
+            backdropColor: 'transparent',
+            font: { weight: 'bold' }
+          },
+          pointLabels: {
+            color: textColor,
+            font: { size: 11, weight: 'bold' }
+          },
+          grid: { color: gridColor },
+          angleLines: { color: gridColor }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: textColor,
+            font: { weight: 'bold' }
+          }
+        }
+      }
+    };
+
+    this.structureChartOptions = {
+      ...this.structureChartOptions,
+      scales: {
+        x: {
+          ticks: { color: textColor, font: { weight: 'bold' } },
+          grid: { color: gridColor }
+        },
+        y: {
+          ticks: { color: textColor, font: { weight: 'bold' } },
+          grid: { color: gridColor }
+        }
+      },
+      plugins: {
+        ...this.structureChartOptions?.plugins,
+        legend: {
+          position: 'top',
+          labels: {
+            color: textColor,
+            font: { weight: 'bold' }
+          }
+        }
+      }
+    };
+
+    this.secteursChartOptions = {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: { color: textColor, font: { weight: 'bold' } },
+          grid: { color: gridColor }
+        },
+        y: {
+          ticks: { color: textColor, font: { weight: 'bold' } },
+          grid: { color: gridColor }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            color: textColor,
+            font: { weight: 'bold' }
+          }
+        }
+      }
+    };
   }
 
   onPerimetreChange(): void {
@@ -699,6 +991,12 @@ export class AnalyseComparativeComponent implements OnInit {
 
   private buildCharts(): void {
     if (!this.analysis) return;
+    const isDark = typeof document !== 'undefined' && document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const colorA = isDark ? '#60a5fa' : '#1A365D';
+    const colorAFill = isDark ? 'rgba(96, 165, 250, 0.25)' : 'rgba(26, 54, 93, 0.2)';
+    const colorB = isDark ? '#fb923c' : '#F77F00';
+    const colorBFill = isDark ? 'rgba(251, 146, 60, 0.25)' : 'rgba(247, 127, 0, 0.2)';
+
     const yA = this.analysis.anneeRef;
     const yB = this.analysis.anneeComp;
 
@@ -708,37 +1006,57 @@ export class AnalyseComparativeComponent implements OnInit {
         {
           label: `Exercice ${yA}`,
           data: this.analysis.radarScoresA,
-          borderColor: '#1A365D',
-          backgroundColor: 'rgba(26, 54, 93, 0.2)',
-          pointBackgroundColor: '#1A365D'
+          borderColor: colorA,
+          backgroundColor: colorAFill,
+          pointBackgroundColor: colorA
         },
         {
           label: `Exercice ${yB}`,
           data: this.analysis.radarScoresB,
-          borderColor: '#F77F00',
-          backgroundColor: 'rgba(247, 127, 0, 0.2)',
-          pointBackgroundColor: '#F77F00'
+          borderColor: colorB,
+          backgroundColor: colorBFill,
+          pointBackgroundColor: colorB
         }
       ]
     };
 
-    this.structureChartData = {
-      labels: this.analysis.structureBreakdown.map(s => s.composante),
-      datasets: [
-        {
-          label: `Exercice ${yA}`,
-          data: this.analysis.structureBreakdown.map(s => s.montantA),
-          backgroundColor: '#1A365D',
-          borderRadius: 5
-        },
-        {
-          label: `Exercice ${yB}`,
-          data: this.analysis.structureBreakdown.map(s => s.montantB),
-          backgroundColor: '#F77F00',
-          borderRadius: 5
-        }
-      ]
-    };
+    const ind = this.selectedIndicator;
+    if (ind) {
+      this.structureChartData = {
+        labels: [ind.nom],
+        datasets: [
+          { label: `Exercice ${yA}`, data: [ind.valeurA], backgroundColor: colorA, borderRadius: 6, maxBarThickness: 70 },
+          { label: `Exercice ${yB}`, data: [ind.valeurB], backgroundColor: colorB, borderRadius: 6, maxBarThickness: 70 }
+        ]
+      };
+    } else if (this.selectedDomainFilter !== 'TOUS') {
+      const inds = this.indicatorsForService;
+      this.structureChartData = {
+        labels: inds.map(i => i.nom.length > 26 ? i.nom.slice(0, 24) + '…' : i.nom),
+        datasets: [
+          { label: `Exercice ${yA}`, data: inds.map(i => i.valeurA), backgroundColor: colorA, borderRadius: 5 },
+          { label: `Exercice ${yB}`, data: inds.map(i => i.valeurB), backgroundColor: colorB, borderRadius: 5 }
+        ]
+      };
+    } else {
+      this.structureChartData = {
+        labels: this.analysis.structureBreakdown.map(s => s.composante),
+        datasets: [
+          {
+            label: `Exercice ${yA}`,
+            data: this.analysis.structureBreakdown.map(s => s.montantA),
+            backgroundColor: colorA,
+            borderRadius: 5
+          },
+          {
+            label: `Exercice ${yB}`,
+            data: this.analysis.structureBreakdown.map(s => s.montantB),
+            backgroundColor: colorB,
+            borderRadius: 5
+          }
+        ]
+      };
+    }
 
     this.secteursChartData = {
       labels: this.analysis.secteursComparatif.map(s => s.secteur),
@@ -746,13 +1064,13 @@ export class AnalyseComparativeComponent implements OnInit {
         {
           label: `Exercice ${yA}`,
           data: this.analysis.secteursComparatif.map(s => s.montantA),
-          backgroundColor: '#1A365D',
+          backgroundColor: colorA,
           borderRadius: 4
         },
         {
           label: `Exercice ${yB}`,
           data: this.analysis.secteursComparatif.map(s => s.montantB),
-          backgroundColor: '#F77F00',
+          backgroundColor: colorB,
           borderRadius: 4
         }
       ]
@@ -845,24 +1163,31 @@ export class AnalyseComparativeComponent implements OnInit {
     };
     const titreSection = (txt: string) => {
       assurerEspace(14);
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(11.5);
       doc.setTextColor(26, 54, 93);
       doc.text(txt, 14, y);
-      y += 3;
+      doc.setFont('helvetica', 'normal');
+      y += 4;
     };
 
     // ===== 1. En-tête =====
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(15);
     doc.setTextColor(26, 54, 93);
-    doc.text(`DGTCP — Analyse Comparative ${tous ? 'des 7 Services' : '— ' + serviceLabel} (${a.anneeRef} vs ${a.anneeComp})`, 14, y);
+    doc.text(`DGTCP — Analyse Comparative ${tous ? '' : '— ' + serviceLabel} (${a.anneeRef} vs ${a.anneeComp})`, 14, y);
     y += 7;
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(100);
     const indicateurLabel = this.selectedIndicatorCode === 'TOUS'
       ? 'Tous les indicateurs'
       : (a.indicateurs.find(i => i.code === this.selectedIndicatorCode)?.nom ?? 'Tous les indicateurs');
     doc.text(`Service : ${serviceLabel}   |   Indicateur : ${indicateurLabel}`, 14, y);
-    y += 8;
+    y += 3;
+    doc.setDrawColor(210, 220, 235);
+    doc.line(14, y, pageW - 14, y);
+    y += 6;
 
     // ===== 2. Indicateurs clés (cartes de la page) =====
     const kpis = [
@@ -871,7 +1196,7 @@ export class AnalyseComparativeComponent implements OnInit {
         ecart: `${signe(a.deltaRecettesMds)}${a.deltaRecettesMds} Mds (${signe(a.deltaRecettesPct)}${a.deltaRecettesPct}%)`, info: `Cautionnements : ${a.metricsA.cautionnementsVolumeMilliards} Mds`
       },
       {
-        services: ['COMPTABILITE', 'COMPTE_GESTION'], nom: 'Comptabilité & Compte de Gestion', vA: `${a.metricsA.tauxRapprochementAuto} % lettré`, vB: `${a.metricsB.tauxRapprochementAuto} % lettré`,
+        services: ['COMPTABILITE', 'COMPTE_GESTION'], nom: 'Comptabilité & Compte de Gestion', vA: `${a.metricsA.tauxRapprochementAuto} % rapproché`, vB: `${a.metricsB.tauxRapprochementAuto} % rapproché`,
         ecart: `${signe(a.deltaConcordancePts)}${a.deltaConcordancePts} pt(s)`, info: `Cour des Comptes : ${a.metricsA.tauxConformiteCompteGestion} %`
       },
       {
@@ -933,10 +1258,20 @@ export class AnalyseComparativeComponent implements OnInit {
           options: { plugins: { legend: { position: 'bottom' } } }
         }, Math.round(imgW * 5.2), Math.round(imgH * 5.2), '');
 
-        assurerEspace(imgH + 8);
-        titreSection(`Volumes comparés ${tous ? 'des 7 services' : '— ' + serviceLabel} (Mds FCFA)`);
+        assurerEspace(imgH + 16);
+        titreSection(`Montants financiers comparés ${tous ? 'par service' : '— ' + serviceLabel} (Mds FCFA)`);
         doc.addImage(volumeImg, 'PNG', 14, y, imgW, imgH);
-        y += imgH + 10;
+        y += imgH + 4;
+        if (tous) {
+          doc.setFontSize(8);
+          doc.setTextColor(100);
+          const note = 'Note de lecture : Comptabilité = mouvements Balance Générale • Trésorerie = solde net CUT • Cautionnement = garanties & consignations • Régies = avances + recettes en régie • Règlement = paiements exécutés • Statistiques = subventions + OC + encours RAP • Compte de Gestion = montant audité (TGE, PGT, RGF, PGA).';
+          const noteLignes = doc.splitTextToSize(note, pageW - 28);
+          doc.text(noteLignes, 14, y);
+          y += noteLignes.length * 4 + 4;
+        } else {
+          y += 6;
+        }
       }
     } catch (err) {
       console.warn('Génération du graphique PDF ignorée :', err);
@@ -949,6 +1284,7 @@ export class AnalyseComparativeComponent implements OnInit {
     y += 3;
     const ecrireListe = (titre: string, items: string[], couleur: [number, number, number], puce: string) => {
       assurerEspace(10);
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(9.5);
       doc.setTextColor(...couleur);
       doc.text(titre, 14, y);
@@ -957,10 +1293,32 @@ export class AnalyseComparativeComponent implements OnInit {
       doc.setTextColor(40);
       const liste = items.length ? items : ['Aucun élément signalé.'];
       liste.forEach(txt => {
-        const lignes = doc.splitTextToSize(`${puce} ${txt}`, pageW - 32);
-        assurerEspace(lignes.length * 4.5);
-        doc.text(lignes, 18, y);
-        y += lignes.length * 4.5 + 1;
+        const line = `${puce} ${txt}`;
+        const colonIdx = line.indexOf(':');
+        if (colonIdx > 0 && colonIdx < 50) {
+          const prefix = line.slice(0, colonIdx + 1) + ' ';
+          const rest = line.slice(colonIdx + 1).trim();
+          doc.setFont('helvetica', 'bold');
+          const prefixW = doc.getTextWidth(prefix);
+          const restLines = doc.splitTextToSize(rest, pageW - 32 - prefixW);
+          assurerEspace(restLines.length * 4.5);
+          doc.text(prefix, 18, y);
+          doc.setFont('helvetica', 'normal');
+          if (restLines.length > 0) {
+            doc.text(restLines[0], 18 + prefixW, y);
+            for (let li = 1; li < restLines.length; li++) {
+              y += 4.5;
+              doc.text(restLines[li], 22, y);
+            }
+          }
+          y += 5.5;
+        } else {
+          doc.setFont('helvetica', 'normal');
+          const lignes = doc.splitTextToSize(line, pageW - 32);
+          assurerEspace(lignes.length * 4.5);
+          doc.text(lignes, 18, y);
+          y += lignes.length * 4.5 + 1;
+        }
       });
       y += 3;
     };

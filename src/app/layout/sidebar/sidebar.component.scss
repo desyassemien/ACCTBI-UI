@@ -166,3 +166,32 @@
 .transition-all {
     transition: all 0.3s ease;
 }
+
+:host-context([data-bs-theme="dark"]) {
+    .sidebar,
+    .bg-primary-dark {
+        background: #16171d !important;
+        border-right: 1px solid #282932 !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
+
+        .sidebar-brand {
+            background-color: #121318 !important;
+            border-bottom: 1px solid #282932 !important;
+        }
+
+        .nav-item-link {
+            color: #cbd5e1 !important;
+
+            &:hover {
+                color: #ffffff !important;
+                background-color: #24252e !important;
+            }
+
+            &.active {
+                background: rgba(247, 127, 0, 0.22) !important;
+                color: #ffffff !important;
+                border-left: 3px solid #F77F00 !important;
+            }
+        }
+    }
+}

@@ -398,13 +398,15 @@ export interface IndicatorDefinition {
                     }
                   </div>
 
-                  <div class="d-flex align-items-center gap-2 ms-auto">
-                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3"
+                  <div class="d-flex align-items-center ms-auto" style="gap: 6px;">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill"
+                            style="font-size: 0.72rem; padding: 2px 10px;"
                             (click)="genererRapport(notif)">
                       <i class="far fa-file-alt text-primary me-1"></i>Générer un rapport
                     </button>
                     @if (notif.actionType) {
-                      <button type="button" class="btn btn-navy btn-sm rounded-pill px-3 fw-bold"
+                      <button type="button" class="btn btn-navy btn-sm rounded-pill fw-semibold"
+                              style="font-size: 0.72rem; padding: 2px 10px;"
                               (click)="executeAction(notif)">
                         {{ notif.actionLabel }} <i class="fas fa-arrow-right ms-1"></i>
                       </button>
@@ -474,13 +476,13 @@ export interface IndicatorDefinition {
             </div>
           }
 
-          <div class="d-flex flex-column gap-2.5 mb-3">
+          <div class="d-flex flex-column mb-3" style="gap: 8px;">
             @for (rule of filteredAlertRules; track rule.id) {
               <div class="p-3 rounded-3 border" [class.opacity-50]="!rule.actif">
-                <div class="d-flex justify-content-between align-items-center gap-2 mb-1.5">
-                  <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                  <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                     <span class="badge bg-light text-dark border very-small">{{ rule.domaine }}</span>
-                    <span class="badge very-small" [ngClass]="{
+                    <span class="badge" style="font-size: 0.62rem; padding: 2px 6px; letter-spacing: 0.02em;" [ngClass]="{
                       'bg-danger text-white': rule.severite === 'CRITIQUE',
                       'bg-warning text-dark': rule.severite === 'VIGILANCE',
                       'bg-success text-white': rule.severite === 'SUCCES',
@@ -833,6 +835,14 @@ export interface IndicatorDefinition {
     .notif-border-succes { border-left-color: #2E7D32 !important; background-color: #f8fdf9; }
     .notif-border-info { border-left-color: #1A365D !important; background-color: #f7fbff; }
 
+    .form-switch .form-check-input:checked {
+      background-color: #16a34a !important;
+      border-color: #16a34a !important;
+    }
+    .form-switch .form-check-input:focus {
+      box-shadow: 0 0 0 0.2rem rgba(22, 163, 74, 0.25) !important;
+    }
+
     .modal-backdrop-custom {
       position: fixed;
       inset: 0;
@@ -846,8 +856,11 @@ export interface IndicatorDefinition {
     .report-modal-header { background: linear-gradient(135deg, #1A365D 0%, #2a4a7f 100%); }
 
     :host-context([data-bs-theme="dark"]) {
-      .title-text, .text-navy { color: #38bdf8 !important; }
-      .smart-notif-card { background-color: #162032 !important; }
+      .title-text, .text-navy { color: #ffffff !important; }
+      .text-muted, small.text-muted, span.text-muted, p.text-muted { color: #ffffff !important; }
+      .filter-item-container label, .form-label { color: #ffffff !important; }
+      .smart-notif-card { background-color: #202127 !important; border: 1px solid #2e2f38 !important; }
+      .modal-dialog-custom, .modal-dialog-report { background-color: #202127 !important; color: #ffffff !important; }
     }
   `]
 })
@@ -918,7 +931,7 @@ export class NotificationsPilotageComponent implements OnInit {
     },
     {
       id: 'CPT_SUSP',
-      nom: 'Encours des Suspens Comptables',
+      nom: 'Encours des Opérations en Attente',
       domaine: 'Comptabilité',
       unite: 'Mds FCFA',
       defaultOperateur: '>',
@@ -1481,7 +1494,7 @@ export class NotificationsPilotageComponent implements OnInit {
         case 'CPT_SUSP':
           val = m.suspensComptablesMilliards;
           chiffreCle = `${val} Mds (${m.suspensionsActivesDossiers} dossiers)`;
-          description = `[Service Comptabilité] Suspens comptables à ${val} Mds FCFA (${m.suspensionsActivesDossiers} dossiers actifs).`;
+          description = `[Service Comptabilité] Opérations en attente à ${val} Mds FCFA (${m.suspensionsActivesDossiers} dossiers actifs).`;
           break;
         case 'CPT_DELAI':
           val = m.delaiMoyenApurementComptaJours;
@@ -1600,7 +1613,7 @@ export class NotificationsPilotageComponent implements OnInit {
             dateStr: `Exercice ${m.annee}`,
             isRead: this.readNotifIds.has(id),
             actionType,
-            actionLabel: actionType === 'SIMULATION' ? 'Simuler l’Apurement' : 'Voir Synthèse 7 Services',
+            actionLabel: actionType === 'SIMULATION' ? 'Simuler l’Apurement' : 'Voir Synthèse',
             anneeRef: m.annee,
             timestamp: Date.now()
           });
@@ -1962,20 +1975,27 @@ export class NotificationsPilotageComponent implements OnInit {
     };
 
     // En-tête DGTCP
-    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
     doc.setTextColor(26, 54, 93);
     doc.text('DGTCP — Rapport de Synthèse & Notifications', 14, y);
     y += 6;
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(9.5);
     doc.setTextColor(100);
     doc.text(`${r.periode}`, 14, y);
-    y += 8;
+    y += 3;
+    doc.setDrawColor(210, 220, 235);
+    doc.line(14, y, pageW - 14, y);
+    y += 7;
 
     // 1. Objet du constat
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(26, 54, 93);
     doc.text('1. Objet du Constat d\'Alerte', 14, y);
     y += 5;
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(80);
     const descLignes = doc.splitTextToSize(r.description, pageW - 28);
@@ -1984,20 +2004,44 @@ export class NotificationsPilotageComponent implements OnInit {
 
     // 2. Diagnostic & Impacts
     assurerEspace(20);
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(26, 54, 93);
     doc.text('2. Diagnostic & Analyse d\'Impact', 14, y);
     y += 5;
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(40);
     const diagLignes = doc.splitTextToSize(r.diagnostic, pageW - 28);
     doc.text(diagLignes, 14, y);
     y += diagLignes.length * 4.2 + 2;
     r.impacts.forEach(imp => {
-      const l = doc.splitTextToSize(`• ${imp}`, pageW - 32);
-      assurerEspace(l.length * 4.2);
-      doc.text(l, 18, y);
-      y += l.length * 4.2 + 1;
+      const line = `• ${imp}`;
+      const colonIdx = line.indexOf(':');
+      if (colonIdx > 0 && colonIdx < 45) {
+        const prefix = line.slice(0, colonIdx + 1) + ' ';
+        const rest = line.slice(colonIdx + 1).trim();
+        doc.setFont('helvetica', 'bold');
+        const prefixW = doc.getTextWidth(prefix);
+        const restLines = doc.splitTextToSize(rest, pageW - 32 - prefixW);
+        assurerEspace(restLines.length * 4.2);
+        doc.text(prefix, 18, y);
+        doc.setFont('helvetica', 'normal');
+        if (restLines.length > 0) {
+          doc.text(restLines[0], 18 + prefixW, y);
+          for (let li = 1; li < restLines.length; li++) {
+            y += 4.2;
+            doc.text(restLines[li], 22, y);
+          }
+        }
+        y += 5.2;
+      } else {
+        doc.setFont('helvetica', 'normal');
+        const l = doc.splitTextToSize(line, pageW - 32);
+        assurerEspace(l.length * 4.2);
+        doc.text(l, 18, y);
+        y += l.length * 4.2 + 1;
+      }
     });
     y += 4;
 
@@ -2006,9 +2050,11 @@ export class NotificationsPilotageComponent implements OnInit {
     // 3. Toutes les notifications incluses (si présentes)
     if (hasNotifs && r.notifications) {
       assurerEspace(24);
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(26, 54, 93);
       doc.text(`3. Détail des Notifications (${r.notifications.length})`, 14, y);
+      doc.setFont('helvetica', 'normal');
       y += 3;
 
       autoTable(doc, {
@@ -2035,10 +2081,12 @@ export class NotificationsPilotageComponent implements OnInit {
 
     // 4. Recommandations en dernière position
     assurerEspace(20);
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(25, 135, 84);
     doc.text(`${hasNotifs ? '4.' : '3.'} Recommandations Opérationnelles Immédiates`, 14, y);
     y += 5;
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(40);
     r.recommandations.forEach((rec, idx) => {

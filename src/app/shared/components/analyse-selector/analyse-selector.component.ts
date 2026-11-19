@@ -20,20 +20,63 @@ export class AnalyseSelectorComponent implements AfterViewInit {
   // State for the selector
   @Input() isDragDropMode: boolean = false;
   @Input() forceDragDrop: boolean = false;
-  @Input() selectedPeriod: string = 'Ce mois-ci (Mars 2026)';
+
+  static getCurrentMonthLabel(): string {
+    const d = new Date();
+    const month = d.toLocaleDateString('fr-FR', { month: 'long' });
+    const capitalized = month.charAt(0).toUpperCase() + month.slice(1);
+    const year = d.getFullYear();
+    return `Ce mois-ci (${capitalized} ${year})`;
+  }
+
+  static getCurrentQuarterLabel(): string {
+    const d = new Date();
+    const q = Math.floor(d.getMonth() / 3) + 1;
+    const prefix = q === 1 ? '1er' : `${q}e`;
+    return `${prefix} Trimestre ${d.getFullYear()}`;
+  }
+
+  private _selectedPeriod: string = AnalyseSelectorComponent.getCurrentMonthLabel();
+
+  @Input() 
+  set selectedPeriod(val: string) {
+    if (!val || val.includes('Mars 2026') || val === 'MOIS') {
+      this._selectedPeriod = AnalyseSelectorComponent.getCurrentMonthLabel();
+    } else {
+      this._selectedPeriod = val;
+    }
+  }
+
+  get selectedPeriod(): string {
+    return this._selectedPeriod;
+  }
+
   @Input() periodsList: string[] = [];
 
   get allPeriods(): string[] {
+    const currentMonth = AnalyseSelectorComponent.getCurrentMonthLabel();
+    const currentQuarter = AnalyseSelectorComponent.getCurrentQuarterLabel();
+    const currentYear = new Date().getFullYear();
+
     if (this.periodsList && this.periodsList.length > 0) {
-      return this.periodsList;
+      return this.periodsList.map(p => {
+        if (p.includes('Mars 2026') || p.startsWith('Ce mois-ci')) {
+          return currentMonth;
+        }
+        if (p.includes('1er Trimestre') && new Date().getMonth() >= 9) {
+          return currentQuarter;
+        }
+        return p;
+      });
     }
+
     return [
       "Aujourd'hui",
       'Cette semaine',
-      'Ce mois-ci (Mars 2026)',
-      '1er Trimestre 2026',
-      'Exercice 2026',
-      'Exercice 2025'
+      currentMonth,
+      currentQuarter,
+      `Exercice ${currentYear}`,
+      `Exercice ${currentYear - 1}`
     ];
   }
   
@@ -53,6 +96,16 @@ export class AnalyseSelectorComponent implements AfterViewInit {
   @Output() availableAxesChange = new EventEmitter<string[]>();
 
   @Output() analysisTriggered = new EventEmitter<any>();
+
+  onPeriodSelect(period: string) {
+    this.selectedPeriod = period;
+    this.selectedPeriodChange.emit(period);
+    this.analysisTriggered.emit({
+      period,
+      indicators: this.selectedIndicators,
+      axes: this.selectedAxes
+    });
+  }
 
   toggleMode(mode: 'classic' | 'dragdrop') {
     this.isDragDropMode = mode === 'dragdrop';

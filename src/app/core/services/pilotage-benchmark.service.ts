@@ -312,12 +312,12 @@ export class PilotageBenchmarkService {
     // Indicateurs complets couvrant l'ensemble des métriques réelles de chacun des 7 Services
     const indicateurs: ComparativeIndicator[] = [
       // COMPTABILITÉ (6 indicateurs)
-      this.createInd('CPT_RAPP', 'COMPTABILITE', 'Comptabilité', 'Taux Rapprochement Auto BCEAO/ACCT', 'Part des écritures lettrées automatiquement sur le CUT', mA.tauxRapprochementAuto, mB.tauxRapprochementAuto, '%', 'HAUSSE'),
+      this.createInd('CPT_RAPP', 'COMPTABILITE', 'Comptabilité', 'Taux Rapprochement Auto BCEAO/ACCT', 'Part des écritures rapprochées automatiquement sur le CUT', mA.tauxRapprochementAuto, mB.tauxRapprochementAuto, '%', 'HAUSSE'),
       this.createInd('CPT_VOL', 'COMPTABILITE', 'Comptabilité', 'Volume Mouvements Balance Générale', 'Total des écritures Débit/Crédit validées aux journaux', mA.comptaVolumeMouvementsMilliards, mB.comptaVolumeMouvementsMilliards, 'Mds FCFA', 'HAUSSE'),
       this.createInd('CPT_ECART', 'COMPTABILITE', 'Comptabilité', 'Écart de Concordance Bancaire', 'Divergence résiduelle entre relevé BCEAO et Grand Livre', mA.ecartConcordanceMilliards, mB.ecartConcordanceMilliards, 'Mds FCFA', 'BAISSE'),
       this.createInd('CPT_DELAI', 'COMPTABILITE', 'Comptabilité', 'Délai Moyen Apurement Comptable', 'Durée moyenne de lettrage et apurement des écritures', mA.delaiMoyenApurementComptaJours, mB.delaiMoyenApurementComptaJours, 'Jours', 'BAISSE'),
-      this.createInd('CPT_SUSP', 'COMPTABILITE', 'Comptabilité', 'Encours des Suspens Comptables', 'Montant total des écritures en attente de régularisation (compte 47)', mA.suspensComptablesMilliards, mB.suspensComptablesMilliards, 'Mds FCFA', 'BAISSE'),
-      this.createInd('CPT_DOSS', 'COMPTABILITE', 'Comptabilité', 'Dossiers en Suspens Actifs', 'Nombre de dossiers comptables non apurés', mA.suspensionsActivesDossiers, mB.suspensionsActivesDossiers, 'Dossiers', 'BAISSE'),
+      this.createInd('CPT_SUSP', 'COMPTABILITE', 'Comptabilité', 'Encours des Opérations en Attente', 'Montant total des écritures en attente de régularisation (compte 47)', mA.suspensComptablesMilliards, mB.suspensComptablesMilliards, 'Mds FCFA', 'BAISSE'),
+      this.createInd('CPT_DOSS', 'COMPTABILITE', 'Comptabilité', 'Dossiers en Attente Actifs', 'Nombre de dossiers comptables en attente d’apurement', mA.suspensionsActivesDossiers, mB.suspensionsActivesDossiers, 'Dossiers', 'BAISSE'),
 
       // TRÉSORERIE (8 indicateurs)
       this.createInd('TRS_LIQ', 'TRESORERIE', 'Trésorerie', 'Position Nette de Liquidité CUT', 'Disponibilités globales BCEAO et banques partenaires', mA.liquiditeNetteCutMilliards, mB.liquiditeNetteCutMilliards, 'Mds FCFA', 'HAUSSE'),

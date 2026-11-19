@@ -3,7 +3,15 @@
     <div class="dashboard-sticky-bar">
         <div class="row align-items-center g-3">
             <div class="col-12 col-md-7 col-lg-8">
-                <h4 class="fw-bold text-primary-900 mb-1">Vue globale</h4>
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <h4 class="fw-bold text-primary-900 mb-0">Vue globale</h4>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">
+                        <i class="far fa-calendar-alt me-1"></i>{{ selectedPeriod }}
+                    </span>
+                    @if (isLoading) {
+                        <span class="text-primary small ms-1"><i class="fas fa-spinner fa-spin me-1"></i>Actualisation...</span>
+                    }
+                </div>
                 <p class="text-secondary mb-0">Situation de l'Agence Comptable Centrale du Trésor</p>
             </div>
             <div class="col-12 col-md-5 col-lg-4 text-md-end reveal-item reveal-delay-1">
