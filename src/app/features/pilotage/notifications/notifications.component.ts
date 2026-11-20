@@ -96,7 +96,7 @@ export interface IndicatorDefinition {
         <div class="d-flex align-items-center gap-2 mb-1">
           <span class="badge-dgtcp-pill"><i class="fas fa-bell me-1"></i> VEILLE PRUDENTIELLE DGTCP</span>
         </div>
-        <h2 class="m-0 fw-bold title-text mb-1">Centre de Notifications & Règles d'Alertes</h2>
+        <h2 class="m-0 fw-bold title-text mb-1">Centre de Notifications & Alertes</h2>
         <p class="text-muted m-0 header-subtitle mt-1">
           Surveillance automatisée des <strong>Services DGTCP</strong> (Comptabilité, Trésorerie, Cautionnement, Régies, Règlement, Statistiques, Compte de Gestion) et alertes comparatives.
         </p>
@@ -465,7 +465,7 @@ export interface IndicatorDefinition {
         <div class="border-bottom p-3 px-3.5">
           <h5 class="m-0 fw-bold text-dark d-flex align-items-center gap-2">
             <i class="fas fa-sliders-h text-primary"></i>
-            <span>Règles d'Alertes</span>
+            <span>Alertes</span>
           </h5>
         </div>
 
@@ -860,6 +860,27 @@ export interface IndicatorDefinition {
       .text-muted, small.text-muted, span.text-muted, p.text-muted { color: #ffffff !important; }
       .filter-item-container label, .form-label { color: #ffffff !important; }
       .smart-notif-card { background-color: #202127 !important; border: 1px solid #2e2f38 !important; }
+      .kpi-spark-card {
+        border: 1px solid #2e2f38 !important;
+        background: #202127 !important;
+
+        &.kpi-spark-blue {
+          background: linear-gradient(180deg, #202127 45%, rgba(37, 99, 235, 0.22) 100%) !important;
+          border-color: rgba(37, 99, 235, 0.35) !important;
+        }
+        &.kpi-spark-red {
+          background: linear-gradient(180deg, #202127 45%, rgba(225, 29, 72, 0.22) 100%) !important;
+          border-color: rgba(225, 29, 72, 0.35) !important;
+        }
+        &.kpi-spark-sky {
+          background: linear-gradient(180deg, #202127 45%, rgba(2, 132, 199, 0.22) 100%) !important;
+          border-color: rgba(2, 132, 199, 0.35) !important;
+        }
+        &.kpi-spark-green {
+          background: linear-gradient(180deg, #202127 45%, rgba(22, 163, 74, 0.22) 100%) !important;
+          border-color: rgba(22, 163, 74, 0.35) !important;
+        }
+      }
       .modal-dialog-custom, .modal-dialog-report { background-color: #202127 !important; color: #ffffff !important; }
     }
   `]

@@ -17,6 +17,12 @@ import {
   ComparativeIndicator,
   ServiceDomainFilter
 } from '../../../core/services/pilotage-benchmark.service';
+import {
+  ChatService,
+  ChatAction,
+  ChatMessage,
+  ChatThread
+} from '../../../core/services/chat.service';
 
 @Component({
   selector: 'app-decision-ia',
@@ -36,7 +42,7 @@ import {
         </div>
         <h2 class="m-0 fw-bold title-text mb-1">Décision & Prospective IA</h2>
         <p class="text-muted m-0 header-subtitle mt-1">
-          Génération de notes stratégiques pour la Direction Générale du Trésor, détection des écarts comptables et modélisations prédictives OLS.
+          Génération de notes stratégiques pour la Direction Générale du Trésor, détection des écarts comptables et projections prédictives.
         </p>
       </div>
 
@@ -274,9 +280,9 @@ import {
                 @for (r of currentSummary.risksAndGaps; track r) {
                   <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center gap-2">
                     <span><i class="fas fa-chevron-right text-warning me-2 small"></i> {{ r }}</span>
-                    <button type="button" class="btn btn-sm btn-light border text-nowrap py-0 px-2 very-small fw-semibold"
-                            (click)="analyserRisqueAvecIa(r)" title="Demander un diagnostic détaillé à l'IA">
-                      <i class="fas fa-magic text-primary me-1"></i> Analyser
+                    <button type="button" class="btn btn-sm btn-action-analyser text-nowrap py-1 px-2.5 very-small fw-semibold"
+                            (click)="analyserRisqueAvecIa(r)" title="Demander un diagnostic détaillé">
+                      <i class="fas fa-magic me-1"></i> Analyser
                     </button>
                   </li>
                 }
@@ -291,9 +297,9 @@ import {
                 @for (rec of currentSummary.recommendations; track rec) {
                   <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center gap-2">
                     <span><i class="fas fa-arrow-circle-right text-primary me-2"></i> {{ rec }}</span>
-                    <button type="button" class="btn btn-sm btn-light border text-nowrap py-0 px-2 very-small fw-semibold"
+                    <button type="button" class="btn btn-sm btn-action-plan text-nowrap py-1 px-2.5 very-small fw-semibold"
                             (click)="genererPlanActionIa(rec)" title="Générer un plan d'action avec échéancier">
-                      <i class="fas fa-tasks text-success me-1"></i> Plan d'action
+                      <i class="fas fa-tasks me-1"></i> Plan d'action
                     </button>
                   </li>
                 }
@@ -307,83 +313,158 @@ import {
     <!-- Colonne Droite : Assistant d'Analyse Décisionnelle IA -->
     <div class="col-lg-5">
       <div class="card shadow-sm border-0 chat-card h-100 d-flex flex-column">
-        <div class="card-header bg-white border-bottom py-3">
+        <div class="card-header bg-white border-bottom py-2.5 px-3">
           <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
               <i class="fas fa-robot text-primary fs-5"></i>
-              <h5 class="m-0 fw-bold text-navy">Assistant Décisionnel</h5>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-              <button type="button" class="btn btn-sm btn-light border py-1 px-2 very-small"
-                      (click)="resetChat()" title="Nouvelle discussion">
-                <i class="fas fa-redo me-1"></i> Réinitialiser
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-body p-3 chat-body flex-grow-1 overflow-auto" style="max-height: 440px;" #chatBody>
-          @for (msg of chatHistory; track $index) {
-            <div class="chat-message mb-3" [class.user-msg]="msg.sender === 'user'" [class.ai-msg]="msg.sender === 'ai'">
-              <div class="message-bubble p-3 rounded-3 shadow-sm">
-                <div class="very-small fw-bold mb-1 opacity-75 d-flex justify-content-between gap-3">
-                  <span>{{ msg.sender === 'ai' ? 'Observatoire IA DGTCP' : 'Vous' }}</span>
-                  <span>{{ msg.time }}</span>
-                </div>
-                <div class="message-content small" [innerHTML]="msg.text"></div>
-                @if (msg.actions && msg.actions.length > 0) {
-                  <div class="d-flex flex-wrap mt-2 pt-2 border-top" style="gap: 8px;">
-                    @for (act of msg.actions; track act.label) {
-                      <button type="button"
-                              class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 very-small fw-semibold"
-                              (click)="executeChatAction(act)">
-                        <i [class]="act.icon + ' me-1'"></i>{{ act.label }}
-                      </button>
-                    }
-                  </div>
-                }
+              <div>
+                <h5 class="m-0 fw-bold text-navy fs-6">Assistant Décisionnel</h5>
+                <span class="very-small text-muted">
+                  @if (showHistory) {
+                    Historique ({{ chatService.threads().length }} conversation(s))
+                  } @else {
+                    <i class="fas fa-circle text-success me-1" style="font-size: 7px;"></i> Conseil stratégique & simulations
+                  }
+                </span>
               </div>
             </div>
-          }
-
-          @if (isGeneratingAnswer) {
-            <div class="text-center my-3 text-muted">
-              <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
-              <p class="small mt-1 mb-0">Analyse en cours...</p>
+            <div class="d-flex align-items-center gap-1.5">
+              <!-- Bouton Dédié : Nouvelle discussion -->
+              <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2.5 very-small fw-bold d-flex align-items-center gap-1.5 rounded-pill shadow-xs"
+                      (click)="startNewChat()" title="Démarrer une nouvelle discussion">
+                <i class="fas fa-plus"></i>
+                <span>Nouvelle discussion</span>
+              </button>
+              <!-- Bouton Dédié : Historique -->
+              <button type="button" class="btn btn-sm py-1 px-2.5 very-small fw-bold d-flex align-items-center gap-1.5 rounded-pill shadow-xs"
+                      [ngClass]="showHistory ? 'btn-primary text-white' : 'btn-light border text-navy'"
+                      (click)="toggleHistory()" [title]="showHistory ? 'Fermer l’historique' : 'Consulter l’historique des conversations'">
+                <i class="fas fa-history"></i>
+                <span>Historique</span>
+                @if (chatService.threads().length > 0) {
+                  <span class="badge rounded-pill" [ngClass]="showHistory ? 'bg-white text-primary' : 'bg-primary-subtle text-primary border border-primary-subtle'" style="font-size: 0.65rem;">
+                    {{ chatService.threads().length }}
+                  </span>
+                }
+              </button>
             </div>
-          }
+          </div>
         </div>
 
-        <!-- Questions Suggérées -->
-        <div class="border-top bg-light p-3">
-          <div class="d-flex align-items-center justify-content-between mb-2">
-            <span class="very-small fw-bold text-uppercase text-muted">
-              <i class="fas fa-bolt text-warning me-1"></i> Questions rapides suggérées
-            </span>
-          </div>
-          <div class="d-flex flex-column gap-1.5">
-            @for (q of suggestedQuestions; track q) {
-              <button type="button"
-                      class="btn btn-sm btn-outline-secondary text-start d-flex align-items-center justify-content-between py-1.5 px-2.5"
-                      (click)="askQuestion(q)">
-                <span class="text-truncate">{{ q }}</span>
-                <i class="fas fa-chevron-right ms-2 text-primary small"></i>
+        @if (showHistory) {
+          <!-- Vue Historique des conversations -->
+          <div class="card-body p-3 chat-body flex-grow-1 overflow-auto" style="max-height: 440px;">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+              <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-icon btn-light border rounded-circle" (click)="toggleHistory()" title="Retour à la discussion">
+                  <i class="fas fa-arrow-left"></i>
+                </button>
+                <span class="fw-bold fs-7 text-navy">Historique des conversations</span>
+              </div>
+              <button type="button" class="btn btn-sm btn-primary py-1 px-2.5 very-small rounded-pill fw-bold" (click)="startNewChat()">
+                <i class="fas fa-plus me-1"></i> Nouvelle discussion
               </button>
+            </div>
+
+            <div class="list-group list-group-flush rounded-3 shadow-sm border mb-3">
+              @for (thread of chatService.threads(); track thread.id) {
+                <div class="list-group-item list-group-item-action p-2.5 d-flex justify-content-between align-items-center gap-2"
+                     [class.active-thread-item]="thread.id === chatService.activeThreadId()"
+                     style="cursor: pointer;"
+                     (click)="selectThread(thread.id)">
+                  <div class="flex-grow-1 overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="fw-bold fs-8 text-truncate pe-2 text-navy">
+                        <i class="fas fa-comment-dots text-primary me-1.5 opacity-75"></i>{{ thread.title }}
+                      </span>
+                      <span class="very-small text-muted text-nowrap">{{ thread.lastUpdated | date:'dd/MM HH:mm' }}</span>
+                    </div>
+                    <p class="m-0 very-small text-secondary text-truncate opacity-75">
+                      {{ getSnippet(thread.messages[thread.messages.length - 1]?.content || '') }}
+                    </p>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-icon text-muted hover-danger border-0 p-1"
+                          (click)="deleteThread($event, thread.id)" title="Supprimer cette discussion">
+                    <i class="fas fa-trash-alt fs-8"></i>
+                  </button>
+                </div>
+              }
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center px-1">
+              <button type="button" class="btn btn-link btn-sm text-muted text-decoration-none very-small p-0" (click)="toggleHistory()">
+                <i class="fas fa-chevron-left me-1"></i> Revenir à la discussion active
+              </button>
+              <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none very-small p-0" (click)="clearAllHistory()">
+                <i class="fas fa-trash-alt me-1"></i> Tout effacer
+              </button>
+            </div>
+          </div>
+        } @else {
+          <!-- Vue Messages actifs -->
+          <div class="card-body p-3 chat-body flex-grow-1 overflow-auto" style="max-height: 440px;" #chatBody>
+            @for (msg of chatService.activeMessages(); track $index) {
+              <div class="chat-message mb-3" [class.user-msg]="msg.role === 'user'" [class.ai-msg]="msg.role === 'assistant'">
+                <div class="message-bubble p-3 rounded-3 shadow-sm">
+                  <div class="very-small fw-bold mb-1 opacity-75 d-flex justify-content-between gap-3">
+                    <span>{{ msg.role === 'assistant' ? 'Observatoire IA DGTCP' : 'Vous' }}</span>
+                    <span>{{ msg.timestamp | date:'HH:mm' }}</span>
+                  </div>
+                  <div class="message-content small" [innerHTML]="msg.content"></div>
+                  @if (msg.actions && msg.actions.length > 0) {
+                    <div class="d-flex flex-wrap mt-2 pt-2 border-top" style="gap: 8px;">
+                      @for (act of msg.actions; track act.label) {
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 very-small fw-semibold"
+                                (click)="executeChatAction(act)">
+                          <i [class]="act.icon + ' me-1'"></i>{{ act.label }}
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (chatService.isGenerating()) {
+              <div class="text-center my-3 text-muted">
+                <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                <p class="small mt-1 mb-0">Analyse en cours...</p>
+              </div>
             }
           </div>
-        </div>
 
-        <!-- Formulaire Chat -->
-        <div class="card-footer bg-white border-top p-3">
-          <form (ngSubmit)="askQuestion()" class="d-flex gap-2">
-            <input type="text" class="form-control form-control-sm"
-                   placeholder="Posez une question sur la Trésorerie, les RAP, la BCEAO..."
-                   [(ngModel)]="userQuestion" name="chatQuestion" [disabled]="isGeneratingAnswer">
-            <button type="submit" class="btn btn-sm btn-primary px-3" [disabled]="!userQuestion.trim() || isGeneratingAnswer">
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </form>
-        </div>
+          <!-- Questions Suggérées -->
+          <div class="border-top bg-light p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="very-small fw-bold text-uppercase text-muted">
+                <i class="fas fa-bolt text-warning me-1"></i> Questions rapides suggérées
+              </span>
+            </div>
+            <div class="d-flex flex-column gap-1.5">
+              @for (q of suggestedQuestions; track q) {
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary text-start d-flex align-items-center justify-content-between py-1.5 px-2.5"
+                        (click)="askQuestion(q)">
+                  <span class="text-truncate">{{ q }}</span>
+                  <i class="fas fa-chevron-right ms-2 text-primary small"></i>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Formulaire Chat -->
+          <div class="card-footer bg-white border-top p-3">
+            <form (ngSubmit)="askQuestion()" class="d-flex gap-2">
+              <input type="text" class="form-control form-control-sm"
+                     placeholder="Posez une question sur la Trésorerie, les RAP, la BCEAO..."
+                     [(ngModel)]="userQuestion" name="chatQuestion" [disabled]="chatService.isGenerating()">
+              <button type="submit" class="btn btn-sm btn-primary px-3" [disabled]="!userQuestion.trim() || chatService.isGenerating()">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </form>
+          </div>
+        }
       </div>
     </div>
   </div>
@@ -403,7 +484,7 @@ import {
           }
         </h5>
         <p class="text-muted small m-0 mt-1">
-          Historique certifié (2019-{{ selectedAnnee }}) et Modélisations IA OLS (2027-2031) en {{ selectedIndicator ? selectedIndicator.unite : 'Milliards FCFA' }}
+          Historique certifié (2019-{{ selectedAnnee }}) et Prévisions (2027-2031) en {{ selectedIndicator ? selectedIndicator.unite : 'Milliards FCFA' }}
         </p>
       </div>
       <div class="d-flex flex-wrap align-items-center" style="gap: 6px;">
@@ -597,8 +678,51 @@ import {
       border-left: 4px solid #1A365D;
     }
 
+    .btn-action-analyser {
+      background: rgba(37, 99, 235, 0.08);
+      border: 1px solid rgba(37, 99, 235, 0.25) !important;
+      color: #1d4ed8 !important;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+
+      i { color: #2563eb; }
+
+      &:hover {
+        background: rgba(37, 99, 235, 0.18) !important;
+        border-color: #2563eb !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+      }
+    }
+
+    .btn-action-plan {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25) !important;
+      color: #047857 !important;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+
+      i { color: #10b981; }
+
+      &:hover {
+        background: rgba(16, 185, 129, 0.18) !important;
+        border-color: #10b981 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+      }
+    }
+
     .chat-card { border-radius: 12px; }
     .chat-body { background-color: #f8fafc; }
+    .active-thread-item {
+      background-color: #f1f5f9 !important;
+      border-left: 4px solid #F77F00 !important;
+      font-weight: 600;
+    }
+    .hover-danger {
+      transition: color 0.15s ease;
+      &:hover { color: #dc2626 !important; }
+    }
     .chat-message { display: flex; }
     .chat-message.user-msg { justify-content: flex-end; }
     .chat-message.user-msg .message-bubble { background-color: #1A365D; color: #fff; }
@@ -621,10 +745,48 @@ import {
       .filter-item-container label, .form-label { color: #ffffff !important; }
       .kpi-spark-title { color: #ffffff !important; }
       .kpi-card-v2 { background: #202127 !important; border: 1px solid #2e2f38 !important; }
+      .kpi-spark-card {
+        border: 1px solid #2e2f38 !important;
+        background: #202127 !important;
+
+        &.kpi-spark-navy {
+          background: linear-gradient(180deg, #202127 45%, rgba(30, 58, 138, 0.28) 100%) !important;
+          border-color: rgba(30, 58, 138, 0.35) !important;
+        }
+        &.kpi-spark-green {
+          background: linear-gradient(180deg, #202127 45%, rgba(22, 163, 74, 0.22) 100%) !important;
+          border-color: rgba(22, 163, 74, 0.35) !important;
+        }
+        &.kpi-spark-sky {
+          background: linear-gradient(180deg, #202127 45%, rgba(2, 132, 199, 0.22) 100%) !important;
+          border-color: rgba(2, 132, 199, 0.35) !important;
+        }
+        &.kpi-spark-amber {
+          background: linear-gradient(180deg, #202127 45%, rgba(217, 119, 6, 0.22) 100%) !important;
+          border-color: rgba(217, 119, 6, 0.35) !important;
+        }
+        &.kpi-spark-orange {
+          background: linear-gradient(180deg, #202127 45%, rgba(249, 115, 22, 0.22) 100%) !important;
+          border-color: rgba(249, 115, 22, 0.35) !important;
+        }
+      }
       .chat-card { background: #202127 !important; border: 1px solid #2e2f38 !important; }
       .card-header { background: #202127 !important; border-color: #2e2f38 !important; }
       .card-footer { background: #202127 !important; border-color: #2e2f38 !important; }
       .chat-body { background-color: #16171d !important; }
+      .active-thread-item {
+        background-color: #282932 !important;
+        border-left: 4px solid #F77F00 !important;
+        color: #ffffff !important;
+      }
+      .list-group-item {
+        background-color: #202127 !important;
+        border-color: #2e2f38 !important;
+        color: #ffffff !important;
+      }
+      .list-group {
+        border-color: #2e2f38 !important;
+      }
 
       .form-control,
       input.form-control {
@@ -658,6 +820,36 @@ import {
       }
       .chat-message.user-msg .message-bubble { background-color: #ea580c !important; color: #ffffff !important; }
       .executive-lead { background: #18191f !important; border-color: #2e2f38 !important; }
+
+      .btn-action-analyser {
+        background: rgba(56, 189, 248, 0.14) !important;
+        border: 1px solid rgba(56, 189, 248, 0.35) !important;
+        color: #38bdf8 !important;
+
+        i { color: #38bdf8 !important; }
+
+        &:hover {
+          background: rgba(56, 189, 248, 0.28) !important;
+          border-color: #38bdf8 !important;
+          color: #ffffff !important;
+          box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3) !important;
+        }
+      }
+
+      .btn-action-plan {
+        background: rgba(74, 222, 128, 0.14) !important;
+        border: 1px solid rgba(74, 222, 128, 0.35) !important;
+        color: #4ade80 !important;
+
+        i { color: #4ade80 !important; }
+
+        &:hover {
+          background: rgba(74, 222, 128, 0.28) !important;
+          border-color: #4ade80 !important;
+          color: #ffffff !important;
+          box-shadow: 0 2px 10px rgba(74, 222, 128, 0.3) !important;
+        }
+      }
     }
   `]
 })
@@ -665,6 +857,7 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
   @ViewChild('chatBody') chatBodyRef?: ElementRef<HTMLDivElement>;
   @ViewChild('predictiveChartCard') predictiveChartCardRef?: ElementRef<HTMLDivElement>;
 
+  public chatService = inject(ChatService);
   private aiService = inject(PilotageAiService);
   private realDataService = inject(PilotageRealDataService);
   private benchmarkService = inject(PilotageBenchmarkService);
@@ -705,6 +898,7 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
   };
 
   userQuestion = '';
+  showHistory = false;
   aiResponseMode: 'synthese' | 'technique' | 'action' = 'synthese';
   activeScenario: 'OPTIMISTE' | 'BASE' | 'STRESS' | 'CUSTOM' = 'BASE';
   customSimulationNote = '';
@@ -712,15 +906,11 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
   simApurementPct = 0;
   projected2031Value = 0;
   projected2031Delta = 0;
-
-  chatHistory: {
-    sender: 'user' | 'ai';
-    text: string;
-    time: string;
-    actions?: { label: string; icon: string; type: 'question' | 'scenario' | 'pdf' | 'download'; payload?: any }[];
-  }[] = [];
-  isGeneratingAnswer = false;
   isCopied = false;
+
+  get isGeneratingAnswer(): boolean {
+    return this.chatService.isGenerating();
+  }
 
   suggestedQuestions = [
     'Fais un bilan synthétique global.',
@@ -745,7 +935,6 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
       });
     }
     this.loadAnalysis();
-    this.resetChat();
   }
 
   ngOnDestroy(): void {
@@ -1133,7 +1322,7 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
     const orangeLine = isDark ? '#fb923c' : '#F77F00';
     const greenLine = isDark ? '#4ade80' : '#16a34a';
 
-    const labels = data.map(d => d.isHistorical ? `${d.year}` : `${d.year} (IA)`);
+    const labels = data.map(d => `${d.year}`);
     const lastHistIndex = data.map(d => d.isHistorical).lastIndexOf(true);
     const ind = this.selectedIndicator;
 
@@ -1183,7 +1372,7 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
           pointRadius: 4
         },
         {
-          label: `${ind.nom} (Tendanciel IA)`,
+          label: `${ind.nom} (Tendanciel)`,
           data: foreSerie,
           borderColor: orangeLine,
           borderDash: [6, 4],
@@ -1234,7 +1423,7 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
         pointRadius: 4
       },
       {
-        label: 'Recettes (Tendanciel IA)',
+        label: 'Recettes (Tendanciel)',
         data: recForecast,
         borderColor: blueLine,
         borderDash: [6, 4],
@@ -1249,7 +1438,7 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
         pointRadius: 4
       },
       {
-        label: 'Règlements (Tendanciel IA)',
+        label: 'Règlements (Tendanciel)',
         data: regForecast,
         borderColor: orangeLine,
         borderDash: [6, 4],
@@ -1260,7 +1449,7 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
 
     if (hasScenario) {
       datasets.push({
-        label: 'Recettes (Scénario Simulé IA)',
+        label: 'Recettes (Scénario Simulé)',
         data: recSim,
         borderColor: greenLine,
         borderWidth: 2.5,
@@ -1297,18 +1486,50 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
     }
   }
 
+  startNewChat(): void {
+    this.chatService.createNewThread();
+    this.showHistory = false;
+    this.scrollToBottom();
+  }
+
+  toggleHistory(): void {
+    this.showHistory = !this.showHistory;
+  }
+
+  selectThread(id: string): void {
+    this.chatService.setActiveThread(id);
+    this.showHistory = false;
+    this.scrollToBottom();
+  }
+
+  deleteThread(event: Event, id: string): void {
+    event.stopPropagation();
+    this.chatService.deleteThread(id);
+  }
+
+  clearAllHistory(): void {
+    if (confirm('Voulez-vous vraiment effacer tout l\'historique des conversations ?')) {
+      this.chatService.clearHistory();
+      this.showHistory = false;
+    }
+  }
+
+  getSnippet(raw: string): string {
+    return this.chatService.getSnippet(raw);
+  }
+
   analyserRisqueAvecIa(risque: string): void {
+    this.showHistory = false;
     this.askQuestion(`Analyse ce point de vigilance et propose des mesures correctives : "${risque}"`);
   }
 
   genererPlanActionIa(rec: string): void {
-    const prevMode = this.aiResponseMode;
-    this.aiResponseMode = 'action';
+    this.showHistory = false;
+    this.chatService.responseMode.set('action');
     this.askQuestion(`Génère un plan d'action opérationnel (responsables, échéance, impact) pour : "${rec}"`);
-    this.aiResponseMode = prevMode;
   }
 
-  executeChatAction(act: { label: string; icon: string; type: 'question' | 'scenario' | 'pdf' | 'download'; payload?: any }): void {
+  executeChatAction(act: any): void {
     if (act.type === 'question' && act.payload) {
       this.askQuestion(act.payload);
     } else if (act.type === 'scenario' && act.payload) {
@@ -1328,6 +1549,11 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
       setTimeout(() => {
         this.predictiveChartCardRef?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 80);
+    } else if (act.type === 'chart' || act.label === 'Simuler sur le graphe') {
+      this.applyScenarioPreset('OPTIMISTE');
+      setTimeout(() => {
+        this.predictiveChartCardRef?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 80);
     } else if (act.type === 'pdf') {
       this.exportDecisionPdf();
     } else if (act.type === 'download' && act.payload) {
@@ -1336,253 +1562,17 @@ export class DecisionIaComponent implements OnInit, OnDestroy {
   }
 
   resetChat(): void {
-    this.chatHistory = [{
-      sender: 'ai',
-      text: 'Bonjour ! Je suis votre Assistant Décisionnel et Prospectif (DGTCP / ACCT). Cliquez sur <strong>Analyser</strong> ou <strong>Plan d\'action</strong> dans la note à gauche, ou posez-moi directement une question.',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }];
+    this.startNewChat();
   }
 
   askQuestion(promptText?: string): void {
+    this.showHistory = false;
     const question = promptText || this.userQuestion;
     if (!question || !question.trim()) return;
 
-    this.chatHistory.push({
-      sender: 'user',
-      text: question,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
+    this.chatService.sendMessage(question);
     this.userQuestion = '';
-    this.isGeneratingAnswer = true;
     this.scrollToBottom();
-
-    setTimeout(() => {
-      const q = question.toLowerCase();
-      const liq = this.realMetrics?.liquiditeNetteCutMilliards || 1542.3;
-      const laEnc = this.realMetrics?.laEnCoursMilliards || 45.8;
-      const laReg = this.realMetrics?.tauxRegularisationLA || 88.5;
-      const rap = this.realMetrics?.encoursRapMilliards || 124.5;
-      const rap90 = this.realMetrics?.rapCritiquePlus90jMilliards || 34.9;
-      const conc = this.realMetrics?.tauxRapprochementAuto || 94.8;
-      const rec = this.realMetrics?.totalRecettesMilliards || 1254.0;
-      const prev27 = this.realMetrics?.prevision2027 || 1321.7;
-
-      const ind = this.selectedIndicator;
-      const modeBadge = this.aiResponseMode === 'action' ? 'Plan d’Action IA' : (this.aiResponseMode === 'technique' ? 'Analyse Technique' : 'Synthèse Direction');
-      let answer = '';
-      let matchedFromData: ComparativeIndicator | null = null;
-      if (q.includes('plan d\'action') || this.aiResponseMode === 'action') {
-        const cible = ind ? `${ind.nom} (${ind.valeurA} ${ind.unite})` : this.selectedServiceLabel;
-        answer = `
-          <div class="p-1 text-dark">
-            <div class="fw-bold text-dark mb-2 border-bottom pb-1"><i class="fas fa-tasks me-1"></i> ${modeBadge} — ${cible}</div>
-            <ul class="list-unstyled mb-2">
-              <li><strong>• Phase 1 (J+7) :</strong> Audit ciblé des dossiers en écart et gel des engagements non justifiés.</li>
-              <li><strong>• Phase 2 (J+30) :</strong> Apurement prioritaire (<strong>+${Math.max(15, this.simApurementPct || 25)}%</strong>) et relance des postes comptables.</li>
-              <li><strong>• Phase 3 (J+60) :</strong> Validation ACCT / PGT et suivi mensuel automatique.</li>
-            </ul>
-            <div class="very-small text-muted"><strong>Impact estimé :</strong> Amélioration de <strong>+3</strong> à <strong>+5 pts</strong> sur le score de conformité ${this.selectedServiceLabel}.</div>
-          </div>`;
-      } else if (ind && (q.includes(ind.nom.toLowerCase().slice(0, 10)) || q.includes('indicateur'))) {
-        answer = `
-          <div class="p-1 text-dark">
-            <div class="fw-bold text-dark mb-2 border-bottom pb-1"><i class="fas fa-chart-line me-1"></i> ${modeBadge} — ${ind.nom}</div>
-            <ul class="list-unstyled mb-2">
-              <li><strong>• Valeur actuelle (${this.selectedAnnee}) :</strong> <span class="text-navy fw-bold">${ind.valeurA} ${ind.unite}</span></li>
-              <li><strong>• Exercice précédent (${this.selectedAnnee - 1}) :</strong> <strong>${ind.valeurB} ${ind.unite}</strong> (Écart : <strong>${ind.deltaPct >= 0 ? '+' : ''}${ind.deltaPct}%</strong>)</li>
-              <li><strong>• Projection 2031 :</strong> <span class="text-success fw-bold">${this.projected2031Value} ${ind.unite}</span></li>
-            </ul>
-            <div class="very-small text-muted">${ind.description}</div>
-          </div>`;
-      } else if (q.includes('caution')) {
-        answer = `
-          <div class="p-1 text-dark">
-            <div class="fw-bold text-dark mb-2 border-bottom pb-1">🛡️ Diagnostic Cautionnement & Garanties des Comptables Publics</div>
-            <ul class="list-unstyled mb-2">
-              <li><strong>• Taux de couverture des cautionnements :</strong> <span class="text-success fw-bold">${this.realMetrics?.tauxCouvertureCautionnement || 91.5}%</span> (Norme DGTCP = <strong>100%</strong>)</li>
-              <li><strong>• Montant total des garanties :</strong> <strong>${this.realMetrics?.cautionnementsVolumeMilliards || 15.0} Mds FCFA</strong></li>
-              <li><strong>• Dossiers de cautionnement actifs :</strong> <strong>${this.realMetrics?.cautionnementsActifsCount || 1450} dossiers</strong></li>
-            </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Régulariser les arrêtés de nomination et mainlevées de quitus en attente.</div>
-          </div>`;
-      } else if (q.includes('régie') || q.includes('regie')) {
-        answer = `
-          <div class="p-1 text-dark">
-            <div class="fw-bold text-dark mb-2 border-bottom pb-1">🏢 Diagnostic Régies d'Avances & de Recettes</div>
-            <ul class="list-unstyled mb-2">
-              <li><strong>• Postes & Régies connectés :</strong> <strong>${this.realMetrics?.postesEtRegiesActifs || 142} unités</strong> (Avances : <strong>${this.realMetrics?.regiesAvancesEnCoursMilliards || 4.85} Mds FCFA</strong>)</li>
-              <li><strong>• Taux de conformité des pièces :</strong> <span class="text-success fw-bold">${this.realMetrics?.regiesTauxPiecesConformes || 96.4}%</span> (Seuil ≥ <strong>95%</strong>)</li>
-              <li><strong>• Régies en dépassement de délai/plafond :</strong> <span class="text-danger fw-bold">${this.realMetrics?.regiesEnDepassementCount || 7} régies</span></li>
-            </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Suspendre les réapprovisionnements pour les <strong>${this.realMetrics?.regiesEnDepassementCount || 7}</strong> régisseurs en dépassement.</div>
-          </div>`;
-      } else if (q.includes('compte de gestion') || q.includes('cour des comptes') || q.includes('reddition')) {
-        answer = `
-          <div class="p-1 text-dark">
-            <div class="fw-bold text-dark mb-2 border-bottom pb-1">📑 Reddition des Comptes de Gestion (Cour des Comptes)</div>
-            <ul class="list-unstyled mb-2">
-              <li><strong>• Conformité des liasses :</strong> <span class="text-success fw-bold">${this.realMetrics?.tauxConformiteCompteGestion || 96.4}%</span> (Seuil ≥ <strong>90%</strong>)</li>
-              <li><strong>• Volume audité (TGE, PGT, RGF, PGA) :</strong> <strong>${this.realMetrics?.cgVolumeAuditeMilliards || 482.5} Mds FCFA</strong></li>
-              <li><strong>• Taux de quitus transmis :</strong> <span class="text-success fw-bold">${this.realMetrics?.quitusTransmisPct || 95.2}%</span> (Restes en instance : <strong>${this.realMetrics?.restesEnInstanceCGMilliards || 11.26} Mds</strong>)</li>
-            </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Apurer les <strong>${this.realMetrics?.restesEnInstanceCGMilliards || 11.26} Mds FCFA</strong> en instance avant transmission définitive à la Cour des Comptes.</div>
-          </div>`;
-      } else if (q.includes('cut') || q.includes('trésor') || q.includes('tresor') || q.includes('liquidit') || q.includes('avance')) {
-        answer = `
-          <div class="p-1 text-dark">
-            <div class="fw-bold text-dark mb-2 border-bottom pb-1">📊 Diagnostic Trésorerie & Compte Unique (CUT)</div>
-            <ul class="list-unstyled mb-2">
-              <li><strong>• Liquidité Nette CUT :</strong> <span class="text-success fw-bold">${liq} Mds FCFA</span> (dont <strong>55%</strong> centralisés à la BCEAO)</li>
-              <li><strong>• Lettres d'Avance non régularisées :</strong> <span class="text-danger fw-bold">${laEnc} Mds FCFA</span></li>
-              <li><strong>• Taux de régularisation LA :</strong> <strong>${laReg}%</strong> (Norme ACCT ≥ <strong>90%</strong>)</li>
-            </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Suspendre toute nouvelle LA sur les ordonnateurs présentant un retard &gt; <strong>45 jours</strong>.</div>
-          </div>`;
-      } else if (q.includes('rap') || q.includes('reste') || q.includes('règle') || q.includes('regle')) {
-        answer = `
-          <div class="p-1 text-dark">
-            <div class="fw-bold text-dark mb-2 border-bottom pb-1">⏳ Analyse des Restes à Payer (RAP) & Règlements</div>
-            <ul class="list-unstyled mb-2">
-              <li><strong>• Encours total RAP :</strong> <strong>${rap} Mds FCFA</strong></li>
-              <li><strong>• Tranche critique (&gt; 90 jours) :</strong> <span class="text-danger fw-bold">${rap90} Mds FCFA</span></li>
-              <li><strong>• Délai moyen de règlement :</strong> <span class="text-success fw-bold">${this.realMetrics?.delaiMoyenReglementJours || 21.4} jours</span> (Cible &lt; <strong>30j</strong>)</li>
-            </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Prioriser l'apurement FIFO des décomptes BTP et fournitures médicales de plus de <strong>90 jours</strong>.</div>
-          </div>`;
-      } else if (q.includes('bceao') || q.includes('rapprochement') || q.includes('concordance') || q.includes('compta')) {
-        answer = `
-          <div class="p-1 text-dark">
-            <div class="fw-bold text-dark mb-2 border-bottom pb-1">⚖️ Concordance Bancaire BCEAO / ACCT (Comptabilité)</div>
-            <ul class="list-unstyled mb-2">
-              <li><strong>• Taux de rapprochement auto :</strong> <span class="text-success fw-bold">${conc}%</span> (Seuil DGTCP ≥ <strong>90%</strong>)</li>
-              <li><strong>• Écart résiduel en sas :</strong> <strong>${this.realMetrics?.ecartConcordanceMilliards || 1.2} Mds FCFA</strong></li>
-              <li><strong>• Volume mouvements comptabilisés :</strong> <strong>${this.realMetrics?.comptaVolumeMouvementsMilliards || 348.52} Mds FCFA</strong></li>
-            </ul>
-            <div class="very-small text-muted"><strong>Action recommandée :</strong> Apurer les comptes transitoires <strong>4711</strong> et <strong>4712</strong> avant l'arrêté mensuel.</div>
-          </div>`;
-      } else if (q.includes('bilan') || q.includes('synthétique') || q.includes('global')) {
-        const m = this.realMetrics;
-        answer = `
-          <div class="p-1 text-dark">
-            <div class="fw-bold text-dark mb-2 border-bottom pb-1">Bilan Synthétique Consolidé — Exercice ${this.selectedAnnee}</div>
-            <ul class="list-unstyled mb-2">
-              <li><strong>• Comptabilité :</strong> Rapprochement auto BCEAO à <span class="text-success fw-bold">${conc}%</span>, opérations en attente à <strong>${m?.suspensComptablesMilliards || 45.8} Mds FCFA</strong> (<strong>${m?.suspensionsActivesDossiers || 18}</strong> dossiers).</li>
-              <li><strong>• Trésorerie :</strong> Liquidité nette CUT à <span class="text-success fw-bold">${liq} Mds FCFA</span> ; régularisation des Lettres d'Avance à <strong>${laReg}%</strong> (<strong>${laEnc} Mds</strong> en cours).</li>
-              <li><strong>• Cautionnement :</strong> <strong>${m?.cautionnementsActifsCount || 1450} dossiers actifs</strong> (<strong>${m?.cautionnementsVolumeMilliards || 15.0} Mds FCFA</strong>), échus non levés : <strong>${m?.cautionnementsEchusMilliards || 2.3} Mds</strong>.</li>
-              <li><strong>• Régies & Règlement :</strong> <strong>${rec} Mds FCFA</strong> de recettes mobilisées (<strong>${m?.regiesTauxPiecesConformes || 96.4}%</strong> pièces conformes) face à <strong>${m?.totalReglementsMilliards || 1138.2} Mds FCFA</strong> de paiements (délai moyen : <strong>${m?.delaiMoyenReglementJours || 21.4} j</strong>).</li>
-              <li><strong>• Statistiques & Compte de Gestion :</strong> Encours RAP à <strong>${rap} Mds FCFA</strong> (dont <strong>${rap90} Mds &gt; 90j</strong>) ; conformité Cour des Comptes à <span class="text-success fw-bold">${m?.tauxConformiteCompteGestion || 96.4}%</span>.</li>
-            </ul>
-            <div class="very-small text-muted"><strong>Priorité DGTCP :</strong> Apurer les RAP &gt; <strong>90 jours</strong> (<strong>${rap90} Mds</strong>) et porter la régularisation des LA au-dessus de <strong>90%</strong>.</div>
-          </div>`;
-      } else if (q.includes('vigilance') || q.includes('risque') || q.includes('point d')) {
-        const risques = this.currentSummary?.risksAndGaps || [];
-        const recs = this.currentSummary?.recommendations || [];
-        answer = `
-          <div class="p-1 text-dark">
-            <div class="fw-bold text-dark mb-2 border-bottom pb-1">Points de Vigilance & Mesures — ${this.selectedServiceLabel}</div>
-            <ul class="list-unstyled mb-2">
-              ${risques.map(r => `<li><strong>•</strong> <span class="text-danger fw-semibold">Risque :</span> ${r}</li>`).join('')}
-              ${recs.slice(0, 2).map(rc => `<li><strong>•</strong> <span class="text-success fw-semibold">Action :</span> ${rc}</li>`).join('')}
-            </ul>
-            <div class="very-small text-muted">Score actuel du service : <strong>${this.currentSummary?.globalScore ?? 92}/100</strong> (${this.currentSummary?.globalStatus ?? 'CONFORME'}).</div>
-          </div>`;
-      } else {
-        const dataResult = this.searchApplicationData(question);
-        if (dataResult) {
-          answer = dataResult.html;
-          if (dataResult.matchedIndicator) {
-            matchedFromData = dataResult.matchedIndicator;
-          }
-        } else {
-          const m = this.realMetrics;
-          answer = `
-            <div class="p-1 text-dark">
-              <div class="fw-bold text-dark mb-2 border-bottom pb-1">Statistiques & Projection Macro-Budgétaire — Exercice ${this.selectedAnnee}</div>
-              <ul class="list-unstyled mb-2">
-                <li><strong>• Recettes mobilisées :</strong> <strong>${rec} Mds FCFA</strong> (Exécution Loi de Finances : <strong>${m?.tauxExecutionLoiFinances || 94.8}%</strong>)</li>
-                <li><strong>• Règlements exécutés :</strong> <strong>${m?.totalReglementsMilliards || 1138.2} Mds FCFA</strong> (Délai moyen : <strong>${m?.delaiMoyenReglementJours || 21.4} j</strong>)</li>
-                <li><strong>• Subventions & Obligations Cautionnées :</strong> <strong>${m?.statSubventionsMilliards || 66.8} Mds</strong> / <strong>${m?.statObligationsCautionneesMilliards || 48.7} Mds FCFA</strong></li>
-                <li><strong>• Encours Restes à Payer (RAP) :</strong> <strong>${rap} Mds FCFA</strong> dont <span class="text-danger fw-bold">${rap90} Mds FCFA &gt; 90 jours</span></li>
-                <li><strong>• Projection OLS 2027 :</strong> <span class="text-success fw-bold">${prev27} Mds FCFA</span> (<strong>+5,4%/an</strong>) — Horizon 2031 : <strong>${this.projected2031Value} Mds FCFA</strong></li>
-              </ul>
-              <div class="very-small text-muted"><strong>Synthèse :</strong> Solde net du CUT préservé à <strong>${liq} Mds FCFA</strong> sous réserve de maîtrise des RAP critiques.</div>
-            </div>`;
-        }
-      }
-
-      // Actions de simulation adaptées aux suggestions de la réponse
-      const isAction = q.includes('plan d\'action') || this.aiResponseMode === 'action';
-      const actions: { label: string; icon: string; type: 'question' | 'scenario' | 'pdf' | 'download'; payload?: any }[] = [];
-
-      if (isAction) {
-        actions.push({
-          label: 'Voir l’impact sur le graphique (+6%)',
-          icon: 'fas fa-chart-line',
-          type: 'scenario',
-          payload: {
-            preset: 'OPTIMISTE',
-            domain: this.selectedDomain,
-            indicatorCode: ind?.code,
-            note: `Application du plan d’action recommandé sur ${ind?.nom || this.selectedServiceLabel}.`
-          }
-        });
-        actions.push({ label: 'Télécharger PDF', icon: 'fas fa-download', type: 'download', payload: answer });
-      } else {
-        let simLabel = 'Simuler ces mesures sur le graphe (+6%)';
-        let simDomain = this.selectedDomain;
-        let simInd = matchedFromData?.code || ind?.code;
-        let simNote = `Application des mesures recommandées sur ${matchedFromData?.nom || ind?.nom || this.selectedServiceLabel}.`;
-
-        if (matchedFromData) {
-          simLabel = `Simuler "${matchedFromData.nom}" sur le graphe`;
-        } else if (q.includes('rap') || q.includes('reste') || q.includes('règle') || q.includes('regle')) {
-          simLabel = 'Simuler l’apurement des RAP sur le graphe';
-          simDomain = 'statistiques';
-          simInd = 'STA_RAP';
-          simNote = 'Apurement prioritaire FIFO des décomptes > 90 jours → baisse progressive de l’encours RAP d’ici 2031.';
-        } else if (q.includes('cut') || q.includes('trésor') || q.includes('tresor') || q.includes('avance')) {
-          simLabel = 'Simuler la régularisation des LA sur le graphe';
-          simDomain = 'tresorerie';
-          simInd = 'TRS_LA_REG';
-          simNote = 'Suspension des nouvelles LA sur les ordonnateurs en retard > 45j → remontée du taux de régularisation au-dessus de 90%.';
-        } else if (q.includes('bceao') || q.includes('rapprochement') || q.includes('compta')) {
-          simLabel = 'Simuler l’apurement comptable sur le graphe';
-          simDomain = 'comptabilite';
-          simInd = 'CPT_RAPP';
-          simNote = 'Apurement des comptes transitoires 4711/4712 → amélioration du taux de rapprochement automatique BCEAO/ACCT.';
-        } else if (q.includes('régie') || q.includes('regie')) {
-          simLabel = 'Simuler le contrôle des régies sur le graphe';
-          simDomain = 'regies';
-          simInd = 'REG_TOT';
-          simNote = 'Suspension des réapprovisionnements en dépassement → hausse de la collecte nette des régies.';
-        } else if (q.includes('caution')) {
-          simLabel = 'Simuler les mainlevées sur le graphe';
-          simDomain = 'cautionnement';
-          simInd = 'CAU_ECH';
-          simNote = 'Régularisation des arrêtés et mainlevées de quitus → réduction des cautionnements échus non levés.';
-        } else if (q.includes('compte de gestion') || q.includes('cour des comptes')) {
-          simLabel = 'Simuler l’apurement CG sur le graphe';
-          simDomain = 'compte_gestion';
-          simInd = 'CG_CONF';
-          simNote = 'Apurement des restes en instance avant transmission → hausse de la conformité Cour des Comptes.';
-        }
-
-        actions.push({ label: simLabel, icon: 'fas fa-arrow-up', type: 'scenario', payload: { preset: 'OPTIMISTE', domain: simDomain, indicatorCode: simInd, note: simNote } });
-        actions.push({ label: 'Simuler ralentissement (-5%)', icon: 'fas fa-arrow-down', type: 'scenario', payload: { preset: 'STRESS', domain: simDomain, indicatorCode: simInd, note: 'Hypothèse de dégradation (-5%) en l’absence de mesures correctives.' } });
-        actions.push({ label: 'Plan d’action détaillé', icon: 'fas fa-tasks', type: 'question', payload: `Génère un plan d'action pour ${ind?.nom || this.selectedServiceLabel}` });
-        actions.push({ label: 'Télécharger PDF', icon: 'fas fa-download', type: 'download', payload: answer });
-      }
-
-      this.chatHistory.push({
-        sender: 'ai',
-        text: answer,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        actions
-      });
-      this.isGeneratingAnswer = false;
-      this.cdr.detectChanges();
-      this.scrollToBottom();
-    }, 500);
   }
 
   /** Recherche dans l'ensemble des données de l'application (45 indicateurs, ministères, historique 2019-2031). */

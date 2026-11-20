@@ -194,6 +194,60 @@ body {
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
   }
 
+  // --- 1.1 KPI & SPARKLINE CARDS GRADIENTS IN DARK MODE ---
+  .kpi-spark-card {
+    border: 1px solid var(--border) !important;
+    background: #202127 !important;
+
+    &.kpi-spark-blue {
+      background: linear-gradient(180deg, #202127 45%, rgba(37, 99, 235, 0.22) 100%) !important;
+      border-color: rgba(37, 99, 235, 0.35) !important;
+    }
+    &.kpi-spark-green {
+      background: linear-gradient(180deg, #202127 45%, rgba(22, 163, 74, 0.22) 100%) !important;
+      border-color: rgba(22, 163, 74, 0.35) !important;
+    }
+    &.kpi-spark-orange {
+      background: linear-gradient(180deg, #202127 45%, rgba(249, 115, 22, 0.22) 100%) !important;
+      border-color: rgba(249, 115, 22, 0.35) !important;
+    }
+    &.kpi-spark-amber {
+      background: linear-gradient(180deg, #202127 45%, rgba(217, 119, 6, 0.22) 100%) !important;
+      border-color: rgba(217, 119, 6, 0.35) !important;
+    }
+    &.kpi-spark-sky {
+      background: linear-gradient(180deg, #202127 45%, rgba(2, 132, 199, 0.22) 100%) !important;
+      border-color: rgba(2, 132, 199, 0.35) !important;
+    }
+    &.kpi-spark-navy {
+      background: linear-gradient(180deg, #202127 45%, rgba(30, 58, 138, 0.28) 100%) !important;
+      border-color: rgba(30, 58, 138, 0.35) !important;
+    }
+    &.kpi-spark-red {
+      background: linear-gradient(180deg, #202127 45%, rgba(225, 29, 72, 0.22) 100%) !important;
+      border-color: rgba(225, 29, 72, 0.35) !important;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+    }
+  }
+
+  // Dashboard Alert Cards Gradients in Dark Mode
+  .alert-card-danger,
+  .alert-portrait-card.alert-card-danger {
+    background: linear-gradient(180deg, #202127 50%, rgba(239, 68, 68, 0.2) 100%) !important;
+  }
+  .alert-card-warning,
+  .alert-portrait-card.alert-card-warning {
+    background: linear-gradient(180deg, #202127 50%, rgba(245, 158, 11, 0.2) 100%) !important;
+  }
+  .alert-card-info,
+  .alert-portrait-card.alert-card-info {
+    background: linear-gradient(180deg, #202127 50%, rgba(2, 132, 199, 0.2) 100%) !important;
+  }
+
   // --- 1b. STATISTIQUES REPORTS CATALOG (16 RAPPORTS) ---
   .reports-catalog-section {
     .report-card {
@@ -1078,6 +1132,18 @@ body {
 
     &:hover, &:focus, &:active, &.active, &.show {
       background-color: var(--surface-elevated) !important;
+      border-color: var(--border) !important;
+      color: #ffffff !important;
+    }
+  }
+
+  .btn-light {
+    background-color: var(--surface-elevated) !important;
+    border-color: var(--border) !important;
+    color: #f8fafc !important;
+
+    &:hover, &:focus, &:active {
+      background-color: var(--surface-hover) !important;
       border-color: var(--border) !important;
       color: #ffffff !important;
     }

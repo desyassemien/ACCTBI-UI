@@ -76,10 +76,10 @@ export class PilotageAiService {
         recommendations: [
           `Prioriser l'apurement des Restes à Payer critiques (> 90j) et des comptes transitoires 47.`,
           `Relancer les postes pour porter la régularisation des Lettres d'Avance au-dessus du seuil de 90%.`,
-          `Maintenir la trajectoire OLS pour atteindre ${prev2027.toFixed(1)} Mds FCFA de recettes projetées en ${annee + 1}.`
+          `Maintenir la trajectoire projetée pour atteindre ${prev2027.toFixed(1)} Mds FCFA de recettes projetées en ${annee + 1}.`
         ],
         predictiveInsights: [
-          { label: 'Recettes Projetées N+1', trend: 'UP', forecast: `${prev2027.toFixed(1)} Mds`, confidence: 94, subLabel: 'Modèle OLS', subValue: 'Tendance +' },
+          { label: 'Recettes Projetées N+1', trend: 'UP', forecast: `${prev2027.toFixed(1)} Mds`, confidence: 94, subLabel: 'Projection', subValue: 'Tendance +' },
           { label: 'Concordance BCEAO', trend: 'UP', forecast: '97,8%', confidence: 93, subLabel: 'Objectif ACCT', subValue: '+3,0 pts' },
           { label: 'Régularisation LA', trend: 'UP', forecast: '92,5%', confidence: 89, subLabel: 'Seuil légal', subValue: '> 90%' },
           { label: 'Indice de Confiance IA', trend: 'UP', forecast: '95%', confidence: 96, subLabel: 'Consolidé', subValue: 'DGTCP' }
@@ -111,7 +111,7 @@ export class PilotageAiService {
           { label: 'Concordance Auto Prévue', trend: 'UP', forecast: '97,8%', confidence: 94, subLabel: 'Objectif ACCT', subValue: '+3,0 pts' },
           { label: 'Délai Moyen Lettrage', trend: 'DOWN', forecast: '0,6 jour', confidence: 91, subLabel: 'Temps réel', subValue: 'Flux T+0' },
           { label: 'Réduction des Suspens', trend: 'DOWN', forecast: '-42%', confidence: 86, subLabel: 'Compte 47', subValue: 'Apurement' },
-          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '95%', confidence: 96, subLabel: 'Modèle OLS', subValue: 'Certifié ACCT' }
+          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '95%', confidence: 96, subLabel: 'Projection', subValue: 'Certifié ACCT' }
         ]
       },
       tresorerie: {
@@ -140,7 +140,7 @@ export class PilotageAiService {
           { label: 'Projection Liquidité CUT N+1', trend: 'UP', forecast: `${(liqMds * 1.058).toFixed(1)} Mds`, confidence: 92, subLabel: 'Horizon 2027', subValue: '+5,8%/an' },
           { label: 'Cible Régularisation LA', trend: 'UP', forecast: '≥ 93,5%', confidence: 89, subLabel: 'Norme ACCT', subValue: 'Seuil ≥ 90%' },
           { label: 'Solde Comptes Spéciaux', trend: 'UP', forecast: `${((metrics?.soldeComptesSpeciauxMilliards || 42.8) * 1.04).toFixed(1)} Mds`, confidence: 87, subLabel: 'Trésorerie', subValue: '+4,0%' },
-          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '94%', confidence: 95, subLabel: 'Modèle OLS', subValue: 'Certifié DWH' }
+          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '94%', confidence: 95, subLabel: 'Projection', subValue: 'Certifié DWH' }
         ]
       },
       cautionnement: {
@@ -168,7 +168,7 @@ export class PilotageAiService {
           { label: 'Volume Garanties N+1', trend: 'UP', forecast: `${((metrics?.cautionnementsVolumeMilliards || 15.0) * 1.08).toFixed(1)} Mds`, confidence: 90, subLabel: 'Marchés & Postes', subValue: '+8,0%' },
           { label: 'Délai Émission Quitus', trend: 'DOWN', forecast: '4,5 jours', confidence: 88, subLabel: 'Dématérialisé', subValue: '-50%' },
           { label: 'Taux Couverture Régisseurs', trend: 'UP', forecast: '100%', confidence: 98, subLabel: 'Obligation légale', subValue: 'Conforme' },
-          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '92%', confidence: 94, subLabel: 'Modèle OLS', subValue: 'Certifié ACCT' }
+          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '92%', confidence: 94, subLabel: 'Projection', subValue: 'Certifié ACCT' }
         ]
       },
       regies: {
@@ -196,7 +196,7 @@ export class PilotageAiService {
           { label: 'Recettes Projetées 2027', trend: 'UP', forecast: `${prev2027.toFixed(1)} Mds`, confidence: 93, subLabel: 'Horizon 2027', subValue: '+5,4%/an' },
           { label: 'Taux Exécution LF Prévu', trend: 'UP', forecast: '96,8%', confidence: 90, subLabel: 'Loi de Finances', subValue: 'Cible ≥ 95%' },
           { label: 'Rotation Moyenne Fonds', trend: 'DOWN', forecast: '9,8 jours', confidence: 88, subLabel: 'Régies Avances', subValue: 'Cible < 15j' },
-          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '93%', confidence: 95, subLabel: 'Modèle OLS', subValue: 'Certifié DWH' }
+          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '93%', confidence: 95, subLabel: 'Projection', subValue: 'Certifié DWH' }
         ]
       },
       reglement: {
@@ -224,7 +224,7 @@ export class PilotageAiService {
           { label: 'Délai Moyen Cible N+1', trend: 'DOWN', forecast: '17,5 jours', confidence: 91, subLabel: 'Norme < 30j', subValue: '-3,9 jours' },
           { label: 'Part Télé-règlement RTGS', trend: 'UP', forecast: '78,0%', confidence: 93, subLabel: 'Digitalisation', subValue: '+10 pts' },
           { label: 'Apurement IP Cible', trend: 'UP', forecast: '96,5%', confidence: 89, subLabel: 'Imputations', subValue: 'Cible > 95%' },
-          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '92%', confidence: 94, subLabel: 'Modèle OLS', subValue: 'Certifié ACCT' }
+          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '92%', confidence: 94, subLabel: 'Projection', subValue: 'Certifié ACCT' }
         ]
       },
       statistiques: {
@@ -252,7 +252,7 @@ export class PilotageAiService {
           { label: 'Réduction Projetée des RAP', trend: 'DOWN', forecast: `${(rapMds * 0.78).toFixed(1)} Mds`, confidence: 89, subLabel: 'Plan Apurement', subValue: '-22% en N+1' },
           { label: 'Mobilisation OC/LC & Douanes', trend: 'UP', forecast: `${(ocMds * 1.06).toFixed(1)} Mds`, confidence: 92, subLabel: 'Webfontaine', subValue: '+6,0%' },
           { label: 'Fiabilité Prévisions Macro', trend: 'UP', forecast: '96,2%', confidence: 91, subLabel: 'DWH / DGTCP', subValue: '+2,4 pts' },
-          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '93%', confidence: 95, subLabel: 'Modèle OLS', subValue: '16 Rapports' }
+          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '93%', confidence: 95, subLabel: 'Projection', subValue: '16 Rapports' }
         ]
       },
       compte_gestion: {
@@ -280,7 +280,7 @@ export class PilotageAiService {
           { label: 'Conformité Reddition N+1', trend: 'UP', forecast: '98,5%', confidence: 96, subLabel: 'Cour des Comptes', subValue: 'Quitus cible' },
           { label: 'Taux Apurement IPD', trend: 'UP', forecast: '97,0%', confidence: 92, subLabel: 'Imputations', subValue: '+5,0 pts' },
           { label: 'Postes Certifiés J+15', trend: 'UP', forecast: '100%', confidence: 94, subLabel: 'Réseau DGTCP', subValue: 'Exhaustif' },
-          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '96%', confidence: 97, subLabel: 'Modèle OLS', subValue: 'Certifié DGTCP' }
+          { label: 'Indice de Confiance IA', trend: 'UP', forecast: '96%', confidence: 97, subLabel: 'Projection', subValue: 'Certifié DGTCP' }
         ]
       }
     };

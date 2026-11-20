@@ -464,7 +464,7 @@ export interface PilotageRiskAlert {
             <div class="card-header-top mb-1">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="tag-pill tag-blue">TENDANCE PRÉVISIONNELLE</span>
-                <span class="badge bg-primary-subtle text-primary"><i class="fas fa-arrow-up me-1"></i>OLS Certifié</span>
+                <span class="badge bg-primary-subtle text-primary"><i class="fas fa-arrow-up me-1"></i>Projection Certifiée</span>
               </div>
               <h5 class="fw-bold text-dark m-0" style="font-size: 1.05rem;">Recettes & Régies Projetées 2027</h5>
             </div>
@@ -542,11 +542,11 @@ export interface PilotageRiskAlert {
                   <i class="fas fa-chart-line text-primary me-2"></i>
                   Trajectoire des Flux Réels & Prédictifs (2019 → 2031)
                 </h5>
-                <span class="text-muted small">Historique certifié prolongé par régression linéaire OLS (Recettes vs Liquidité CUT)</span>
+                <span class="text-muted small">Historique certifié prolongé par projection (Recettes vs Liquidité CUT)</span>
               </div>
               <div class="d-flex gap-2">
                 <span class="badge bg-primary-subtle text-primary border px-3 py-1">Constaté (2019-{{ selectedExercice }})</span>
-                <span class="badge bg-warning-subtle text-warning-emphasis border px-3 py-1">Prédit (2027-2031)</span>
+                <span class="badge bg-warning-subtle text-warning-emphasis border px-3 py-1">Prévision (2027-2031)</span>
               </div>
             </div>
             <div class="card-body p-3">
@@ -635,17 +635,17 @@ export interface PilotageRiskAlert {
                     <td class="text-end fw-bold text-navy">{{ h.recettesMilliards }} Mds FCFA</td>
                     <td class="text-end fw-semibold">{{ h.reglementsMilliards }} Mds FCFA</td>
                     <td class="text-end fw-bold text-success">{{ h.liquiditeMilliards }} Mds FCFA</td>
-                    <td class="text-center"><span class="badge bg-success-subtle text-success border border-success-subtle">Réel Certifié</span></td>
+                    <td class="text-center"><span class="badge bg-success-subtle text-success border border-success-subtle">Constaté</span></td>
                     <td class="text-center text-muted very-small">Arrêté Comptable ACCT ({{ h.tauxConcordance }}%)</td>
                   </tr>
                 }
                 @for (pYear of realMetrics.anneesProjections; track pYear; let idx = $index) {
                   <tr>
-                    <td class="ps-3"><span class="badge bg-warning-subtle text-warning-emphasis fw-bold">{{ pYear }} (Prédit)</span></td>
+                    <td class="ps-3"><span class="badge bg-warning-subtle text-warning-emphasis fw-bold">{{ pYear }}</span></td>
                     <td class="text-end fw-bold text-orange-acct">{{ realMetrics.projectionsRecettes[idx] }} Mds FCFA</td>
                     <td class="text-end fw-semibold">{{ realMetrics.projectionsReglements[idx] }} Mds FCFA</td>
                     <td class="text-end fw-bold text-primary">{{ realMetrics.projectionsLiquidite[idx] }} Mds FCFA</td>
-                    <td class="text-center"><span class="badge bg-info-subtle text-info-emphasis border">Projection IA / OLS</span></td>
+                    <td class="text-center"><span class="badge bg-info-subtle text-info-emphasis border">Prévision</span></td>
                     <td class="text-center text-muted very-small">Modèle Prévisionnel (+5,4%/an)</td>
                   </tr>
                 }
@@ -944,6 +944,28 @@ export interface PilotageRiskAlert {
       .prediction-highlight-box .projection-value.text-orange-acct { color: #fb923c !important; }
       .custom-nav-pills .nav-link:not(.active) { background: #18191f; border-color: #2e2f38; color: #ffffff; }
       .kpi-card-v2 { background: #202127 !important; border: 1px solid #2e2f38 !important; }
+
+      .kpi-spark-card {
+        border: 1px solid #2e2f38 !important;
+        background: #202127 !important;
+
+        &.kpi-spark-blue {
+          background: linear-gradient(180deg, #202127 45%, rgba(37, 99, 235, 0.22) 100%) !important;
+          border-color: rgba(37, 99, 235, 0.35) !important;
+        }
+        &.kpi-spark-green {
+          background: linear-gradient(180deg, #202127 45%, rgba(22, 163, 74, 0.22) 100%) !important;
+          border-color: rgba(22, 163, 74, 0.35) !important;
+        }
+        &.kpi-spark-orange {
+          background: linear-gradient(180deg, #202127 45%, rgba(249, 115, 22, 0.22) 100%) !important;
+          border-color: rgba(249, 115, 22, 0.35) !important;
+        }
+        &.kpi-spark-amber {
+          background: linear-gradient(180deg, #202127 45%, rgba(217, 119, 6, 0.22) 100%) !important;
+          border-color: rgba(217, 119, 6, 0.35) !important;
+        }
+      }
 
       .timeline-btn:not(.timeline-btn-active),
       .timeline-btn.btn-outline-secondary {
@@ -1474,7 +1496,7 @@ export class SyntheseDecisionnelleComponent implements OnInit, OnDestroy {
           pointRadius: 4
         },
         {
-          label: 'Recettes Projetées OLS (2027-2031)',
+          label: 'Recettes Projetées (2027-2031)',
           data: recProjSeries,
           borderColor: orangeLine,
           borderDash: [6, 4],

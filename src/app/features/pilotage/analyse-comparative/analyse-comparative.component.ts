@@ -670,6 +670,27 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
       .title-text, .text-navy { color: #ffffff !important; }
       .text-muted, small.text-muted, span.text-muted { color: #f8fafc !important; }
       .kpi-card { background: #202127 !important; border: 1px solid #2e2f38 !important; }
+      .kpi-spark-card {
+        border: 1px solid #2e2f38 !important;
+        background: #202127 !important;
+
+        &.kpi-spark-blue {
+          background: linear-gradient(180deg, #202127 45%, rgba(37, 99, 235, 0.22) 100%) !important;
+          border-color: rgba(37, 99, 235, 0.35) !important;
+        }
+        &.kpi-spark-green {
+          background: linear-gradient(180deg, #202127 45%, rgba(22, 163, 74, 0.22) 100%) !important;
+          border-color: rgba(22, 163, 74, 0.35) !important;
+        }
+        &.kpi-spark-orange {
+          background: linear-gradient(180deg, #202127 45%, rgba(249, 115, 22, 0.22) 100%) !important;
+          border-color: rgba(249, 115, 22, 0.35) !important;
+        }
+        &.kpi-spark-sky {
+          background: linear-gradient(180deg, #202127 45%, rgba(2, 132, 199, 0.22) 100%) !important;
+          border-color: rgba(2, 132, 199, 0.35) !important;
+        }
+      }
       .kpi-value strong { color: #ffffff !important; }
       .kpi-foot { border-top-color: #2e2f38 !important; }
       .table-custom { color: #ffffff !important; }

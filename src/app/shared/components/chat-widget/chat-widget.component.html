@@ -38,12 +38,14 @@
       </div>
     </div>
     <div class="d-flex align-items-center gap-1">
-      @if (!showHistory()) {
-      <button class="btn btn-sm btn-icon btn-glass" (click)="toggleHistory()" title="Voir l'historique">
+      <button class="btn btn-sm btn-icon btn-glass" (click)="startNewChat()" title="Nouvelle discussion">
+        <i class="fas fa-plus fs-9"></i>
+      </button>
+      <button class="btn btn-sm btn-icon btn-glass" (click)="toggleHistory()"
+              [title]="showHistory() ? 'Retour à la discussion' : 'Voir l’historique'">
         <i class="fas fa-history fs-9"></i>
       </button>
-      }
-      <button class="btn btn-sm btn-icon btn-glass" (click)="toggleChat()">
+      <button class="btn btn-sm btn-icon btn-glass" (click)="toggleChat()" title="Fermer">
         <i class="fas fa-times"></i>
       </button>
     </div>
@@ -62,16 +64,22 @@
 
       <div class="list-group list-group-flush rounded-3 shadow-sm">
         @for (thread of chatService.threads(); track thread.id) {
-        <button class="list-group-item list-group-item-action border-bottom-0 p-3 d-flex flex-column gap-1"
-          [class.active-thread]="thread.id === chatService.activeThreadId()" (click)="selectThread(thread.id)">
-          <div class="d-flex justify-content-between align-items-start">
-            <span class="fw-bold fs-7 text-truncate pe-2">{{ thread.title }}</span>
-            <span class="fs-9 text-muted opacity-75">{{ thread.lastUpdated | date:'dd/MM' }}</span>
+        <div class="list-group-item list-group-item-action border-bottom-0 p-3 d-flex justify-content-between align-items-center gap-2"
+          [class.active-thread]="thread.id === chatService.activeThreadId()" (click)="selectThread(thread.id)" style="cursor: pointer;">
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="d-flex justify-content-between align-items-start">
+              <span class="fw-bold fs-7 text-truncate pe-2">{{ thread.title }}</span>
+              <span class="fs-9 text-muted opacity-75">{{ thread.lastUpdated | date:'dd/MM HH:mm' }}</span>
+            </div>
+            <p class="m-0 fs-8 text-secondary text-truncate opacity-75">
+              {{ getSnippet(thread.messages[thread.messages.length - 1]?.content || '') }}
+            </p>
           </div>
-          <p class="m-0 fs-8 text-secondary text-truncate opacity-75">
-            {{ thread.messages[thread.messages.length - 1].content }}
-          </p>
-        </button>
+          <button type="button" class="btn btn-sm text-muted hover-danger border-0 p-1"
+            (click)="deleteThread($event, thread.id)" title="Supprimer cette discussion">
+            <i class="fas fa-trash-alt fs-9"></i>
+          </button>
+        </div>
         }
       </div>
 
@@ -94,7 +102,7 @@
           <div class="d-flex flex-wrap mt-2 pt-2 border-top" style="gap: 6px;">
             @for (act of msg.actions; track act.label) {
             <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 fw-semibold"
-              style="font-size: 0.7rem;" (click)="executeAction(act)">
+              style="font-size: 0.7rem;" (click)="executeAction(act, msg)">
               <i [class]="act.icon + ' me-1'"></i>{{ act.label }}
             </button>
             }
@@ -156,3 +164,147 @@
     }
   </div>
 </div>
+
+<!-- Modal Simulation Graphique Prévisionnelle (Ouvert au clic dans le chat) -->
+@if (isModalOpen() && currentModalChart()) {
+<div class="chat-modal-backdrop" (click)="closeModal()">
+  <div class="chat-modal-dialog" (click)="$event.stopPropagation()">
+    <!-- En-tête Modal -->
+    <div class="chat-modal-header d-flex justify-content-between align-items-center p-3 border-bottom">
+      <div class="d-flex align-items-center gap-2">
+        <div class="modal-icon-bubble rounded-circle d-flex align-items-center justify-content-center">
+          <i class="fas fa-chart-line text-primary fs-5"></i>
+        </div>
+        <div>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <h5 class="m-0 fw-bold fs-6 modal-title-text">{{ currentModalChart()!.title }}</h5>
+            <span class="badge" [ngClass]="currentModalChart()!.badgeClass">
+              {{ currentModalChart()!.serviceName }}
+            </span>
+          </div>
+          <small class="text-muted fs-8">{{ currentModalChart()!.subtitle }}</small>
+        </div>
+      </div>
+      <button class="btn btn-sm btn-icon modal-close-btn rounded-circle" (click)="closeModal()"
+        title="Fermer la simulation">
+        <i class="fas fa-times fs-6"></i>
+      </button>
+    </div>
+
+    <!-- Corps Modal -->
+    <div class="chat-modal-body p-3 p-md-4">
+      <!-- Indicateurs Clés Contextuels du Rapport Chat -->
+      <div class="row g-2 mb-3">
+        @for (kpi of currentModalChart()!.kpis; track kpi.label) {
+        <div class="col-6 col-md-3">
+          <div class="modal-kpi-card p-2 rounded-3 border">
+            <div class="very-small text-muted text-uppercase fw-semibold">{{ kpi.label }}</div>
+            <div class="fs-6 fw-bold modal-kpi-val">{{ kpi.value }}</div>
+            @if (kpi.trend) {
+            <span class="badge py-0 px-1 mt-1" [ngClass]="{
+              'bg-success-subtle text-success': kpi.status === 'success',
+              'bg-warning-subtle text-warning-emphasis': kpi.status === 'warning',
+              'bg-danger-subtle text-danger': kpi.status === 'danger',
+              'bg-info-subtle text-info': kpi.status === 'info'
+            }">
+              {{ kpi.trend }}
+            </span>
+            }
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Barre de Sélection des Scénarios Prévisionnels -->
+      <div
+        class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 p-2 rounded-3 scenario-bar border">
+        <div class="d-flex align-items-center gap-2">
+          <i class="fas fa-sliders-h text-primary"></i>
+          <span class="fs-8 fw-bold scenario-bar-label">Simulations Prévisionnelles :</span>
+        </div>
+        <div class="btn-group btn-group-sm" role="group">
+          @for (sc of currentModalChart()!.scenarios; track sc.key) {
+          <button type="button" class="btn btn-sm scenario-toggle-btn"
+            [class.btn-primary]="selectedScenario() === sc.key"
+            [class.btn-outline-secondary]="selectedScenario() !== sc.key" (click)="selectScenario(sc.key)">
+            {{ sc.label }}
+          </button>
+          }
+        </div>
+      </div>
+
+      <!-- Détails du Scénario Actif -->
+      @if (activeScenarioObj(); as sc) {
+      <div
+        class="alert alert-scenario py-2 px-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2 fs-8 rounded-3">
+        <div>
+          <i class="fas fa-info-circle me-1 text-primary"></i>
+          <strong>{{ sc.label }} :</strong> {{ sc.description }}
+        </div>
+        <div>
+          Projection 2027 : <strong class="fs-7 text-primary">{{ sc.projValue }}</strong>
+        </div>
+      </div>
+      }
+
+      <!-- Conteneur Graphique Chart.js -->
+      <div class="modal-chart-container position-relative mb-4 p-2 rounded-3 border">
+        <div style="height: 330px; width: 100%;">
+          <canvas #modalChartCanvas></canvas>
+        </div>
+      </div>
+
+      <!-- Synthèse du Rapport & Suggestions IA du Chat -->
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="modal-info-panel h-100 p-3 rounded-3 border">
+            <h6 class="fw-bold fs-7 mb-2 d-flex align-items-center text-primary">
+              <i class="fas fa-file-alt me-2"></i>Synthèse du Rapport Analysé
+            </h6>
+            <p class="small text-muted mb-0 leading-relaxed modal-summary-text">
+              {{ currentModalChart()!.reportSummary }}
+            </p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="modal-info-panel h-100 p-3 rounded-3 border">
+            <h6 class="fw-bold fs-7 mb-2 d-flex align-items-center text-warning-emphasis">
+              <i class="fas fa-lightbulb me-2 text-warning"></i>Suggestions & Recommandations Stratégiques
+            </h6>
+            <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+              @for (rec of currentModalChart()!.recommendations; track rec.title) {
+              <li class="d-flex align-items-start gap-2 fs-8">
+                <span class="badge mt-0.5" [ngClass]="{
+                  'bg-danger text-white': rec.priority === 'CRITIQUE',
+                  'bg-warning text-dark': rec.priority === 'HAUTE',
+                  'bg-secondary text-white': rec.priority === 'MOYENNE'
+                }">{{ rec.priority }}</span>
+                <div>
+                  <strong class="modal-rec-title d-block">{{ rec.title }}</strong>
+                  <span class="text-muted very-small">{{ rec.desc }}</span>
+                </div>
+              </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pied de Page Modal -->
+    <div class="chat-modal-footer p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" (click)="downloadChartImage()">
+          <i class="fas fa-camera me-1"></i> Exporter l'image (PNG)
+        </button>
+        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" (click)="goToDecisionIa()">
+          <i class="fas fa-compass me-1"></i> Pilotage & Surveillance
+        </button>
+      </div>
+      <button class="btn btn-sm btn-secondary rounded-pill px-4" (click)="closeModal()">
+        Fermer
+      </button>
+    </div>
+  </div>
+</div>
+}
