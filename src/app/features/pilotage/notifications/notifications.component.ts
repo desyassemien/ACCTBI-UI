@@ -856,6 +856,10 @@ export interface IndicatorDefinition {
     .report-modal-header { background: linear-gradient(135deg, #1A365D 0%, #2a4a7f 100%); }
 
     :host-context([data-bs-theme="dark"]) {
+      .header-card {
+        background: #202127 !important;
+        border: 1px solid rgba(148, 163, 184, 0.22) !important;
+      }
       .title-text, .text-navy { color: #ffffff !important; }
       .text-muted, small.text-muted, span.text-muted, p.text-muted { color: #ffffff !important; }
       .filter-item-container label, .form-label { color: #ffffff !important; }

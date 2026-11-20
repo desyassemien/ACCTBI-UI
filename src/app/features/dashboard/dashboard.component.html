@@ -64,10 +64,24 @@
                             <!-- En-tête de la Card -->
                             <div class="alert-card-top position-relative z-1">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="alert-type-badge d-inline-flex align-items-center justify-content-center rounded-2">
-                                        <i [class]="getAlertIcon(alerte.type)"></i>
+                                    <span class="alert-type-badge alert-duotone-icon d-inline-flex align-items-center justify-content-center">
+                                        @if (alerte.type === 'DANGER') {
+                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                            <path d="M12 8v4.5M12 16h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                        </svg>
+                                        } @else if (alerte.type === 'WARNING') {
+                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                            <path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                        </svg>
+                                        } @else {
+                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="9.5" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.8"/>
+                                            <path d="M12 16v-4.5M12 8h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                        </svg>
+                                        }
                                     </span>
-                                    <span class="alert-type-pill fw-bold">{{ alerte.type }}</span>
                                 </div>
                                 <h6 class="alert-service-title fw-bold mb-0">{{ alerte.service }}</h6>
                             </div>
@@ -107,7 +121,7 @@
                         <h6 class="fw-bold mb-0 text-primary" style="font-size:0.86rem;">Solde Consolidé</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Vue par institution</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="fw-bold text-primary" style="font-size:0.95rem;">{{ soldeBancaireTotal | number:'1.0-0' }} Mds</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('tres_solde', 'Trésorerie', 'fas fa-university', 'Solde Consolidé', 'Vue détaillée par institution et historique', soldeBancaireTotal + ' Mds', 'text-primary', '/tresorerie', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -174,7 +188,7 @@
                         <h6 class="fw-bold mb-0 text-primary" style="font-size:0.86rem;">Lettres d'Avance (LA)</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Régularisations vs En cours</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-warning-subtle text-warning-emphasis fw-bold" style="font-size:0.72rem;">{{ laEnCoursTotal | number:'1.1-1' }} Mds</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('tres_la', 'Trésorerie', 'fas fa-university', 'Lettres d\'Avance (LA)', 'Suivi du portefeuille et apurement des avances', 'En cours: ' + laEnCoursTotal + ' Mds', 'text-warning', '/tresorerie', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -219,7 +233,7 @@
                                             <td class="ps-1 text-truncate" style="max-width:85px;" [title]="item.ministere">{{ item.ministere }}</td>
                                             <td class="text-end fw-bold">{{ item.montant | number:'1.1-1' }}M</td>
                                             <td class="pe-1 text-center">
-                                                <span class="badge" [style.background]="item.statut==='REGULARISE' ? '#E8F5E9' : '#FFF3E0'" [style.color]="item.statut==='REGULARISE' ? '#2E7D32' : '#E65100'" style="font-size:0.62rem;">
+                                                <span class="fw-bold" [ngClass]="item.statut==='REGULARISE' ? 'text-success' : 'text-warning'" style="font-size:0.68rem;">
                                                     {{ item.statut==='REGULARISE' ? 'Régul.' : 'En cours' }}
                                                 </span>
                                             </td>
@@ -242,7 +256,7 @@
                         <h6 class="fw-bold mb-0 text-primary" style="font-size:0.86rem;">Disponibilités &amp; Liquidité</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Répartition des dépôts</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="fw-bold text-success" style="font-size:0.95rem;">{{ liquiditeNetteTotal | number:'1.0-0' }} Mds</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('tres_disp', 'Trésorerie', 'fas fa-university', 'Disponibilités & Liquidité', 'Ventilation des avoirs par institution bancaire', liquiditeNetteTotal + ' Mds', 'text-success', '/tresorerie', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -464,7 +478,7 @@
                         <h6 class="fw-bold mb-0 text-danger" style="font-size:0.86rem;">Volumes par Poste</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Réglé vs Restes à Payer</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-success-subtle text-success fw-bold" style="font-size:0.72rem;">{{ reglementTotalRegle | number:'1.0-0' }} Mds</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('reg_postes', 'Règlement', 'fas fa-money-check-alt', 'Volumes par Poste Comptable', 'Répartition des dépenses réglées et restes à payer', reglementTotalRegle + ' Mds réglés', 'text-success', '/reglement', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -528,7 +542,7 @@
                         <h6 class="fw-bold mb-0 text-danger" style="font-size:0.86rem;">Flux de Transactions</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Dernières opérations</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-danger-subtle text-danger fw-bold" style="font-size:0.72rem;">Temps réel</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('reg_flux', 'Règlement', 'fas fa-money-check-alt', 'Flux de Transactions & Moyens de Règlement', 'Journal complet des opérations et ventilations par instrument', 'Temps réel', 'text-danger', '/reglement', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -571,7 +585,7 @@
                                             <td class="ps-1 text-truncate" style="max-width:85px;" [title]="tx.libelle">{{ tx.libelle }}</td>
                                             <td class="text-end fw-bold">{{ tx.montant | number:'1.1-1' }}M</td>
                                             <td class="pe-1 text-center">
-                                                <span class="badge" [style.background]="tx.statut==='REGLE' ? '#E8F5E9' : '#FFEBEE'" [style.color]="tx.statut==='REGLE' ? '#2E7D32' : '#B71C1C'" style="font-size:0.62rem;">
+                                                <span class="fw-bold" [ngClass]="tx.statut==='REGLE' ? 'text-success' : 'text-danger'" style="font-size:0.68rem;">
                                                     {{ tx.statut }}
                                                 </span>
                                             </td>
@@ -594,7 +608,7 @@
                         <h6 class="fw-bold mb-0 text-danger" style="font-size:0.86rem;">Délais &amp; RAP</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Ancienneté des instances</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-danger text-white fw-bold" style="font-size:0.72rem;">99.9 Mds &gt; 90j</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('reg_delais', 'Règlement', 'fas fa-money-check-alt', 'Délais de Règlement & Échéancier RAP', 'Suivi des instances critiques et bénéficiaires prioritaires', '99.9 Mds critiques', 'text-danger', '/reglement', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -632,7 +646,7 @@
                                             <td class="ps-1 text-truncate" style="max-width:85px;" [title]="ech.beneficiaire">{{ ech.beneficiaire }}</td>
                                             <td class="text-end fw-bold">{{ ech.montant | number:'1.1-1' }}M</td>
                                             <td class="pe-1 text-center">
-                                                <span class="badge" [style.background]="ech.statut==='URGENT' ? '#FFEBEE' : '#FFF3E0'" [style.color]="ech.statut==='URGENT' ? '#B71C1C' : '#E65100'" style="font-size:0.62rem;">
+                                                <span class="fw-bold" [ngClass]="ech.statut==='URGENT' ? 'text-danger' : 'text-warning'" style="font-size:0.68rem;">
                                                     {{ ech.age }}
                                                 </span>
                                             </td>
@@ -663,8 +677,8 @@
                         <h6 class="fw-bold mb-0" style="color:#6C3483; font-size:0.86rem;">États Cautions</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Répartition par statut</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
-                        <span class="badge" style="background:#EAE2F3; color:#6C3483; font-weight:700; font-size:0.72rem;">{{ cautionTotalCount }} Dos.</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge badge-purple-subtle fw-bold" style="font-size:0.72rem;">{{ cautionTotalCount }} Dos.</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('caut_statuts', 'Cautionnement', 'fas fa-file-contract', 'États des Cautionnements', 'Répartition globale par statut (Actives, Libérées, Appelées)', cautionTotalCount + ' Dossiers', 'text-purple', '/cautionnement', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
                         </button>
@@ -725,7 +739,7 @@
                         <h6 class="fw-bold mb-0" style="color:#6C3483; font-size:0.86rem;">Volumes par Catégorie</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Marchés &amp; Douanes</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge" style="background:#6C3483; color:white; font-weight:700; font-size:0.72rem;">{{ cautionTotalVolume | number:'1.1-1' }} Mds</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('caut_volumes', 'Cautionnement', 'fas fa-file-contract', 'Volumes de Cautionnement par Catégorie', 'Structure par type de marché (BTP, Douanes, Marchés Publics)', cautionTotalVolume + ' Mds', 'text-purple', '/cautionnement', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -782,7 +796,7 @@
                         <h6 class="fw-bold mb-0" style="color:#6C3483; font-size:0.86rem;">Échéances Cautions</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Dossiers à risque</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-danger-subtle text-danger fw-bold" style="font-size:0.72rem;">4.8 Mds &lt; 30j</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('caut_ech', 'Cautionnement', 'fas fa-file-contract', 'Échéances & Mainlevées de Cautions', 'Dossiers sensibles arrivant à échéance sans mainlevée', '4.8 Mds sous 30 jours', 'text-danger', '/cautionnement', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -820,7 +834,7 @@
                                             <td class="ps-1 text-truncate" style="max-width:85px;" [title]="risk.tiers">{{ risk.tiers }}</td>
                                             <td class="text-end fw-bold">{{ risk.montant | number:'1.1-1' }}M</td>
                                             <td class="pe-1 text-center">
-                                                <span class="badge" [style.background]="risk.statut==='CONTENTIEUX' ? '#FFEBEE' : '#FFF3E0'" [style.color]="risk.statut==='CONTENTIEUX' ? '#B71C1C' : '#E65100'" style="font-size:0.62rem;">
+                                                <span class="fw-bold" [ngClass]="risk.statut==='CONTENTIEUX' ? 'text-danger' : 'text-warning'" style="font-size:0.68rem;">
                                                     {{ risk.echeance }}
                                                 </span>
                                             </td>
@@ -851,7 +865,7 @@
                         <h6 class="fw-bold mb-0 text-success" style="font-size:0.86rem;">Suspends Ministère</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Axe structurel</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="fw-bold text-success" style="font-size:0.95rem;">{{ laEnCoursTotal | number:'1.1-1' }} Mds</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('compta_min', 'Comptabilité', 'fas fa-book', 'Suspends par Ministère', 'Répartition structurelle des écritures en suspens', laEnCoursTotal + ' Mds', 'text-success', '/comptabilite', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -908,7 +922,7 @@
                         <h6 class="fw-bold mb-0 text-success" style="font-size:0.86rem;">Balance Âgée</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Axe temporel</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-danger-subtle text-danger fw-bold" style="font-size:0.72rem;">9.2 Mds &gt; 90j</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('compta_age', 'Comptabilité', 'fas fa-book', 'Balance Âgée des Suspends', 'Analyse de l\'ancienneté des écritures et suivi du plan d\'apurement', '9.2 Mds > 90 jours', 'text-danger', '/comptabilite', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -967,7 +981,7 @@
                         <h6 class="fw-bold mb-0 text-success" style="font-size:0.86rem;">Rapprochement &amp; Écarts</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Écarts de concordance</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-warning text-dark fw-bold" style="font-size:0.72rem;">1.2 Mds</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('compta_rap', 'Comptabilité', 'fas fa-book', 'Rapprochement & Écarts BCEAO', 'Suivi des divergences Livre Trésor vs Relevés Bancaires', 'Écart: 1.2 Mds', 'text-warning', '/comptabilite', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -1005,7 +1019,7 @@
                                             <td class="ps-1 text-truncate" style="max-width:85px;" [title]="op.compte">{{ op.compte }}</td>
                                             <td class="text-end fw-bold" [style.color]="op.ecart > 0 ? '#D4A017' : '#2E7D32'">{{ op.ecart | number:'1.1-1' }}M</td>
                                             <td class="pe-1 text-center">
-                                                <span class="badge" [style.background]="op.statut==='CONFORME' ? '#E8F5E9' : '#FFF8E1'" [style.color]="op.statut==='CONFORME' ? '#2E7D32' : '#F57F17'" style="font-size:0.62rem;">
+                                                <span class="fw-bold" [ngClass]="op.statut==='CONFORME' ? 'text-success' : 'text-warning'" style="font-size:0.68rem;">
                                                     {{ op.statut }}
                                                 </span>
                                             </td>
@@ -1036,7 +1050,7 @@
                         <h6 class="fw-bold mb-0 text-info" style="font-size:0.86rem;">Recettes de l'État</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Composition globale</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="fw-bold text-info" style="font-size:0.95rem;">10 000 Mds</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('regie_recettes', 'Régies', 'fas fa-store', 'Composition des Recettes de l\'État', 'Ventilation globale des recettes fiscales et non-fiscales', '10 000 Mds', 'text-info', '/regies', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -1099,7 +1113,7 @@
                         <h6 class="fw-bold mb-0 text-info" style="font-size:0.86rem;">Performance Régies</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Recettes collectées</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-info-subtle text-info fw-bold" style="font-size:0.72rem;">Taux: 93%</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('regie_perf', 'Régies', 'fas fa-store', 'Performance & Recouvrement des Régies', 'Taux de collecte et suivi d\'activité par grande régie', 'Taux moyen: 93%', 'text-info', '/regies', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -1156,7 +1170,7 @@
                         <h6 class="fw-bold mb-0 text-info" style="font-size:0.86rem;">Objectifs LF</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Taux de réalisation</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-success text-white fw-bold" style="font-size:0.72rem;">{{ regiesTauxGlobal }}%</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('regie_lf', 'Régies', 'fas fa-store', 'Objectifs de la Loi de Finances vs Réalisé', 'Taux de concrétisation budgétaire par régie financière', 'Taux global: ' + regiesTauxGlobal + '%', 'text-success', '/regies', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -1225,7 +1239,7 @@
                         <h6 class="fw-bold mb-0 text-warning" style="font-size:0.86rem;">Encours Dette</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Évolution annuelle (Mds)</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="fw-bold text-dark" style="font-size:0.95rem;">12 100 Mds</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('dette_encours', 'Statistiques & Dette', 'fas fa-chart-bar', 'Évolution de l\'Encours de la Dette Publique', 'Trajectoire historique et encours consolidé (2021-2025)', '12 100 Mds', 'text-dark', '/statistiques', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -1284,7 +1298,7 @@
                         <h6 class="fw-bold mb-0 text-warning" style="font-size:0.86rem;">Portefeuille Dette</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Structure par catégorie</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-warning-subtle text-warning-emphasis fw-bold" style="font-size:0.72rem;">4 Types</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('dette_portefeuille', 'Statistiques & Dette', 'fas fa-chart-bar', 'Portefeuille de la Dette par Instrument', 'Ventilation de l\'encours par catégorie d\'instrument et devise', '4 Instruments majeurs', 'text-dark', '/statistiques', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -1341,7 +1355,7 @@
                         <h6 class="fw-bold mb-0 text-warning" style="font-size:0.86rem;">Service Dette</h6>
                         <span class="text-secondary" style="font-size:0.7rem;">Principal vs Intérêts</span>
                     </div>
-                    <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-dark text-white fw-bold" style="font-size:0.72rem;">1 090 Mds</span>
                         <button type="button" class="btn-card-expand" (click)="openCardModal('dette_service', 'Statistiques & Dette', 'fas fa-chart-bar', 'Service de la Dette & Échéancier', 'Calendrier prévisionnel des remboursements du principal et intérêts', '1 090 Mds annuel', 'text-dark', '/statistiques', $event)" title="Agrandir la carte">
                             <i class="fas fa-expand-alt"></i>
@@ -1556,7 +1570,7 @@
                                                     </td>
                                                     <td class="text-end fw-bold">{{ item.montant | number:'1.1-1' }} Mds</td>
                                                     <td class="text-center">
-                                                        <span class="badge" [style.background]="item.statut==='REGULARISE' ? '#E8F5E9' : '#FFF3E0'" [style.color]="item.statut==='REGULARISE' ? '#2E7D32' : '#E65100'">
+                                                        <span class="fw-bold" [ngClass]="item.statut==='REGULARISE' ? 'text-success' : 'text-warning'">
                                                             {{ item.statut==='REGULARISE' ? 'Régularisé' : 'En cours' }}
                                                         </span>
                                                     </td>
@@ -1581,7 +1595,7 @@
                                                     <td class="fw-medium">{{ tx.libelle }}</td>
                                                     <td class="text-end fw-bold">{{ tx.montant | number:'1.1-1' }} Mds</td>
                                                     <td class="text-end">
-                                                        <span class="badge bg-success-subtle text-success">{{ tx.statut }}</span>
+                                                        <span class="fw-bold text-success">{{ tx.statut }}</span>
                                                     </td>
                                                 </tr>
                                                 }

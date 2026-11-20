@@ -203,26 +203,32 @@ body {
       background: linear-gradient(180deg, #202127 45%, rgba(37, 99, 235, 0.22) 100%) !important;
       border-color: rgba(37, 99, 235, 0.35) !important;
     }
+
     &.kpi-spark-green {
       background: linear-gradient(180deg, #202127 45%, rgba(22, 163, 74, 0.22) 100%) !important;
       border-color: rgba(22, 163, 74, 0.35) !important;
     }
+
     &.kpi-spark-orange {
       background: linear-gradient(180deg, #202127 45%, rgba(249, 115, 22, 0.22) 100%) !important;
       border-color: rgba(249, 115, 22, 0.35) !important;
     }
+
     &.kpi-spark-amber {
       background: linear-gradient(180deg, #202127 45%, rgba(217, 119, 6, 0.22) 100%) !important;
       border-color: rgba(217, 119, 6, 0.35) !important;
     }
+
     &.kpi-spark-sky {
       background: linear-gradient(180deg, #202127 45%, rgba(2, 132, 199, 0.22) 100%) !important;
       border-color: rgba(2, 132, 199, 0.35) !important;
     }
+
     &.kpi-spark-navy {
       background: linear-gradient(180deg, #202127 45%, rgba(30, 58, 138, 0.28) 100%) !important;
       border-color: rgba(30, 58, 138, 0.35) !important;
     }
+
     &.kpi-spark-red {
       background: linear-gradient(180deg, #202127 45%, rgba(225, 29, 72, 0.22) 100%) !important;
       border-color: rgba(225, 29, 72, 0.35) !important;
@@ -239,10 +245,12 @@ body {
   .alert-portrait-card.alert-card-danger {
     background: linear-gradient(180deg, #202127 50%, rgba(239, 68, 68, 0.2) 100%) !important;
   }
+
   .alert-card-warning,
   .alert-portrait-card.alert-card-warning {
     background: linear-gradient(180deg, #202127 50%, rgba(245, 158, 11, 0.2) 100%) !important;
   }
+
   .alert-card-info,
   .alert-portrait-card.alert-card-info {
     background: linear-gradient(180deg, #202127 50%, rgba(2, 132, 199, 0.2) 100%) !important;
@@ -1130,7 +1138,11 @@ body {
     color: #e2e8f0 !important;
     background-color: transparent !important;
 
-    &:hover, &:focus, &:active, &.active, &.show {
+    &:hover,
+    &:focus,
+    &:active,
+    &.active,
+    &.show {
       background-color: var(--surface-elevated) !important;
       border-color: var(--border) !important;
       color: #ffffff !important;
@@ -1142,7 +1154,9 @@ body {
     border-color: var(--border) !important;
     color: #f8fafc !important;
 
-    &:hover, &:focus, &:active {
+    &:hover,
+    &:focus,
+    &:active {
       background-color: var(--surface-hover) !important;
       border-color: var(--border) !important;
       color: #ffffff !important;
@@ -1347,35 +1361,37 @@ body {
       border-top-color: rgba(255, 255, 255, 0.18) !important;
     }
 
-    // Icônes lumineuses et watermark ultra-visible
+    // Icônes Duotone SVG nettes et modernes
     .alert-type-badge {
-      color: #ffffff !important;
-      font-size: 0.9rem !important;
-      font-weight: 900 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
     }
 
     .alert-watermark-icon {
-      opacity: 0.32 !important;
+      opacity: 0.22 !important;
+      filter: none !important;
     }
 
     &:hover .alert-watermark-icon {
-      opacity: 0.52 !important;
+      opacity: 0.38 !important;
     }
 
     &.alert-card-danger {
-      background: linear-gradient(160deg, #23334d 0%, rgba(239, 68, 68, 0.18) 100%) !important;
+      background: linear-gradient(160deg, #18191f 35%, rgba(239, 68, 68, 0.24) 100%) !important;
       border: 1px solid rgba(239, 68, 68, 0.4) !important;
-      border-top: 4px solid #ef4444 !important;
+      border-top: 1px solid #ef4444 !important;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
 
       .alert-watermark-icon {
         color: #ef4444 !important;
-        filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.45)) !important;
+        filter: none !important;
       }
 
       .alert-type-badge {
-        background-color: #ef4444 !important;
-        box-shadow: 0 0 10px rgba(239, 68, 68, 0.6) !important;
+        background: transparent !important;
+        color: #f87171 !important;
+        box-shadow: none !important;
       }
 
       .alert-type-pill {
@@ -1386,19 +1402,20 @@ body {
     }
 
     &.alert-card-warning {
-      background: linear-gradient(160deg, #23334d 0%, rgba(245, 158, 11, 0.18) 100%) !important;
+      background: linear-gradient(160deg, #18191f 35%, rgba(245, 158, 11, 0.24) 100%) !important;
       border: 1px solid rgba(245, 158, 11, 0.4) !important;
-      border-top: 4px solid #f59e0b !important;
+      border-top: 1px solid #f59e0b !important;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
 
       .alert-watermark-icon {
         color: #f59e0b !important;
-        filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.45)) !important;
+        filter: none !important;
       }
 
       .alert-type-badge {
-        background-color: #f59e0b !important;
-        box-shadow: 0 0 10px rgba(245, 158, 11, 0.6) !important;
+        background: transparent !important;
+        color: #fbbf24 !important;
+        box-shadow: none !important;
       }
 
       .alert-type-pill {
@@ -1409,19 +1426,20 @@ body {
     }
 
     &.alert-card-info {
-      background: linear-gradient(160deg, #23334d 0%, rgba(2, 132, 199, 0.18) 100%) !important;
+      background: linear-gradient(160deg, #18191f 35%, rgba(2, 132, 199, 0.24) 100%) !important;
       border: 1px solid rgba(2, 132, 199, 0.4) !important;
-      border-top: 4px solid #0ea5e9 !important;
+      border-top: 1px solid #0ea5e9 !important;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
 
       .alert-watermark-icon {
         color: #38bdf8 !important;
-        filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.45)) !important;
+        filter: none !important;
       }
 
       .alert-type-badge {
-        background-color: #0284c7 !important;
-        box-shadow: 0 0 10px rgba(2, 132, 199, 0.6) !important;
+        background: transparent !important;
+        color: #38bdf8 !important;
+        box-shadow: none !important;
       }
 
       .alert-type-pill {

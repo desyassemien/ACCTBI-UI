@@ -694,6 +694,10 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
       .kpi-value strong { color: #ffffff !important; }
       .kpi-foot { border-top-color: #2e2f38 !important; }
       .table-custom { color: #ffffff !important; }
+      .benchmark-header-card {
+        background: #202127 !important;
+        border: 1px solid rgba(148, 163, 184, 0.22) !important;
+      }
     }
   `]
 })

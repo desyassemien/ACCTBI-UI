@@ -224,10 +224,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     getAlertIcon(type: string): string {
         switch (type) {
-            case 'DANGER': return 'fas fa-exclamation-circle text-danger';
-            case 'WARNING': return 'fas fa-exclamation-triangle text-warning';
-            case 'INFO': return 'fas fa-info-circle text-info';
-            default: return 'fas fa-bell text-secondary';
+            case 'DANGER': return 'fas fa-exclamation-circle';
+            case 'WARNING': return 'fas fa-exclamation-triangle';
+            case 'INFO': return 'fas fa-info-circle';
+            default: return 'fas fa-bell';
         }
     }
 

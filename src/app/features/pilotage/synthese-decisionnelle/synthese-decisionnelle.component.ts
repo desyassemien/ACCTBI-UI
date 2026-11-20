@@ -943,6 +943,10 @@ export interface PilotageRiskAlert {
       .prediction-highlight-box .projection-value.text-success { color: #4ade80 !important; }
       .prediction-highlight-box .projection-value.text-orange-acct { color: #fb923c !important; }
       .custom-nav-pills .nav-link:not(.active) { background: #18191f; border-color: #2e2f38; color: #ffffff; }
+      .header-card {
+        background: #202127 !important;
+        border: 1px solid rgba(148, 163, 184, 0.22) !important;
+      }
       .kpi-card-v2 { background: #202127 !important; border: 1px solid #2e2f38 !important; }
 
       .kpi-spark-card {
