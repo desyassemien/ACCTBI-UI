@@ -1,12 +1,19 @@
 <div class="app-wrapper d-flex flex-column min-vh-100">
 
-    <!-- Topbar Header with Navigation -->
+    <!-- Topbar Header with Navigation (or compact header when sidebar is active) -->
     <app-header></app-header>
 
-    <!-- Page Content (Router Outlet) -->
-    <main class="page-content flex-grow-1 px-3 px-md-4 pt-0 pb-3 pb-md-4">
-        <router-outlet></router-outlet>
-    </main>
+    <!-- Body Shell: optional Left Sidebar + Main Content -->
+    <div class="app-body d-flex flex-grow-1">
+        @if (layoutService.navPosition() === 'left') {
+            <app-sidebar></app-sidebar>
+        }
+
+        <!-- Page Content (Router Outlet) -->
+        <main class="page-content flex-grow-1 px-3 px-md-4 pt-0 pb-3 pb-md-4">
+            <router-outlet></router-outlet>
+        </main>
+    </div>
 
     <!-- Floating Chat Widget (visible on all pages) -->
     <app-chat-widget></app-chat-widget>

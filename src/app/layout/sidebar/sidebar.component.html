@@ -1,102 +1,110 @@
-<!-- Desktop Sidebar -->
-<nav class="sidebar bg-primary-dark text-white d-none d-xl-flex flex-column transition-all">
+<!-- Mobile Backdrop -->
+@if (layoutService.mobileSidebarOpen()) {
+<div class="sidebar-mobile-backdrop d-lg-none" (click)="layoutService.closeMobileSidebar()"></div>
+}
 
-    <!-- Logo Section -->
-    <div class="sidebar-brand d-flex align-items-center px-4">
-        <div class="brand-icon me-3">
-            <i class="fas fa-landmark text-accent fs-4"></i>
+<!-- Left Sidebar (Desktop collapsible + Mobile slide-over drawer) -->
+<aside class="left-sidebar d-flex flex-column"
+    [class.collapsed]="layoutService.sidebarCollapsed()"
+    [class.mobile-open]="layoutService.mobileSidebarOpen()">
+
+    <!-- Mobile drawer header -->
+    <div class="sidebar-mobile-header d-flex d-lg-none align-items-center justify-content-between px-3 py-2 border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <span class="mobile-brand-dot"></span>
+            <span class="fw-bold fs-6 tracking-tight">SYGACUT-BI</span>
         </div>
-        <span class="fs-5 fw-bold tracking-tight">SYGACUT-BI</span>
+        <button type="button" class="btn btn-sm btn-icon border-0 text-secondary" (click)="layoutService.closeMobileSidebar()" title="Fermer">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
 
-    <div class="sidebar-scrollable flex-grow-1 py-4">
-
-        <!-- Primary Action: Dashboard -->
-        <div class="px-3 mb-4">
-            <a routerLink="/dashboard" routerLinkActive="active"
-                class="nav-item-link dashboard-link d-flex align-items-center rounded-3 px-3 py-2 text-decoration-none transition-all">
-                <i class="fas fa-chart-pie me-3 fs-5"></i>
-                <span class="fw-medium">Tableau de Bord</span>
+    <div class="sidebar-scroll flex-grow-1 py-2">
+        <!-- Tableau de Bord -->
+        <div class="px-2 mb-2">
+            <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                (click)="onLinkClick()"
+                class="side-link side-link-primary d-flex align-items-center text-decoration-none"
+                [title]="layoutService.sidebarCollapsed() ? 'Tableau de Bord' : ''">
+                <span class="side-icon-wrap">
+                    <i class="fas fa-chart-pie"></i>
+                </span>
+                <span class="side-label fw-semibold text-truncate">Tableau de Bord</span>
             </a>
         </div>
 
-        <!-- Menu Sections -->
-        @for (section of menuItems; track section.title) {
-        <div class="nav-section mb-4">
-            <h6 class="nav-section-title px-4 mb-2 text-primary-100 opacity-75 small fw-bold tracking-wider">
-                {{ section.title }}
-            </h6>
-
-            <ul class="nav flex-column mb-0">
-                @for (item of section.items; track item.path) {
-                <li class="nav-item">
-                    <a [routerLink]="item.path" routerLinkActive="active"
-                        class="nav-item-link d-flex align-items-center px-4 py-2 text-decoration-none transition-all position-relative overflow-hidden">
-                        <i [class]="item.icon + ' me-3'"></i>
-                        <span>{{ item.label }}</span>
-                        <!-- Active Indicator Bar -->
-                        <div class="active-indicator"></div>
-                    </a>
-                </li>
+        <!-- Section Services -->
+        <div class="side-section mb-2">
+            <button type="button" class="side-section-header w-100 border-0 bg-transparent d-flex align-items-center justify-content-between px-3 py-1"
+                (click)="toggleServices()">
+                <span class="side-section-title">Services</span>
+                <i class="fas fa-chevron-down side-chevron" [class.rotated]="!servicesOpen()"></i>
+            </button>
+            @if (servicesOpen() || layoutService.sidebarCollapsed()) {
+            <div class="px-2 d-flex flex-column side-list">
+                @for (item of serviceItems; track item.path) {
+                <a [routerLink]="item.path" routerLinkActive="active" (click)="onLinkClick()"
+                    class="side-link d-flex align-items-center justify-content-between text-decoration-none"
+                    [title]="layoutService.sidebarCollapsed() ? item.label : ''">
+                    <div class="d-flex align-items-center side-link-main overflow-hidden">
+                        <span class="side-icon-wrap">
+                            <i [class]="item.icon"></i>
+                        </span>
+                        <span class="side-label text-truncate">{{ item.label }}</span>
+                    </div>
+                </a>
                 }
-            </ul>
-        </div>
-        }
-    </div>
-
-    <!-- Logout Section -->
-    <div class="sidebar-footer px-3 py-3 border-top border-primary-500">
-        <a href="#"
-            class="nav-item-link text-danger d-flex align-items-center px-3 py-2 text-decoration-none rounded-3 transition-all"
-            (click)="$event.preventDefault()">
-            <i class="fas fa-sign-out-alt me-3"></i>
-            <span class="fw-medium">Déconnexion</span>
-        </a>
-    </div>
-</nav>
-
-<!-- Mobile Offcanvas Sidebar -->
-<div class="offcanvas offcanvas-start bg-primary-dark text-white" tabindex="-1" id="mobileSidebar"
-    aria-labelledby="mobileSidebarLabel">
-    <div class="offcanvas-header border-bottom border-primary-500 sidebar-brand px-4 py-3">
-        <div class="d-flex align-items-center">
-            <div class="brand-icon me-3">
-                <i class="fas fa-landmark text-accent fs-4"></i>
             </div>
-            <h5 class="offcanvas-title fw-bold mb-0 text-white" id="mobileSidebarLabel">SYGACUT-BI</h5>
-        </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-
-    <div class="offcanvas-body p-0 pt-3">
-        <!-- Duplicate Desktop Content for Mobile -->
-        <div class="px-3 mb-4">
-            <a routerLink="/dashboard" routerLinkActive="active" data-bs-dismiss="offcanvas"
-                class="nav-item-link dashboard-link d-flex align-items-center rounded-3 px-3 py-2 text-decoration-none transition-all">
-                <i class="fas fa-chart-pie me-3 fs-5"></i>
-                <span class="fw-medium">Tableau de Bord</span>
-            </a>
+            }
         </div>
 
-        @for (section of menuItems; track section.title) {
-        <div class="nav-section mb-4">
-            <h6 class="nav-section-title px-4 mb-2 text-primary-100 opacity-75 small fw-bold tracking-wider">
-                {{ section.title }}
-            </h6>
-
-            <ul class="nav flex-column mb-0">
-                @for (item of section.items; track item.path) {
-                <li class="nav-item">
-                    <a [routerLink]="item.path" routerLinkActive="active" data-bs-dismiss="offcanvas"
-                        class="nav-item-link d-flex align-items-center px-4 py-2 text-decoration-none transition-all position-relative overflow-hidden">
-                        <i [class]="item.icon + ' me-3'"></i>
-                        <span>{{ item.label }}</span>
-                        <div class="active-indicator"></div>
-                    </a>
-                </li>
+        <!-- Section Pilotage & Surveillance -->
+        <div class="side-section mb-2">
+            <button type="button" class="side-section-header w-100 border-0 bg-transparent d-flex align-items-center justify-content-between px-3 py-1"
+                (click)="togglePilotage()">
+                <span class="side-section-title">Pilotage &amp; Surveillance</span>
+                <i class="fas fa-chevron-down side-chevron" [class.rotated]="!pilotageOpen()"></i>
+            </button>
+            @if (pilotageOpen() || layoutService.sidebarCollapsed()) {
+            <div class="px-2 d-flex flex-column side-list">
+                @for (item of pilotageItems; track item.path) {
+                <a [routerLink]="item.path" routerLinkActive="active" (click)="onLinkClick()"
+                    class="side-link d-flex align-items-center justify-content-between text-decoration-none"
+                    [title]="layoutService.sidebarCollapsed() ? item.label : ''">
+                    <div class="d-flex align-items-center side-link-main overflow-hidden">
+                        <span class="side-icon-wrap">
+                            <i [class]="item.icon"></i>
+                        </span>
+                        <span class="side-label text-truncate">{{ item.label }}</span>
+                    </div>
+                    @if (item.isNotif && notificationService.unreadCount() > 0) {
+                    <span class="side-badge">
+                        {{ notificationService.unreadCount() }}
+                    </span>
+                    }
+                </a>
                 }
-            </ul>
+            </div>
+            }
         </div>
-        }
     </div>
-</div>
+
+    <!-- Compact Footer Toolbar -->
+    <div class="sidebar-footer p-2 border-top d-flex align-items-center gap-2">
+        <button type="button"
+            class="footer-action-btn flex-grow-1 d-none d-lg-inline-flex align-items-center justify-content-center gap-2"
+            (click)="layoutService.toggleSidebarCollapse()"
+            [title]="layoutService.sidebarCollapsed() ? 'Déplier la sidebar' : 'Replier en icônes'">
+            <i class="fas" [class.fa-angle-double-left]="!layoutService.sidebarCollapsed()" [class.fa-angle-double-right]="layoutService.sidebarCollapsed()"></i>
+            <span class="side-label">Replier</span>
+        </button>
+        <button type="button"
+            class="footer-action-btn footer-action-top d-inline-flex align-items-center justify-content-center gap-2"
+            [class.flex-grow-1]="!layoutService.sidebarCollapsed()"
+            (click)="layoutService.setNavPosition('top')"
+            title="Replacer le menu en haut">
+            <i class="fas fa-window-maximize"></i>
+            <span class="side-label">En haut</span>
+        </button>
+    </div>
+</aside>

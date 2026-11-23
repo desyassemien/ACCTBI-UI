@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import Keycloak from 'keycloak-js';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LayoutService } from '../../core/services/layout.service';
 import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
@@ -18,6 +19,7 @@ export class HeaderComponent implements OnInit {
     private keycloak = inject(Keycloak);
     private authService = inject(AuthService);
     public notificationService = inject(NotificationService);
+    public layoutService = inject(LayoutService);
 
     userProfile: any | null = null;
     notificationCount = 3;

@@ -1,20 +1,28 @@
 .app-wrapper {
     background-color: var(--bg-body);
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
     width: 100%;
 }
 
+.app-body {
+    min-width: 0;
+    width: 100%;
+    align-items: stretch;
+}
+
 .page-content {
     overflow-x: hidden;
-    max-width: 100vw;
-    width: 100%;
+    min-width: 0;
+    flex: 1 1 0;
     box-sizing: border-box;
     padding-top: 1rem !important;
 }
 
 :host-context([data-bs-theme="dark"]) {
+
     .app-wrapper,
+    .app-body,
     .page-content {
         background-color: #111114 !important;
     }

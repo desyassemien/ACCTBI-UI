@@ -5,13 +5,27 @@
         <!-- Row 1: Logo + Hamburger + Right Actions -->
         <div class="d-flex align-items-center w-100">
 
+            <!-- Sidebar Toggle (visible only when left sidebar mode is active) -->
+            @if (layoutService.navPosition() === 'left') {
+            <button type="button" class="topbar-action-btn me-2 d-none d-lg-inline-flex"
+                (click)="layoutService.toggleSidebarCollapse()"
+                [title]="layoutService.sidebarCollapsed() ? 'Déplier la sidebar' : 'Replier la sidebar'">
+                <i class="fas fa-bars fs-6"></i>
+            </button>
+            <button type="button" class="topbar-action-btn me-2 d-inline-flex d-lg-none"
+                (click)="layoutService.toggleMobileSidebar()" title="Ouvrir le menu">
+                <i class="fas fa-bars fs-6"></i>
+            </button>
+            }
+
             <!-- Logo -->
             <a class="navbar-brand d-flex align-items-center me-4 text-decoration-none" routerLink="/dashboard">
                 <img src="img/logo-dgtcp.png" alt="DGTCP" class="brand-logo me-2" />
                 <span class="fs-5 fw-bold text-white tracking-tight">SYGACUT-BI</span>
             </a>
 
-            <!-- Desktop Navigation (inline on lg+) -->
+            <!-- Desktop Navigation (inline on lg+, visible only in topbar mode) -->
+            @if (layoutService.navPosition() === 'top') {
             <div class="collapse navbar-collapse" id="topbarNavCollapse">
                 <ul class="navbar-nav me-auto gap-1">
                     <!-- Dashboard -->
@@ -30,17 +44,13 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-services border-0 shadow-lg mt-1 rounded-3 py-2">
                             @for (item of serviceItems; track item.path) {
-                            <a class="dropdown-item d-flex align-items-center justify-content-between px-3 py-2" [routerLink]="item.path"
-                                routerLinkActive="active-item">
+                            <a class="dropdown-item d-flex align-items-center justify-content-between px-3 py-2"
+                                [routerLink]="item.path" routerLinkActive="active-item">
                                 <div class="d-flex align-items-center">
-                                    <i [class]="item.icon + ' me-3 text-secondary'" style="width: 18px; text-align: center;"></i>
+                                    <i [class]="item.icon + ' me-3 text-secondary'"
+                                        style="width: 18px; text-align: center;"></i>
                                     <span class="fw-medium">{{ item.label }}</span>
                                 </div>
-                                @if (notificationService.unreadCountByService()[getServiceName(item.path)]) {
-                                <span class="badge rounded-pill bg-danger ms-2">
-                                    {{ notificationService.unreadCountByService()[getServiceName(item.path)] }}
-                                </span>
-                                }
                             </a>
                             }
                         </div>
@@ -59,10 +69,11 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-services border-0 shadow-lg mt-1 rounded-3 py-2">
                             @for (item of pilotageItems; track item.path) {
-                            <a class="dropdown-item d-flex align-items-center justify-content-between px-3 py-2" [routerLink]="item.path"
-                                routerLinkActive="active-item">
+                            <a class="dropdown-item d-flex align-items-center justify-content-between px-3 py-2"
+                                [routerLink]="item.path" routerLinkActive="active-item">
                                 <div class="d-flex align-items-center">
-                                    <i [class]="item.icon + ' me-3 text-secondary'" style="width: 18px; text-align: center;"></i>
+                                    <i [class]="item.icon + ' me-3 text-secondary'"
+                                        style="width: 18px; text-align: center;"></i>
                                     <span class="fw-medium">{{ item.label }}</span>
                                 </div>
                                 @if (item.isNotif && notificationService.unreadCount() > 0) {
@@ -76,6 +87,7 @@
                     </li>
                 </ul>
             </div>
+            }
 
             <!-- Right Side Actions -->
             <div class="d-flex align-items-center gap-2 gap-md-3 ms-auto">
@@ -86,6 +98,27 @@
                     <span class="fs-7 fw-medium text-white">{{ currentMonthLabel }}</span>
                 </div>
 
+                <!-- Navigation Layout Toggle: Topbar vs Left Sidebar -->
+                <div class="nav-pos-switch d-none d-sm-inline-flex align-items-center" role="group"
+                    aria-label="Position du menu">
+                    <button type="button" class="nav-pos-btn" [class.active]="layoutService.navPosition() === 'top'"
+                        (click)="layoutService.setNavPosition('top')" title="Menu en haut">
+                        <i class="fas fa-window-maximize"></i>
+                        <span class="d-none d-xxl-inline ms-1">Haut</span>
+                    </button>
+                    <button type="button" class="nav-pos-btn" [class.active]="layoutService.navPosition() === 'left'"
+                        (click)="layoutService.setNavPosition('left')" title="Sidebar à gauche">
+                        <i class="fas fa-columns"></i>
+                        <span class="d-none d-xxl-inline ms-1">Gauche</span>
+                    </button>
+                </div>
+                <button type="button" class="topbar-action-btn d-inline-flex d-sm-none"
+                    (click)="layoutService.toggleNavPosition()"
+                    [title]="layoutService.navPosition() === 'top' ? 'Passer en Sidebar à gauche' : 'Passer le menu en haut'">
+                    <i class="fas fs-6" [class.fa-columns]="layoutService.navPosition() === 'top'"
+                        [class.fa-window-maximize]="layoutService.navPosition() === 'left'"></i>
+                </button>
+
                 <!-- Theme Toggle -->
                 <button class="topbar-action-btn" (click)="toggleTheme()"
                     [title]="isDarkMode ? 'Mode clair' : 'Mode sombre'">
@@ -94,7 +127,8 @@
 
                 <!-- Notifications -->
                 <div class="dropdown">
-                    <button class="topbar-action-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                    <button class="topbar-action-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false"
+                        data-bs-auto-close="outside">
                         <i class="far fa-bell fs-6"></i>
                         @if (notificationService.unreadCount() > 0) {
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
@@ -104,11 +138,14 @@
                         }
                     </button>
 
-                    <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 rounded-3 p-0" style="width: 380px; max-width: 100vw;">
-                        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top-3">
+                    <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 rounded-3 p-0"
+                        style="width: 380px; max-width: 100vw;">
+                        <div
+                            class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top-3">
                             <h6 class="m-0 fw-bold">Notifications</h6>
                             @if (notificationService.unreadCount() > 0) {
-                            <button class="btn btn-sm btn-link text-decoration-none p-0" (click)="markAllAsRead($event)">
+                            <button class="btn btn-sm btn-link text-decoration-none p-0"
+                                (click)="markAllAsRead($event)">
                                 Tout marquer comme lu
                             </button>
                             }
@@ -128,64 +165,78 @@
                                 <p class="mb-0 fs-7">Aucune notification</p>
                             </div>
                             } @else {
-                                @for (alerte of notificationService.alertes(); track alerte.id) {
-                                <div class="notification-item p-3 border-bottom position-relative" [class.bg-light-opacity-50]="!alerte.lue">
-                                    <a [routerLink]="alerte.routeAction" class="text-decoration-none text-body d-flex gap-3">
-                                        
-                                        <!-- Icon based on type -->
-                                        <div class="flex-shrink-0 mt-1">
-                                            @if (alerte.type === 'DANGER') {
-                                                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                                                    <i class="fas fa-exclamation-circle"></i>
-                                                </div>
-                                            } @else if (alerte.type === 'WARNING') {
-                                                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                                                    <i class="fas fa-exclamation-triangle"></i>
-                                                </div>
-                                            } @else {
-                                                <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                                                    <i class="fas fa-info-circle"></i>
-                                                </div>
-                                            }
-                                        </div>
+                            @for (alerte of notificationService.alertes(); track alerte.id) {
+                            <div class="notification-item p-3 border-bottom position-relative"
+                                [class.bg-light-opacity-50]="!alerte.lue">
+                                <a [routerLink]="alerte.routeAction"
+                                    class="text-decoration-none text-body d-flex gap-3">
 
-                                        <!-- Content -->
-                                        <div class="flex-grow-1 min-w-0">
-                                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                                <h6 class="mb-0 fs-7 fw-bold text-truncate pe-3" [class.text-muted]="alerte.lue">{{ alerte.titre }}</h6>
-                                            </div>
-                                            <p class="mb-1 fs-8 text-secondary text-wrap" style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" [class.opacity-75]="alerte.lue">
-                                                {{ alerte.description }}
-                                            </p>
-                                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                                <span class="fs-9 text-uppercase tracking-wider fw-bold" [class.text-danger]="alerte.type === 'DANGER'" [class.text-warning]="alerte.type === 'WARNING'" [class.text-info]="alerte.type === 'INFO'">{{ alerte.service }}</span>
-                                            </div>
+                                    <!-- Icon based on type -->
+                                    <div class="flex-shrink-0 mt-1">
+                                        @if (alerte.type === 'DANGER') {
+                                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 36px; height: 36px;">
+                                            <i class="fas fa-exclamation-circle"></i>
                                         </div>
-                                    </a>
-
-                                    <!-- Unread Dot Indicator & Action -->
-                                    <div class="position-absolute top-0 end-0 p-3 h-100 d-flex flex-column justify-content-between align-items-end">
-                                        @if (!alerte.lue) {
-                                            <span class="badge bg-primary p-1 rounded-circle" title="Non lu">
-                                                <span class="visually-hidden">Non lu</span>
-                                            </span>
+                                        } @else if (alerte.type === 'WARNING') {
+                                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 36px; height: 36px;">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
                                         } @else {
-                                            <span></span>
-                                        }
-                                        
-                                        @if (!alerte.lue) {
-                                        <button class="btn btn-sm btn-link text-secondary p-0 icon-hover" (click)="markAsRead(alerte.id, $event)" title="Marquer comme lu">
-                                            <i class="fas fa-check-double fs-8"></i>
-                                        </button>
+                                        <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 36px; height: 36px;">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
                                         }
                                     </div>
+
+                                    <!-- Content -->
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <h6 class="mb-0 fs-7 fw-bold text-truncate pe-3"
+                                                [class.text-muted]="alerte.lue">{{ alerte.titre }}</h6>
+                                        </div>
+                                        <p class="mb-1 fs-8 text-secondary text-wrap"
+                                            style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
+                                            [class.opacity-75]="alerte.lue">
+                                            {{ alerte.description }}
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center mt-2">
+                                            <span class="fs-9 text-uppercase tracking-wider fw-bold"
+                                                [class.text-danger]="alerte.type === 'DANGER'"
+                                                [class.text-warning]="alerte.type === 'WARNING'"
+                                                [class.text-info]="alerte.type === 'INFO'">{{ alerte.service }}</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <!-- Unread Dot Indicator & Action -->
+                                <div
+                                    class="position-absolute top-0 end-0 p-3 h-100 d-flex flex-column justify-content-between align-items-end">
+                                    @if (!alerte.lue) {
+                                    <span class="badge bg-primary p-1 rounded-circle" title="Non lu">
+                                        <span class="visually-hidden">Non lu</span>
+                                    </span>
+                                    } @else {
+                                    <span></span>
+                                    }
+
+                                    @if (!alerte.lue) {
+                                    <button class="btn btn-sm btn-link text-secondary p-0 icon-hover"
+                                        (click)="markAsRead(alerte.id, $event)" title="Marquer comme lu">
+                                        <i class="fas fa-check-double fs-8"></i>
+                                    </button>
+                                    }
                                 </div>
-                                }
+                            </div>
+                            }
                             }
                         </div>
-                        
+
                         <div class="p-2 border-top text-center bg-light rounded-bottom-3">
-                            <a routerLink="/notifications" class="text-decoration-none fs-8 fw-bold">Voir toutes les notifications</a>
+                            <a routerLink="/notifications" class="text-decoration-none fs-8 fw-bold">Voir toutes les
+                                notifications</a>
                         </div>
                     </div>
                 </div>
@@ -222,12 +273,14 @@
                     </ul>
                 </div>
 
-                <!-- Mobile Hamburger Toggle -->
+                <!-- Mobile Hamburger Toggle (topbar mode only) -->
+                @if (layoutService.navPosition() === 'top') {
                 <button class="navbar-toggler d-lg-none ms-1" type="button" data-bs-toggle="collapse"
                     data-bs-target="#topbarNavCollapse" aria-controls="topbarNavCollapse" aria-expanded="false"
                     aria-label="Toggle navigation">
                     <i class="fas fa-bars text-white fs-5"></i>
                 </button>
+                }
             </div>
         </div>
     </div>
