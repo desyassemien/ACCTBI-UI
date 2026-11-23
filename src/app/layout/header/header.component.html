@@ -102,14 +102,13 @@
                 <div class="nav-pos-switch d-none d-sm-inline-flex align-items-center" role="group"
                     aria-label="Position du menu">
                     <button type="button" class="nav-pos-btn" [class.active]="layoutService.navPosition() === 'top'"
-                        (click)="layoutService.setNavPosition('top')" title="Menu en haut">
+                        (click)="layoutService.setNavPosition('top')" title="Menu en haut" aria-label="Menu en haut">
                         <i class="fas fa-window-maximize"></i>
-                        <span class="d-none d-xxl-inline ms-1">Haut</span>
                     </button>
                     <button type="button" class="nav-pos-btn" [class.active]="layoutService.navPosition() === 'left'"
-                        (click)="layoutService.setNavPosition('left')" title="Sidebar à gauche">
+                        (click)="layoutService.setNavPosition('left')" title="Sidebar à gauche"
+                        aria-label="Sidebar à gauche">
                         <i class="fas fa-columns"></i>
-                        <span class="d-none d-xxl-inline ms-1">Gauche</span>
                     </button>
                 </div>
                 <button type="button" class="topbar-action-btn d-inline-flex d-sm-none"

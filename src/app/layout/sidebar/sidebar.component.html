@@ -4,17 +4,18 @@
 }
 
 <!-- Left Sidebar (Desktop collapsible + Mobile slide-over drawer) -->
-<aside class="left-sidebar d-flex flex-column"
-    [class.collapsed]="layoutService.sidebarCollapsed()"
+<aside class="left-sidebar d-flex flex-column" [class.collapsed]="layoutService.sidebarCollapsed()"
     [class.mobile-open]="layoutService.mobileSidebarOpen()">
 
     <!-- Mobile drawer header -->
-    <div class="sidebar-mobile-header d-flex d-lg-none align-items-center justify-content-between px-3 py-2 border-bottom">
+    <div
+        class="sidebar-mobile-header d-flex d-lg-none align-items-center justify-content-between px-3 py-2 border-bottom">
         <div class="d-flex align-items-center gap-2">
             <span class="mobile-brand-dot"></span>
             <span class="fw-bold fs-6 tracking-tight">SYGACUT-BI</span>
         </div>
-        <button type="button" class="btn btn-sm btn-icon border-0 text-secondary" (click)="layoutService.closeMobileSidebar()" title="Fermer">
+        <button type="button" class="btn btn-sm btn-icon border-0 text-secondary"
+            (click)="layoutService.closeMobileSidebar()" title="Fermer">
             <i class="fas fa-times"></i>
         </button>
     </div>
@@ -35,7 +36,8 @@
 
         <!-- Section Services -->
         <div class="side-section mb-2">
-            <button type="button" class="side-section-header w-100 border-0 bg-transparent d-flex align-items-center justify-content-between px-3 py-1"
+            <button type="button"
+                class="side-section-header w-100 border-0 bg-transparent d-flex align-items-center justify-content-between px-3 py-1"
                 (click)="toggleServices()">
                 <span class="side-section-title">Services</span>
                 <i class="fas fa-chevron-down side-chevron" [class.rotated]="!servicesOpen()"></i>
@@ -60,7 +62,8 @@
 
         <!-- Section Pilotage & Surveillance -->
         <div class="side-section mb-2">
-            <button type="button" class="side-section-header w-100 border-0 bg-transparent d-flex align-items-center justify-content-between px-3 py-1"
+            <button type="button"
+                class="side-section-header w-100 border-0 bg-transparent d-flex align-items-center justify-content-between px-3 py-1"
                 (click)="togglePilotage()">
                 <span class="side-section-title">Pilotage &amp; Surveillance</span>
                 <i class="fas fa-chevron-down side-chevron" [class.rotated]="!pilotageOpen()"></i>
@@ -90,21 +93,14 @@
     </div>
 
     <!-- Compact Footer Toolbar -->
-    <div class="sidebar-footer p-2 border-top d-flex align-items-center gap-2">
+    <div class="sidebar-footer p-2 border-top d-none d-lg-flex align-items-center justify-content-center">
         <button type="button"
-            class="footer-action-btn flex-grow-1 d-none d-lg-inline-flex align-items-center justify-content-center gap-2"
+            class="footer-action-btn flex-grow-1 d-inline-flex align-items-center justify-content-center gap-2"
             (click)="layoutService.toggleSidebarCollapse()"
             [title]="layoutService.sidebarCollapsed() ? 'Déplier la sidebar' : 'Replier en icônes'">
-            <i class="fas" [class.fa-angle-double-left]="!layoutService.sidebarCollapsed()" [class.fa-angle-double-right]="layoutService.sidebarCollapsed()"></i>
+            <i class="fas" [class.fa-angle-double-left]="!layoutService.sidebarCollapsed()"
+                [class.fa-angle-double-right]="layoutService.sidebarCollapsed()"></i>
             <span class="side-label">Replier</span>
-        </button>
-        <button type="button"
-            class="footer-action-btn footer-action-top d-inline-flex align-items-center justify-content-center gap-2"
-            [class.flex-grow-1]="!layoutService.sidebarCollapsed()"
-            (click)="layoutService.setNavPosition('top')"
-            title="Replacer le menu en haut">
-            <i class="fas fa-window-maximize"></i>
-            <span class="side-label">En haut</span>
         </button>
     </div>
 </aside>
