@@ -38,7 +38,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy, AfterViewChecked 
     return chart.scenarios.find(s => s.key === key) || chart.scenarios[0] || null;
   });
 
-  private chartInstance: Chart | null = null;
+  private chartInstance: Chart<'line'> | null = null;
   private themeObserver: MutationObserver | null = null;
 
   ngOnInit() {
@@ -400,7 +400,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy, AfterViewChecked 
     if (this.isOpen() && this.scrollContainer) {
       try {
         this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
-      } catch (err) {}
+      } catch (err) { }
     }
   }
 

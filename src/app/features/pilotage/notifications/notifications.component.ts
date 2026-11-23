@@ -90,7 +90,7 @@ export interface IndicatorDefinition {
 <div class="notifications-page-container py-3">
 
   <!-- 1. EN-TÊTE DU CENTRE DE NOTIFICATIONS -->
-  <div class="header-card card shadow-sm border-0 mb-3 px-4 py-3">
+  <div class="header-card card shadow-sm border-0 mb-3 px-3 px-md-4 py-3">
     <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
       <div>
         <div class="d-flex align-items-center gap-2 mb-1">
@@ -102,8 +102,8 @@ export interface IndicatorDefinition {
         </p>
       </div>
 
-      <div class="d-flex flex-wrap flex-xl-nowrap justify-content-lg-end align-items-end gap-2">
-        <div class="filter-item-container" style="min-width: 175px;">
+      <div class="notif-filters d-flex flex-wrap justify-content-lg-end align-items-end gap-2">
+        <div class="filter-item-container filter-field-service">
           <label class="form-label text-uppercase">
             <i class="fas fa-layer-group text-primary me-1"></i> Service
           </label>
@@ -122,7 +122,7 @@ export interface IndicatorDefinition {
           </select>
         </div>
 
-        <div class="filter-item-container" style="min-width: 215px; max-width: 265px;">
+        <div class="filter-item-container filter-field-indicator">
           <label class="form-label text-uppercase">
             <i class="fas fa-chart-line text-primary me-1"></i> Indicateur
           </label>
@@ -135,7 +135,7 @@ export interface IndicatorDefinition {
           </select>
         </div>
 
-        <div class="filter-item-container" style="width: 100px; flex-shrink: 0;">
+        <div class="filter-item-container filter-field-year">
           <label class="form-label text-uppercase">
             <i class="far fa-calendar-alt text-primary me-1"></i> Exercice
           </label>
@@ -296,22 +296,22 @@ export interface IndicatorDefinition {
   <div class="row g-4">
     <div class="col-xl-8 col-lg-8 col-12">
       <div class="card shadow-sm border-0 mb-4">
-        <div class="border-bottom p-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="border-bottom p-3 px-3 px-md-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
           <div>
-            <h5 class="m-0 fw-bold text-dark d-flex align-items-center gap-2">
+            <h5 class="m-0 fw-bold text-dark d-flex flex-wrap align-items-center gap-2">
               <span>Flux des Notifications Actives</span>
-              <span class="badge bg-navy text-white rounded-pill px-2.5 py-1 small">{{ filteredNotifications.length }}</span>
+              <span class="badge bg-navy text-white rounded-pill px-2 py-1 small">{{ filteredNotifications.length }}</span>
             </h5>
             <span class="text-muted small">Détections automatiques sur Comptabilité, Trésorerie, Cautionnement, Régies, Règlement, Statistiques et Compte de Gestion</span>
           </div>
 
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1.5 fw-semibold px-3 rounded-pill shadow-sm"
+            <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 fw-semibold px-3 rounded-pill shadow-sm"
                     (click)="genererRapportGlobal()">
               <i class="fas fa-file-alt"></i>
               <span>Rapport de synthèse</span>
             </button>
-            <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5 fw-semibold px-3 rounded-pill"
+            <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2 fw-semibold px-3 rounded-pill"
                     (click)="markAllAsRead()" [disabled]="unreadCount === 0">
               <i class="fas fa-check-double"></i>
               <span>Tout marquer comme lu</span>
@@ -398,7 +398,7 @@ export interface IndicatorDefinition {
                     }
                   </div>
 
-                  <div class="d-flex align-items-center ms-auto" style="gap: 6px;">
+                  <div class="d-flex flex-wrap align-items-center ms-auto" style="gap: 6px;">
                     <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill"
                             style="font-size: 0.72rem; padding: 2px 10px;"
                             (click)="genererRapport(notif)">
@@ -440,8 +440,8 @@ export interface IndicatorDefinition {
 
                 @for (notif of readNotifications; track notif.id) {
                   <div class="smart-notif-card card mb-2 opacity-75">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                      <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                      <div class="d-flex flex-wrap align-items-center gap-2">
                         <span class="badge bg-secondary">{{ notif.badgeLabel }}</span>
                         <h6 class="fw-bold text-muted m-0">{{ notif.titre }}</h6>
                       </div>
@@ -462,7 +462,7 @@ export interface IndicatorDefinition {
     <!-- Colonne Droite : Gestionnaire de Règles d'Alertes (7 Services) -->
     <div class="col-xl-4 col-lg-4 col-12">
       <div class="card shadow-sm border-0 mb-4">
-        <div class="border-bottom p-3 px-3.5">
+        <div class="border-bottom p-3">
           <h5 class="m-0 fw-bold text-dark d-flex align-items-center gap-2">
             <i class="fas fa-sliders-h text-primary"></i>
             <span>Alertes</span>
@@ -479,7 +479,7 @@ export interface IndicatorDefinition {
           <div class="d-flex flex-column mb-3" style="gap: 8px;">
             @for (rule of filteredAlertRules; track rule.id) {
               <div class="p-3 rounded-3 border" [class.opacity-50]="!rule.actif">
-                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                   <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                     <span class="badge bg-light text-dark border very-small">{{ rule.domaine }}</span>
                     <span class="badge" style="font-size: 0.62rem; padding: 2px 6px; letter-spacing: 0.02em;" [ngClass]="{
@@ -490,11 +490,11 @@ export interface IndicatorDefinition {
                     }">{{ rule.severite }}</span>
                   </div>
 
-                  <div class="d-flex align-items-center gap-1.5">
-                    <button class="btn btn-sm btn-light border py-0 px-1.5" (click)="editRule(rule)" title="Modifier">
+                  <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-light border py-0 px-2" (click)="editRule(rule)" title="Modifier">
                       <i class="fas fa-pencil-alt small"></i>
                     </button>
-                    <button class="btn btn-sm btn-light border text-danger py-0 px-1.5" (click)="deleteRule(rule.id)" title="Supprimer">
+                    <button class="btn btn-sm btn-light border text-danger py-0 px-2" (click)="deleteRule(rule.id)" title="Supprimer">
                       <i class="fas fa-trash small"></i>
                     </button>
                     <div class="form-check form-switch m-0 ms-1">
@@ -511,11 +511,11 @@ export interface IndicatorDefinition {
             }
           </div>
 
-          <div class="d-flex gap-2 pt-2 border-top">
-            <button class="btn btn-sm btn-outline-secondary w-50 fw-semibold" (click)="resetToDefaultRules()">
+          <div class="d-flex flex-column flex-sm-row gap-2 pt-2 border-top">
+            <button class="btn btn-sm btn-outline-secondary flex-fill fw-semibold" (click)="resetToDefaultRules()">
               <i class="fas fa-undo me-1"></i> Rétablir par défaut
             </button>
-            <button class="btn btn-sm btn-navy w-50 fw-bold" (click)="openNewRuleModal()">
+            <button class="btn btn-sm btn-navy flex-fill fw-bold" (click)="openNewRuleModal()">
               <i class="fas fa-plus me-1"></i> Nouvelle règle
             </button>
           </div>
@@ -589,18 +589,18 @@ export interface IndicatorDefinition {
   @if (showReportModal && activeReport) {
     <div class="modal-backdrop-custom d-flex justify-content-center align-items-center">
       <div class="card shadow-lg border-0 modal-dialog-report">
-        <div class="report-modal-header p-3 px-4 d-flex justify-content-between align-items-center">
+        <div class="report-modal-header p-3 px-3 px-md-4 d-flex justify-content-between align-items-start gap-2">
           <div>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex flex-wrap align-items-center gap-2">
               <h5 class="m-0 fw-bold text-white">Note d'Alerte & Rapport Décisionnel DGTCP</h5>
               <span class="badge bg-warning text-dark fw-bold">{{ activeReport.badgeLabel }}</span>
             </div>
             <span class="text-white-50 very-small">Réf : {{ activeReport.id }} • Édité le {{ activeReport.dateEdition }}</span>
           </div>
-          <button type="button" class="btn-close btn-close-white" (click)="showReportModal = false"></button>
+          <button type="button" class="btn-close btn-close-white flex-shrink-0" (click)="showReportModal = false"></button>
         </div>
 
-        <div class="card-body p-4" style="max-height: 70vh; overflow-y: auto;">
+        <div class="card-body p-3 p-md-4" style="max-height: 70vh; overflow-y: auto;">
           <div class="row g-3 p-3 border rounded-3 bg-light mb-3">
             <div class="col-md-5">
               <span class="very-small text-uppercase text-muted fw-bold d-block">Périmètre sous revue</span>
@@ -708,7 +708,27 @@ export interface IndicatorDefinition {
 </div>
   `,
   styles: [`
-    .notifications-page-container { max-width: 1600px; margin: 0 auto; }
+    .notifications-page-container { max-width: 1600px; margin: 0 auto; overflow-x: hidden; }
+    .filter-field-service { flex: 1 1 160px; min-width: 150px; max-width: 220px; }
+    .filter-field-indicator { flex: 1 1 190px; min-width: 180px; max-width: 265px; }
+    .filter-field-year { flex: 0 0 100px; }
+
+    @media (max-width: 991.98px) {
+      .notif-filters { width: 100%; }
+      .filter-field-service,
+      .filter-field-indicator { flex: 1 1 200px; max-width: none; }
+      .filter-field-year { flex: 0 1 120px; }
+    }
+
+    @media (max-width: 575.98px) {
+      .title-text { font-size: 1.15rem !important; }
+      .kpi-spark-value { font-size: 1.35rem !important; }
+      .filter-field-service,
+      .filter-field-indicator,
+      .filter-field-year { flex: 1 1 100%; min-width: 0; max-width: none; width: 100%; }
+      .modal-dialog-custom .btn-group { flex-wrap: wrap; }
+      .modal-dialog-custom .btn-group .btn { flex: 1 1 48%; border-radius: 6px !important; margin: 1px; }
+    }
     .text-navy { color: #1A365D !important; }
     .bg-navy { background-color: #1A365D !important; }
     .btn-navy { background-color: #1A365D !important; color: #fff !important; }
@@ -851,8 +871,8 @@ export interface IndicatorDefinition {
       z-index: 1060;
       padding: 1rem;
     }
-    .modal-dialog-custom { width: 100%; max-width: 560px; border-radius: 14px; }
-    .modal-dialog-report { width: 100%; max-width: 760px; border-radius: 14px; overflow: hidden; }
+    .modal-dialog-custom { width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; border-radius: 14px; }
+    .modal-dialog-report { width: 100%; max-width: 760px; max-height: 92vh; border-radius: 14px; overflow: hidden; }
     .report-modal-header { background: linear-gradient(135deg, #1A365D 0%, #2a4a7f 100%); }
 
     :host-context([data-bs-theme="dark"]) {

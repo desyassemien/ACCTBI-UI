@@ -34,7 +34,7 @@ import {
   <!-- ======================================================== -->
   <!-- 1. EN-TÊTE & FILTRES DÉCISIONNELS                        -->
   <!-- ======================================================== -->
-  <div class="decision-header-card card shadow-sm border-0 mb-3 px-4 py-3">
+  <div class="decision-header-card card shadow-sm border-0 mb-3 px-3 px-md-4 py-3">
     <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
       <div>
         <div class="d-flex align-items-center gap-2 mb-1">
@@ -46,9 +46,9 @@ import {
         </p>
       </div>
 
-      <div class="decision-filters d-flex flex-wrap flex-xl-nowrap justify-content-lg-end align-items-end gap-2">
+      <div class="decision-filters d-flex flex-wrap justify-content-lg-end align-items-end gap-2">
         <!-- Service -->
-        <div class="filter-item-container" style="min-width: 170px;">
+        <div class="filter-item-container filter-field-service">
           <label class="form-label text-uppercase">
             <i class="fas fa-layer-group text-primary me-1"></i> Service
           </label>
@@ -62,7 +62,7 @@ import {
         </div>
 
         <!-- Indicateur (lié au Service) -->
-        <div class="filter-item-container" style="min-width: 210px; max-width: 260px;">
+        <div class="filter-item-container filter-field-indicator">
           <label class="form-label text-uppercase">
             <i class="fas fa-chart-line text-primary me-1"></i> Indicateur
           </label>
@@ -77,7 +77,7 @@ import {
         </div>
 
         <!-- Exercice -->
-        <div class="filter-item-container" style="width: 100px; flex-shrink: 0;">
+        <div class="filter-item-container filter-field-year">
           <label class="form-label text-uppercase">
             <i class="far fa-calendar-alt text-primary me-1"></i> Exercice
           </label>
@@ -202,14 +202,14 @@ import {
     <!-- Colonne Gauche : Note Stratégique -->
     <div class="col-lg-7">
       <div class="card shadow-sm border-0 summary-card h-100">
-        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center gap-3">
+        <div class="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <h5 class="m-0 fw-bold text-navy">Synthèse Exécutive Décisionnelle</h5>
             <span class="badge-priority-pulse">
               <i class="fas fa-bookmark text-warning me-1"></i> Lecture Prioritaire DGTCP
             </span>
           </div>
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
             <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 px-3 shadow-sm"
                     (click)="copySummary()">
               <i class="fas" [ngClass]="isCopied ? 'fa-check text-success' : 'fa-copy'"></i>
@@ -224,7 +224,7 @@ import {
         </div>
 
         @if (currentSummary) {
-          <div class="card-body p-4">
+          <div class="card-body p-3 p-md-4">
             @if (selectedIndicator; as ind) {
               <div class="p-3 rounded-3 mb-4 border bg-light d-flex flex-wrap justify-content-between align-items-center gap-3">
                 <div>
@@ -278,9 +278,9 @@ import {
               </h6>
               <ul class="list-group list-group-flush">
                 @for (r of currentSummary.risksAndGaps; track r) {
-                  <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center gap-2">
+                  <li class="list-group-item px-0 py-2 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
                     <span><i class="fas fa-chevron-right text-warning me-2 small"></i> {{ r }}</span>
-                    <button type="button" class="btn btn-sm btn-action-analyser text-nowrap py-1 px-2.5 very-small fw-semibold"
+                    <button type="button" class="btn btn-sm btn-action-analyser text-nowrap py-1 px-2 very-small fw-semibold flex-shrink-0"
                             (click)="analyserRisqueAvecIa(r)" title="Demander un diagnostic détaillé">
                       <i class="fas fa-magic me-1"></i> Analyser
                     </button>
@@ -295,9 +295,9 @@ import {
               </h6>
               <ul class="list-group list-group-flush">
                 @for (rec of currentSummary.recommendations; track rec) {
-                  <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center gap-2">
+                  <li class="list-group-item px-0 py-2 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
                     <span><i class="fas fa-arrow-circle-right text-primary me-2"></i> {{ rec }}</span>
-                    <button type="button" class="btn btn-sm btn-action-plan text-nowrap py-1 px-2.5 very-small fw-semibold"
+                    <button type="button" class="btn btn-sm btn-action-plan text-nowrap py-1 px-2 very-small fw-semibold flex-shrink-0"
                             (click)="genererPlanActionIa(rec)" title="Générer un plan d'action avec échéancier">
                       <i class="fas fa-tasks me-1"></i> Plan d'action
                     </button>
@@ -328,15 +328,15 @@ import {
                 </span>
               </div>
             </div>
-            <div class="d-flex align-items-center gap-1.5">
+            <div class="d-flex align-items-center flex-wrap gap-2">
               <!-- Bouton Dédié : Nouvelle discussion -->
-              <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2.5 very-small fw-bold d-flex align-items-center gap-1.5 rounded-pill shadow-xs"
+              <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 very-small fw-bold d-flex align-items-center gap-1 rounded-pill shadow-xs"
                       (click)="startNewChat()" title="Démarrer une nouvelle discussion">
                 <i class="fas fa-plus"></i>
                 <span>Nouvelle discussion</span>
               </button>
               <!-- Bouton Dédié : Historique -->
-              <button type="button" class="btn btn-sm py-1 px-2.5 very-small fw-bold d-flex align-items-center gap-1.5 rounded-pill shadow-xs"
+              <button type="button" class="btn btn-sm py-1 px-2 very-small fw-bold d-flex align-items-center gap-1 rounded-pill shadow-xs"
                       [ngClass]="showHistory ? 'btn-primary text-white' : 'btn-light border text-navy'"
                       (click)="toggleHistory()" [title]="showHistory ? 'Fermer l’historique' : 'Consulter l’historique des conversations'">
                 <i class="fas fa-history"></i>
@@ -507,7 +507,7 @@ import {
     </div>
 
     <!-- Explication explicite Cause -> Effet du scénario choisi -->
-    <div class="px-4 py-2 bg-light border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2 small">
+    <div class="px-3 px-md-4 py-2 bg-light border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2 small">
       <div class="text-dark">
         @if (customSimulationNote) {
           <strong [ngClass]="activeScenario === 'STRESS' ? 'text-danger' : 'text-success'">Recommandation simulée :</strong>
@@ -523,7 +523,7 @@ import {
           Sans nouvelle réforme ni choc conjoncturel &rarr; poursuite du rythme historique constaté sur 2019-{{ selectedAnnee }}.
         }
       </div>
-      <div class="d-flex align-items-center gap-2 text-nowrap">
+      <div class="d-flex flex-wrap align-items-center gap-2">
         <span class="text-muted">Résultat prévu en 2031 :</span>
         <strong class="text-navy">{{ projected2031Value | number:'1.1-1' }} {{ selectedIndicator ? selectedIndicator.unite : 'Mds FCFA' }}</strong>
         @if (activeScenario !== 'BASE') {
@@ -535,7 +535,7 @@ import {
     </div>
 
     <div class="card-body p-3">
-      <div style="height: 360px; position: relative;">
+      <div class="predictive-chart-box" style="position: relative;">
         @if (isBrowser) {
           <canvas baseChart
                   [data]="predictiveChartData"
@@ -550,7 +550,28 @@ import {
 </div>
   `,
   styles: [`
-    .decision-ia-container { max-width: 1600px; margin: 0 auto; }
+    .decision-ia-container { max-width: 1600px; margin: 0 auto; overflow-x: hidden; }
+    .predictive-chart-box { height: 360px; }
+    .filter-field-service { flex: 1 1 160px; min-width: 150px; max-width: 215px; }
+    .filter-field-indicator { flex: 1 1 190px; min-width: 180px; max-width: 260px; }
+    .filter-field-year { flex: 0 0 100px; }
+
+    @media (max-width: 991.98px) {
+      .decision-filters { width: 100%; }
+      .filter-field-service,
+      .filter-field-indicator { flex: 1 1 200px; max-width: none; }
+      .filter-field-year { flex: 0 1 120px; }
+    }
+
+    @media (max-width: 575.98px) {
+      .title-text { font-size: 1.15rem !important; }
+      .kpi-spark-value { font-size: 1.35rem !important; }
+      .predictive-chart-box { height: 250px; }
+      .filter-field-service,
+      .filter-field-indicator,
+      .filter-field-year { flex: 1 1 100%; min-width: 0; max-width: none; width: 100%; }
+      .message-bubble { max-width: 98% !important; }
+    }
     .text-navy { color: #1A365D !important; }
     .btn-navy { background-color: #1A365D !important; border-color: #1A365D !important; color: #fff !important; }
     .very-small { font-size: 0.72rem; }

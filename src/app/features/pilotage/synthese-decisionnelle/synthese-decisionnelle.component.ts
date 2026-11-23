@@ -35,9 +35,9 @@ export interface PilotageRiskAlert {
 <div class="surveillance-container py-3">
 
   <!-- 1. EN-TÊTE EXÉCUTIF & SÉLECTEURS DE DONNÉES RÉELLES -->
-  <div class="header-card card shadow-sm border-0 mb-3 px-4 py-3">
-    <div class="row align-items-center">
-      <div class="col-xl-5 col-lg-5">
+  <div class="header-card card shadow-sm border-0 mb-3 px-3 px-md-4 py-3">
+    <div class="row align-items-center g-3">
+      <div class="col-xl-5 col-lg-5 col-12">
         <div class="d-flex align-items-center gap-2 mb-1">
           <span class="badge-dgtcp-pill"><i class="fas fa-shield-alt me-1"></i> PILOTAGE & SURVEILLANCE</span>
         </div>
@@ -49,9 +49,9 @@ export interface PilotageRiskAlert {
         </p>
       </div>
 
-      <div class="col-xl-7 col-lg-7 mt-3 mt-lg-0">
-        <div class="header-selectors d-flex flex-wrap flex-xl-nowrap justify-content-lg-end align-items-end gap-2">
-          <div class="d-flex flex-column" style="min-width: 170px;">
+      <div class="col-xl-7 col-lg-7 col-12">
+        <div class="header-selectors d-flex flex-wrap justify-content-lg-end align-items-end gap-2">
+          <div class="d-flex flex-column filter-field-service">
             <label class="form-label text-uppercase mb-1 very-small fw-bold text-muted">
               <i class="fas fa-layer-group text-primary me-1"></i> Service
             </label>
@@ -64,7 +64,7 @@ export interface PilotageRiskAlert {
             </select>
           </div>
 
-          <div class="d-flex flex-column" style="min-width: 210px; max-width: 265px;">
+          <div class="d-flex flex-column filter-field-indicator">
             <label class="form-label text-uppercase mb-1 very-small fw-bold text-muted">
               <i class="fas fa-chart-line text-primary me-1"></i> Indicateur
             </label>
@@ -78,7 +78,7 @@ export interface PilotageRiskAlert {
             </select>
           </div>
 
-          <div class="d-flex flex-column" style="width: 100px; flex-shrink: 0;">
+          <div class="d-flex flex-column filter-field-year">
             <label class="form-label text-uppercase mb-1 very-small fw-bold text-muted text-nowrap">
               <i class="far fa-calendar-alt text-primary me-1"></i> Exercice
             </label>
@@ -97,7 +97,7 @@ export interface PilotageRiskAlert {
   <div class="timeline-card card shadow-sm border-0 mb-4">
     <div class="card-body p-3">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center flex-wrap gap-2">
           <span class="small fw-bold text-uppercase text-muted">
             <i class="fas fa-history text-primary me-1"></i> Chronologie Multi-Exercices :
           </span>
@@ -459,7 +459,7 @@ export interface PilotageRiskAlert {
 
       <!-- 3 Cartes de Projections -->
       <div class="row g-3 mb-4 align-items-stretch">
-        <div class="col-xl-4 col-md-4 col-12">
+        <div class="col-xl-4 col-md-6 col-12">
           <div class="projection-card card border-0 p-3 h-100 d-flex flex-column">
             <div class="card-header-top mb-1">
               <div class="d-flex justify-content-between align-items-center mb-1">
@@ -483,7 +483,7 @@ export interface PilotageRiskAlert {
           </div>
         </div>
 
-        <div class="col-xl-4 col-md-4 col-12">
+        <div class="col-xl-4 col-md-6 col-12">
           <div class="projection-card card border-0 p-3 h-100 d-flex flex-column">
             <div class="card-header-top mb-1">
               <div class="d-flex justify-content-between align-items-center mb-1">
@@ -507,7 +507,7 @@ export interface PilotageRiskAlert {
           </div>
         </div>
 
-        <div class="col-xl-4 col-md-4 col-12">
+        <div class="col-xl-4 col-md-6 col-12">
           <div class="projection-card card border-0 p-3 h-100 d-flex flex-column">
             <div class="card-header-top mb-1">
               <div class="d-flex justify-content-between align-items-center mb-1">
@@ -544,13 +544,13 @@ export interface PilotageRiskAlert {
                 </h5>
                 <span class="text-muted small">Historique certifié prolongé par projection (Recettes vs Liquidité CUT)</span>
               </div>
-              <div class="d-flex gap-2">
+              <div class="d-flex flex-wrap gap-2">
                 <span class="badge bg-primary-subtle text-primary border px-3 py-1">Constaté (2019-{{ selectedExercice }})</span>
                 <span class="badge bg-warning-subtle text-warning-emphasis border px-3 py-1">Prévision (2027-2031)</span>
               </div>
             </div>
             <div class="card-body p-3">
-              <div style="height: 340px; position: relative;">
+              <div class="trajectory-chart-box" style="position: relative;">
                 @if (isBrowser) {
                   <canvas baseChart
                           [data]="trajectoryChartData"
@@ -591,7 +591,7 @@ export interface PilotageRiskAlert {
 
               <div class="w-100 mt-2">
                 <h6 class="very-small text-uppercase fw-bold text-muted mb-2 text-center">Répartition par Service ({{ selectedExercice }})</h6>
-                <div style="height: 165px; position: relative;">
+                <div class="breakdown-chart-box" style="position: relative;">
                   @if (isBrowser) {
                     <canvas baseChart
                             [data]="breakdownChartData"
@@ -608,7 +608,7 @@ export interface PilotageRiskAlert {
 
       <!-- Tableau Pluriannuel -->
       <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <div class="card-header bg-white border-0 py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
           <h5 class="m-0 fw-bold text-dark d-flex align-items-center gap-2">
             <i class="fas fa-table text-primary"></i>
             <span>Tableau de Bord Pluriannuel des Flux & Projections ({{ selectedPerimetre }})</span>
@@ -668,8 +668,8 @@ export interface PilotageRiskAlert {
             </h5>
             <span class="text-muted small">Surveillance proactive couvrant Comptabilité, Trésorerie, Cautionnement, Régies, Règlement, Statistiques et Compte de Gestion</span>
           </div>
-          <div class="d-flex align-items-center gap-2 flex-wrap">
-            <select class="form-select form-select-sm fw-semibold" style="width: 210px;"
+          <div class="alert-filters-bar d-flex align-items-center gap-2 flex-wrap">
+            <select class="form-select form-select-sm fw-semibold alert-filter-select"
                     [ngModel]="selectedAlertDomaine"
                     (ngModelChange)="onAlertDomaineChange($event)">
               <option value="TOUS">Tous les Services</option>
@@ -682,7 +682,7 @@ export interface PilotageRiskAlert {
               <option value="Compte de Gestion">Compte de Gestion</option>
             </select>
 
-            <select class="form-select form-select-sm fw-bold" style="width: 210px;"
+            <select class="form-select form-select-sm fw-bold alert-filter-select"
                     [(ngModel)]="selectedAlertSeverite">
               <option value="TOUTES">Toutes les sévérités ({{ alertsForSelectedService.length }})</option>
               <option value="CRITIQUE">Critiques ({{ countAlertesBySeverite('CRITIQUE') }})</option>
@@ -927,6 +927,38 @@ export interface PilotageRiskAlert {
     .gauge-val-text { font-size: 22px; font-weight: 800; fill: #1A365D; }
     .gauge-sub-text { font-size: 10px; font-weight: 700; fill: #2E7D32; }
 
+    /* Responsive Pilotage */
+    .surveillance-container { overflow-x: hidden; }
+    .trajectory-chart-box { height: 340px; }
+    .breakdown-chart-box { height: 165px; }
+    .filter-field-service { flex: 1 1 160px; min-width: 150px; max-width: 220px; }
+    .filter-field-indicator { flex: 1 1 190px; min-width: 180px; max-width: 265px; }
+    .filter-field-year { flex: 0 0 100px; }
+    .alert-filter-select { width: 210px; max-width: 100%; }
+
+    @media (max-width: 991.98px) {
+      .filter-field-service,
+      .filter-field-indicator { flex: 1 1 200px; max-width: none; }
+      .filter-field-year { flex: 0 1 120px; }
+      .alert-filters-bar { width: 100%; }
+      .alert-filter-select { flex: 1 1 180px; width: auto; }
+    }
+
+    @media (max-width: 575.98px) {
+      .title-text { font-size: 1.15rem !important; }
+      .kpi-spark-value { font-size: 1.35rem !important; }
+      .projection-value { font-size: 1.25rem !important; }
+      .trajectory-chart-box { height: 240px; }
+      .breakdown-chart-box { height: 220px; }
+      .filter-field-service,
+      .filter-field-indicator,
+      .filter-field-year { flex: 1 1 100%; min-width: 0; max-width: none; width: 100%; }
+      .custom-nav-pills .nav-item { width: 100%; }
+      .custom-nav-pills .nav-link { width: 100%; justify-content: center; padding: 8px 12px; font-size: 0.82rem; }
+      .alert-filter-select { flex: 1 1 100%; width: 100%; }
+      .table-responsive table { min-width: 640px; }
+    }
+
     :host-context([data-bs-theme="dark"]) {
       .title-text, .text-navy { color: #ffffff !important; }
       .text-muted, small.text-muted, span.text-muted, p.text-muted, div.text-muted { color: #ffffff !important; }
@@ -1095,7 +1127,12 @@ export class SyntheseDecisionnelleComponent implements OnInit, OnDestroy {
   breakdownChartOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } }
+    plugins: {
+      legend: {
+        position: typeof window !== 'undefined' && window.innerWidth < 576 ? 'bottom' : 'right',
+        labels: { boxWidth: 10, font: { size: 10 } }
+      }
+    }
   };
 
   simulationChartData: ChartData<'bar'> = { labels: [], datasets: [] };

@@ -20,9 +20,9 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
 <div class="benchmark-container py-3">
 
   <!-- 1. EN-TÊTE STRATÉGIQUE & SÉLECTEURS DE COMPARAISON -->
-  <div class="benchmark-header-card card shadow-sm border-0 mb-3 px-4 py-3">
-    <div class="row align-items-center">
-      <div class="col-xl-5 col-lg-5">
+  <div class="benchmark-header-card card shadow-sm border-0 mb-3 px-3 px-md-4 py-3">
+    <div class="row align-items-center g-3">
+      <div class="col-xl-5 col-lg-5 col-12">
         <div class="d-flex align-items-center gap-2 mb-1">
           <span class="badge-dgtcp-pill"><i class="fas fa-balance-scale me-1"></i> ANALYSE COMPARATIVE</span>
         </div>
@@ -33,9 +33,9 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
         </p>
       </div>
 
-      <div class="col-xl-7 col-lg-7 mt-3 mt-lg-0">
-        <div class="d-flex flex-wrap flex-xl-nowrap justify-content-lg-end align-items-end gap-2">
-          <div class="d-flex flex-column" style="min-width: 155px;">
+      <div class="col-xl-7 col-lg-7 col-12">
+        <div class="benchmark-filters d-flex flex-wrap justify-content-lg-end align-items-end gap-2">
+          <div class="d-flex flex-column filter-field-service">
             <label class="form-label text-uppercase mb-1 very-small fw-bold text-muted">
               <i class="fas fa-layer-group text-primary me-1"></i> Service
             </label>
@@ -48,7 +48,7 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
             </select>
           </div>
 
-          <div class="d-flex flex-column" style="min-width: 190px; max-width: 240px;">
+          <div class="d-flex flex-column filter-field-indicator">
             <label class="form-label text-uppercase mb-1 very-small fw-bold text-muted">
               <i class="fas fa-chart-line text-primary me-1"></i> Indicateur
             </label>
@@ -62,39 +62,41 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
             </select>
           </div>
 
-          <div class="d-flex flex-column" style="width: 100px; flex-shrink: 0;">
-            <label class="form-label text-uppercase mb-1 very-small fw-bold text-muted text-nowrap">
-              <i class="far fa-calendar-alt text-primary me-1"></i> Ex. (Réf.)
-            </label>
-            <select class="form-select form-select-sm fw-bold text-navy"
-                    [ngModel]="selectedAnneeA"
-                    (ngModelChange)="onYearAChange($event)">
-              @for (a of anneesList; track a) {
-                <option [value]="a">{{ a }}</option>
-              }
-            </select>
-          </div>
+          <div class="year-compare-pair d-flex align-items-end gap-1">
+            <div class="d-flex flex-column filter-field-year">
+              <label class="form-label text-uppercase mb-1 very-small fw-bold text-muted text-nowrap">
+                <i class="far fa-calendar-alt text-primary me-1"></i> Ex. (Réf.)
+              </label>
+              <select class="form-select form-select-sm fw-bold text-navy"
+                      [ngModel]="selectedAnneeA"
+                      (ngModelChange)="onYearAChange($event)">
+                @for (a of anneesList; track a) {
+                  <option [value]="a">{{ a }}</option>
+                }
+              </select>
+            </div>
 
-          <div class="d-flex align-items-center justify-content-center px-1" style="height: 32px; flex-shrink: 0;">
-            <span class="badge bg-dark text-white px-2 py-1 rounded-pill fw-bold">Vs</span>
-          </div>
+            <div class="d-flex align-items-center justify-content-center px-1" style="height: 31px; flex-shrink: 0;">
+              <span class="badge bg-dark text-white px-2 py-1 rounded-pill fw-bold">Vs</span>
+            </div>
 
-          <div class="d-flex flex-column" style="width: 100px; flex-shrink: 0;">
-            <label class="form-label text-uppercase mb-1 very-small fw-bold text-muted text-nowrap">
-              <i class="far fa-calendar text-warning me-1"></i> Ex. (Comp.)
-            </label>
-            <select class="form-select form-select-sm fw-bold text-dark"
-                    [ngModel]="selectedAnneeB"
-                    (ngModelChange)="onYearBChange($event)">
-              @for (a of anneesList; track a) {
-                <option [value]="a">{{ a }}</option>
-              }
-            </select>
+            <div class="d-flex flex-column filter-field-year">
+              <label class="form-label text-uppercase mb-1 very-small fw-bold text-muted text-nowrap">
+                <i class="far fa-calendar text-warning me-1"></i> Ex. (Comp.)
+              </label>
+              <select class="form-select form-select-sm fw-bold text-dark"
+                      [ngModel]="selectedAnneeB"
+                      (ngModelChange)="onYearBChange($event)">
+                @for (a of anneesList; track a) {
+                  <option [value]="a">{{ a }}</option>
+                }
+              </select>
+            </div>
           </div>
         </div>
 
         <div class="d-flex justify-content-lg-end mt-2">
-          <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 px-3 shadow-sm"
+          <button class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center gap-2 px-3 shadow-sm btn-export-responsive"
                   style="height: 32px;"
                   (click)="exportBenchmarkPdf()">
             <i class="fas fa-file-pdf text-danger"></i>
@@ -360,7 +362,7 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
     <div class="row g-3 mb-3">
       <div class="col-lg-5">
         <div class="card shadow-sm border-0 p-3 h-100">
-          <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
             <div>
               <h5 class="m-0 fw-bold text-navy">Radar Comparatif</h5>
               <small class="text-muted">Taux de performance & conformité par service (base 100)</small>
@@ -383,7 +385,7 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
 
       <div class="col-lg-7">
         <div class="card shadow-sm border-0 p-3 h-100">
-          <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
             <div>
               @if (selectedIndicator; as ind) {
                 <h5 class="m-0 fw-bold text-navy">{{ ind.nom }} ({{ ind.unite }})</h5>
@@ -527,7 +529,7 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
 
       <div class="col-lg-5">
         <div class="card shadow-sm border-0 p-3 h-100">
-          <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h5 class="fw-bold text-navy m-0">
               <i class="fas fa-lightbulb text-warning me-2"></i>Synthèse Différentielle
             </h5>
@@ -565,15 +567,15 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
           }
 
           <div class="p-3 rounded-3 bg-light border-top mt-auto">
-            <div class="d-flex justify-content-between small mb-1">
+            <div class="d-flex flex-wrap justify-content-between gap-2 small mb-1">
               <span class="text-muted">Collecte moyenne / poste ou régie :</span>
               <strong>{{ analysis.recetteParPosteA }} Mds FCFA</strong>
             </div>
-            <div class="d-flex justify-content-between small mb-1">
+            <div class="d-flex flex-wrap justify-content-between gap-2 small mb-1">
               <span class="text-muted">Couverture Recettes / Règlements :</span>
               <strong>{{ analysis.ratioCouvertureDepensesA }}%</strong>
             </div>
-            <div class="d-flex justify-content-between small">
+            <div class="d-flex flex-wrap justify-content-between gap-2 small">
               <span class="text-muted">Conformité Compte de Gestion :</span>
               <strong>{{ analysis.metricsA.tauxConformiteCompteGestion }}%</strong>
             </div>
@@ -586,7 +588,29 @@ import { PilotageRealDataService } from '../../../core/services/pilotage-real-da
 </div>
   `,
   styles: [`
-    .benchmark-container { max-width: 1600px; margin: 0 auto; }
+    .benchmark-container { max-width: 1600px; margin: 0 auto; overflow-x: hidden; }
+    .filter-field-service { flex: 1 1 150px; min-width: 145px; max-width: 210px; }
+    .filter-field-indicator { flex: 1 1 180px; min-width: 170px; max-width: 240px; }
+    .filter-field-year { flex: 0 0 98px; }
+    .year-compare-pair { flex-shrink: 0; }
+
+    @media (max-width: 991.98px) {
+      .filter-field-service,
+      .filter-field-indicator { flex: 1 1 200px; max-width: none; }
+      .year-compare-pair { flex: 1 1 220px; }
+      .year-compare-pair .filter-field-year { flex: 1 1 0; }
+    }
+
+    @media (max-width: 575.98px) {
+      .title-text { font-size: 1.15rem !important; }
+      .kpi-spark-value { font-size: 1.35rem !important; }
+      .filter-field-service,
+      .filter-field-indicator,
+      .year-compare-pair { flex: 1 1 100%; min-width: 0; max-width: none; width: 100%; }
+      .year-compare-pair .filter-field-year { flex: 1 1 0; min-width: 0; }
+      .btn-export-responsive { width: 100%; }
+      .table-responsive table { min-width: 660px; }
+    }
     .text-navy { color: #1A365D !important; }
     .btn-navy { background-color: #1A365D !important; color: #fff !important; }
     .very-small { font-size: 0.74rem; }
